@@ -486,9 +486,6 @@
     background: transparent;
   }
 }
-    padding: var(--spacing-sm);
-  }
-}
 
 /* Focus management */
 .page-main-content:focus {

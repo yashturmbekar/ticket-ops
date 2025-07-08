@@ -8,7 +8,6 @@
   background: var(--color-surface-elevated);
   box-shadow: var(--color-shadow);
   position: relative;
-}
 
 .table {
   width: 100%;

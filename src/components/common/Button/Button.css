@@ -40,7 +40,7 @@
 }
 
 .btn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -222,7 +222,7 @@
 }
 
 .btn-loading::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -341,9 +341,15 @@
 }
 
 @keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Professional Responsive Buttons */
@@ -352,24 +358,24 @@
     width: 100%;
     justify-content: center;
   }
-  
+
   .btn-group.btn-responsive {
     flex-direction: column;
     width: 100%;
   }
-  
+
   .btn-group.btn-responsive .btn {
     border-radius: 0;
     border-right-width: 1px;
     border-bottom-width: 0;
   }
-  
+
   .btn-group.btn-responsive .btn:first-child {
     border-top-left-radius: var(--border-radius-md);
     border-top-right-radius: var(--border-radius-md);
     border-bottom-left-radius: 0;
   }
-  
+
   .btn-group.btn-responsive .btn:last-child {
     border-top-right-radius: 0;
     border-bottom-left-radius: var(--border-radius-md);
@@ -400,7 +406,6 @@
 }
 
 /* End of Professional Button Styles */
-}
 
 .btn-secondary:hover:not(:disabled) {
   background-color: #5a6268;

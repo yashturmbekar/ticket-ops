@@ -10,6 +10,8 @@ import {
   FaNetworkWired,
   FaCog,
   FaPlus,
+  FaRoute,
+  FaShieldAlt,
 } from "react-icons/fa";
 import { Button } from "../Button";
 import { useAuth } from "../../../hooks/useAuth";
@@ -76,6 +78,18 @@ const navItems: NavItem[] = [
     path: "/settings",
     label: "Settings",
     icon: FaCog,
+    permission: Permission.ADMIN_SETTINGS,
+  },
+  {
+    path: "/admin/ticket-rules",
+    label: "Ticket Rules",
+    icon: FaRoute,
+    permission: Permission.ADMIN_SETTINGS,
+  },
+  {
+    path: "/admin/settings",
+    label: "Admin Settings",
+    icon: FaShieldAlt,
     permission: Permission.ADMIN_SETTINGS,
   },
 ];

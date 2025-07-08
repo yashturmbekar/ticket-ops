@@ -10,7 +10,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { PageLayout } from "./components/common/PageLayout";
 import { NotificationContainer } from "./components/common/NotificationContainer";
-import { DashboardPage } from "./pages/DashboardPage";
+import { RoleDashboard } from "./components/dashboards/RoleDashboard";
 import { TicketsPage } from "./pages/TicketsPage";
 import { AssetsPage } from "./pages/AssetsPage";
 import { UsersPage } from "./pages/UsersPage";
@@ -18,7 +18,10 @@ import { KnowledgePage } from "./pages/KnowledgePage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { NetworkPage } from "./pages/NetworkPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { TicketRules } from "./components/admin/TicketRules";
+import { AdminSettings } from "./components/admin/AdminSettings";
 import { useAuth } from "./hooks/useAuth";
+import { UserRole } from "./types";
 import "./styles/globals.css";
 
 // Protected Route component
@@ -33,6 +36,27 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+// Admin Only Route component
+const AdminOnlyRoute: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { user, isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user?.role !== UserRole.ADMIN) {
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
@@ -182,7 +206,7 @@ const AppContent: React.FC = () => {
           element={
             <ProtectedRoute>
               <PageLayout>
-                <DashboardPage />
+                <RoleDashboard />
               </PageLayout>
             </ProtectedRoute>
           }
@@ -191,7 +215,9 @@ const AppContent: React.FC = () => {
           path="/tickets"
           element={
             <ProtectedRoute>
-              <TicketsPage />
+              <PageLayout>
+                <TicketsPage />
+              </PageLayout>
             </ProtectedRoute>
           }
         />
@@ -199,7 +225,9 @@ const AppContent: React.FC = () => {
           path="/assets"
           element={
             <ProtectedRoute>
-              <AssetsPage />
+              <PageLayout>
+                <AssetsPage />
+              </PageLayout>
             </ProtectedRoute>
           }
         />
@@ -207,7 +235,9 @@ const AppContent: React.FC = () => {
           path="/users"
           element={
             <ProtectedRoute>
-              <UsersPage />
+              <PageLayout>
+                <UsersPage />
+              </PageLayout>
             </ProtectedRoute>
           }
         />
@@ -215,7 +245,9 @@ const AppContent: React.FC = () => {
           path="/knowledge"
           element={
             <ProtectedRoute>
-              <KnowledgePage />
+              <PageLayout>
+                <KnowledgePage />
+              </PageLayout>
             </ProtectedRoute>
           }
         />
@@ -223,7 +255,9 @@ const AppContent: React.FC = () => {
           path="/reports"
           element={
             <ProtectedRoute>
-              <ReportsPage />
+              <PageLayout>
+                <ReportsPage />
+              </PageLayout>
             </ProtectedRoute>
           }
         />
@@ -231,7 +265,9 @@ const AppContent: React.FC = () => {
           path="/network"
           element={
             <ProtectedRoute>
-              <NetworkPage />
+              <PageLayout>
+                <NetworkPage />
+              </PageLayout>
             </ProtectedRoute>
           }
         />
@@ -239,8 +275,30 @@ const AppContent: React.FC = () => {
           path="/settings"
           element={
             <ProtectedRoute>
-              <SettingsPage />
+              <PageLayout>
+                <SettingsPage />
+              </PageLayout>
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/ticket-rules"
+          element={
+            <AdminOnlyRoute>
+              <PageLayout>
+                <TicketRules />
+              </PageLayout>
+            </AdminOnlyRoute>
+          }
+        />
+        <Route
+          path="/admin/settings"
+          element={
+            <AdminOnlyRoute>
+              <PageLayout>
+                <AdminSettings />
+              </PageLayout>
+            </AdminOnlyRoute>
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />

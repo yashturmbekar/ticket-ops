@@ -1,0 +1,387 @@
+.ticket-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: var(--color-background);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--color-shadow);
+}
+
+.ticket-actions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ticket-info h2 {
+  margin: 0 0 0.5rem 0;
+  color: var(--color-text-primary);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.ticket-meta {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.status-badge,
+.priority-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--border-radius-sm);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.ticket-actions-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.quick-actions {
+  padding: 1rem;
+  background: var(--color-surface);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ticket-details-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tab-buttons {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tab-button {
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+}
+
+.tab-button.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.tab-content {
+  min-height: 300px;
+}
+
+.ticket-details {
+  padding: 1.5rem;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detail-item label {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.detail-item p {
+  margin: 0;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+.tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tag {
+  padding: 0.25rem 0.5rem;
+  background: var(--color-primary);
+  color: white;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.8rem;
+}
+
+.notes-list,
+.time-entries,
+.history-list,
+.attachments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.note-item,
+.time-entry,
+.history-item,
+.attachment-item {
+  padding: 1rem;
+  border-left: 4px solid var(--color-primary);
+}
+
+.note-header,
+.time-header,
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.note-author,
+.time-user,
+.history-user {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.note-date,
+.time-date,
+.history-date {
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+}
+
+.internal-badge {
+  padding: 0.125rem 0.5rem;
+  background: var(--color-warning);
+  color: white;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.note-content {
+  margin-top: 0.5rem;
+}
+
+.note-content p {
+  margin: 0;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+.time-hours {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.time-description {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-style: italic;
+}
+
+.history-action {
+  font-weight: 600;
+  color: var(--color-success);
+}
+
+.history-changes {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.change-item {
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.change-item strong {
+  color: var(--color-text-primary);
+}
+
+.attachment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-left: 4px solid var(--color-info);
+}
+
+.attachment-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.attachment-name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.attachment-size {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.attachment-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ticket-actions {
+    padding: 1rem;
+  }
+
+  .ticket-actions-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .ticket-actions-buttons {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .action-buttons button {
+    width: 100%;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tab-buttons {
+    flex-wrap: wrap;
+  }
+
+  .tab-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .attachment-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}
+
+/* Loading states */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text-secondary);
+}
+
+/* Empty states */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
+}
+
+.empty-state svg {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--color-text-primary);
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.note-item,
+.time-entry,
+.history-item,
+.attachment-item {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Print styles */
+@media print {
+  .ticket-actions-buttons,
+  .quick-actions,
+  .tab-buttons {
+    display: none;
+  }
+
+  .ticket-actions {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+
+  .tab-content {
+    min-height: auto;
+  }
+}

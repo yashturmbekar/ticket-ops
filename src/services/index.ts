@@ -3,6 +3,7 @@ export { apiService } from "./api";
 export { authService } from "./authService";
 export { userService } from "./userService";
 export { ticketService } from "./ticketService";
+export { ticketActionsService } from "./ticketActionsService";
 export { assetService } from "./assetService";
 export { knowledgeService } from "./knowledgeService";
 export { networkService } from "./networkService";

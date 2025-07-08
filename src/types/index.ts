@@ -80,6 +80,92 @@ export interface Comment {
   attachments?: Attachment[];
 }
 
+export interface TicketNote {
+  id: string;
+  ticketId: string;
+  userId: string;
+  content: string;
+  isInternal: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  attachments?: Attachment[];
+}
+
+export interface TimeEntry {
+  id: string;
+  ticketId: string;
+  userId: string;
+  hours: number;
+  description: string;
+  date: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TicketHistory {
+  id: string;
+  ticketId: string;
+  userId: string;
+  action: string;
+  changes: Record<string, { from: unknown; to: unknown }>;
+  createdAt: Date;
+}
+
+export interface TicketLink {
+  id: string;
+  ticketId: string;
+  linkedTicketId: string;
+  linkType:
+    | "duplicate"
+    | "related"
+    | "blocks"
+    | "blocked_by"
+    | "parent"
+    | "child";
+  description?: string;
+  createdAt: Date;
+  createdBy: string;
+}
+
+export interface TicketStats {
+  id: string;
+  ticketId: string;
+  totalTimeSpent: number;
+  responseTime: number;
+  resolutionTime: number;
+  slaCompliance: boolean;
+  escalationCount: number;
+  reopenCount: number;
+  satisfactionScore?: number;
+  updatedAt: Date;
+}
+
+export interface SlaInfo {
+  id: string;
+  ticketId: string;
+  responseDeadline: Date;
+  resolutionDeadline: Date;
+  responseTime?: number;
+  resolutionTime?: number;
+  isResponseBreached: boolean;
+  isResolutionBreached: boolean;
+  breachReason?: string;
+  updatedAt: Date;
+}
+
+export interface WebSocketEvent {
+  id: string;
+  type: string;
+  data: Record<string, unknown>;
+  timestamp: Date;
+  userId?: string;
+}
+
+export interface WebSocketMessage {
+  type: string;
+  data: Record<string, unknown>;
+}
+
 export interface Attachment {
   id: string;
   filename: string;

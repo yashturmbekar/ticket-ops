@@ -100,9 +100,35 @@ export const CHART_COLORS = {
 } as const;
 
 // Export individual constants for specific domains
-export * from "./ticketStatus";
-export * from "./priorities";
-export * from "./userRoles";
-export * from "./assetTypes";
-export * from "./departments";
-export * from "./permissions";
+// Note: Importing these individually to avoid module resolution issues
+export {
+  TICKET_STATUS_LABELS,
+  TICKET_STATUS_COLORS,
+  TICKET_STATUS_ICONS,
+  TICKET_STATUS_ORDER,
+} from "./ticketStatus.ts";
+export {
+  PRIORITY_LABELS,
+  PRIORITY_COLORS,
+  PRIORITY_ICONS,
+  PRIORITY_ORDER,
+  PRIORITY_WEIGHTS,
+  SLA_HOURS,
+} from "./priorities.ts";
+export {
+  USER_ROLE_LABELS,
+  USER_ROLE_COLORS,
+  USER_ROLE_PERMISSIONS,
+  USER_ROLE_DESCRIPTIONS,
+} from "./userRoles.ts";
+export {
+  ASSET_TYPE_LABELS,
+  ASSET_TYPE_ICONS,
+  ASSET_TYPE_COLORS,
+} from "./assetTypes.ts";
+export { DEPARTMENTS, DEPARTMENT_COLORS } from "./departments.ts";
+export {
+  PERMISSION_LABELS,
+  PERMISSION_DESCRIPTIONS,
+  PERMISSION_CATEGORIES,
+} from "./permissions.ts";

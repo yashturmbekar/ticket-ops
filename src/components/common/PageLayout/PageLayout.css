@@ -1,0 +1,113 @@
+/* PageLayout Component Styles */
+
+.page-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-background);
+}
+
+.page-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.page-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.page-main-content {
+  flex: 1;
+  padding: var(--spacing-lg);
+  overflow-y: auto;
+  background-color: var(--color-surface);
+}
+
+/* Desktop styles */
+@media (min-width: 769px) {
+  .page-content {
+    margin-left: 250px; /* Sidebar width */
+  }
+
+  .page-main {
+    margin-left: -250px; /* Compensate for sidebar */
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .page-main-content {
+    padding: var(--spacing-md);
+  }
+}
+
+/* Small mobile styles */
+@media (max-width: 576px) {
+  .page-main-content {
+    padding: var(--spacing-sm);
+  }
+}
+
+/* Focus management */
+.page-main-content:focus {
+  outline: none;
+}
+
+/* Scrollbar styles */
+.page-main-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.page-main-content::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+.page-main-content::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--border-radius-md);
+}
+
+.page-main-content::-webkit-scrollbar-thumb:hover {
+  background: var(--color-secondary);
+}
+
+/* Print styles */
+@media print {
+  .page-layout {
+    display: block;
+  }
+
+  .page-content {
+    display: block;
+    margin-left: 0;
+  }
+
+  .page-main {
+    margin-left: 0;
+  }
+
+  .page-main-content {
+    padding: 0;
+    overflow: visible;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .page-layout,
+  .page-content,
+  .page-main {
+    transition: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .page-main-content {
+    border: 1px solid var(--color-border);
+  }
+}

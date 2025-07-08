@@ -1,0 +1,368 @@
+/* Dashboard Component Styles */
+
+.dashboard-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  margin-bottom: var(--spacing-xl);
+}
+
+.dashboard-header h1 {
+  color: var(--color-text);
+  margin-bottom: var(--spacing-sm);
+}
+
+.dashboard-header p {
+  color: var(--color-textSecondary);
+  font-size: 1.125rem;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.stat-card {
+  background: var(--color-background);
+  transition: transform var(--transition-fast);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-card-content {
+  padding: var(--spacing-lg);
+}
+
+.stat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.stat-card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-textSecondary);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-card-icon {
+  font-size: 1.5rem;
+  opacity: 0.8;
+}
+
+.stat-card-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-sm);
+}
+
+.stat-card-change {
+  font-size: 0.875rem;
+  color: var(--color-success);
+  font-weight: 500;
+}
+
+.dashboard-content {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: var(--spacing-xl);
+  align-items: start;
+}
+
+.dashboard-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.dashboard-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.recent-tickets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.recent-ticket-item {
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  background: var(--color-surface);
+  transition: all var(--transition-fast);
+}
+
+.recent-ticket-item:hover {
+  border-color: var(--color-primary);
+  background: var(--color-background);
+}
+
+.recent-ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.recent-ticket-id {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.recent-ticket-priority {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-lg);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.priority-low {
+  background: var(--color-success);
+  color: white;
+}
+
+.priority-medium {
+  background: var(--color-warning);
+  color: var(--color-text);
+}
+
+.priority-high {
+  background: #fd7e14;
+  color: white;
+}
+
+.priority-critical {
+  background: var(--color-error);
+  color: white;
+}
+
+.recent-ticket-title {
+  font-weight: 500;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.4;
+}
+
+.recent-ticket-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.recent-ticket-status {
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  text-transform: capitalize;
+}
+
+.status-open {
+  background: var(--color-error);
+  color: white;
+}
+
+.status-in-progress {
+  background: var(--color-primary);
+  color: white;
+}
+
+.status-resolved {
+  background: var(--color-success);
+  color: white;
+}
+
+.recent-ticket-time {
+  color: var(--color-textSecondary);
+}
+
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.system-health {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.health-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  background: var(--color-surface);
+}
+
+.health-item-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.health-item-icon {
+  color: var(--color-primary);
+}
+
+.health-status {
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.875rem;
+}
+
+.status-online {
+  background: var(--color-success);
+  color: white;
+}
+
+.health-value {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.recent-activity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.activity-item {
+  padding: var(--spacing-sm);
+  border-left: 3px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.activity-time {
+  font-size: 0.75rem;
+  color: var(--color-textSecondary);
+  font-weight: 500;
+  margin-bottom: var(--spacing-xs);
+}
+
+.activity-text {
+  font-size: 0.875rem;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+/* Responsive design */
+@media (max-width: 992px) {
+  .dashboard-content {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-sidebar {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card-content {
+    padding: var(--spacing-md);
+  }
+
+  .stat-card-value {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-header p {
+    font-size: 1rem;
+  }
+
+  .recent-ticket-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .recent-ticket-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+}
+
+/* Dark theme adjustments */
+@media (prefers-color-scheme: dark) {
+  .recent-ticket-item {
+    background: var(--color-background);
+  }
+
+  .recent-ticket-item:hover {
+    background: var(--color-surface);
+  }
+
+  .health-item {
+    background: var(--color-background);
+  }
+
+  .activity-item {
+    background: var(--color-background);
+  }
+}
+
+/* Print styles */
+@media print {
+  .dashboard-page {
+    max-width: none;
+  }
+
+  .dashboard-content {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-actions {
+    display: none;
+  }
+
+  .stat-card:hover {
+    transform: none;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .stat-card {
+    transition: none;
+  }
+
+  .stat-card:hover {
+    transform: none;
+  }
+
+  .recent-ticket-item {
+    transition: none;
+  }
+}

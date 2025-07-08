@@ -1,0 +1,281 @@
+/* Table Styles */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.table-header {
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid var(--color-border);
+  text-align: left;
+  position: relative;
+}
+
+.table-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.table-header:hover {
+  background: var(--color-border);
+}
+
+.sort-icon {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  transition: color 0.2s ease;
+}
+
+.sort-icon.active {
+  color: var(--color-primary);
+}
+
+.table-cell {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  vertical-align: top;
+}
+
+.table-row:last-child .table-cell {
+  border-bottom: none;
+}
+
+.table-striped .table-row:nth-child(even) {
+  background: var(--color-surface);
+}
+
+.table-hoverable .table-row:hover {
+  background: var(--color-border);
+}
+
+.table-row-clickable {
+  cursor: pointer;
+}
+
+.table-compact .table-header,
+.table-compact .table-cell {
+  padding: 0.5rem 0.75rem;
+}
+
+.table-loading,
+.table-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: var(--color-text-secondary);
+}
+
+.table-loading {
+  gap: 1rem;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-border);
+  border-top: 3px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.table-empty p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Status badges and other common cell content */
+.table-cell .status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table-cell .status-badge.open {
+  background: var(--color-info-light);
+  color: var(--color-info);
+}
+
+.table-cell .status-badge.in-progress {
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.table-cell .status-badge.resolved {
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.table-cell .status-badge.closed {
+  background: var(--color-text-secondary);
+  color: var(--color-background);
+}
+
+.table-cell .priority-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table-cell .priority-badge.low {
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.table-cell .priority-badge.medium {
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.table-cell .priority-badge.high {
+  background: var(--color-error-light);
+  color: var(--color-error);
+}
+
+.table-cell .priority-badge.critical {
+  background: var(--color-error);
+  color: white;
+}
+
+.table-cell .user-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.table-cell .user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.table-cell .user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.table-cell .user-name {
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.table-cell .user-email {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.table-cell .table-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.table-cell .table-action {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: all 0.2s ease;
+}
+
+.table-cell .table-action:hover {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+.table-cell .table-action.danger:hover {
+  background: var(--color-error-light);
+  color: var(--color-error);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .table-container {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .table {
+    font-size: 0.75rem;
+  }
+
+  .table-header,
+  .table-cell {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .table-header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .sort-icon {
+    font-size: 0.625rem;
+  }
+
+  .table-cell .status-badge,
+  .table-cell .priority-badge {
+    font-size: 0.625rem;
+    padding: 0.125rem 0.5rem;
+  }
+
+  .table-cell .user-avatar {
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
+  }
+
+  .table-cell .user-email {
+    display: none;
+  }
+
+  .table-cell .table-actions {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}

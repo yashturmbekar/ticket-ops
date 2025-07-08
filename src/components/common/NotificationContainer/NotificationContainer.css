@@ -1,0 +1,240 @@
+/* Notification Container Styles */
+.notification-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 400px;
+  width: 100%;
+}
+
+.notification {
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+  position: relative;
+  animation: slideIn 0.3s ease-out;
+}
+
+.notification-success {
+  border-left: 4px solid var(--color-success);
+}
+
+.notification-error {
+  border-left: 4px solid var(--color-error);
+}
+
+.notification-warning {
+  border-left: 4px solid var(--color-warning);
+}
+
+.notification-info {
+  border-left: 4px solid var(--color-info);
+}
+
+.notification-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.notification-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.notification-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.notification-success .notification-icon {
+  color: var(--color-success);
+}
+
+.notification-error .notification-icon {
+  color: var(--color-error);
+}
+
+.notification-warning .notification-icon {
+  color: var(--color-warning);
+}
+
+.notification-info .notification-icon {
+  color: var(--color-info);
+}
+
+.notification-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.notification-close {
+  padding: 0.25rem !important;
+  min-width: auto !important;
+  border: none !important;
+  background: none !important;
+  color: var(--color-text-secondary) !important;
+}
+
+.notification-close:hover {
+  background: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+
+.notification-message {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.notification-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+.notification.removing {
+  animation: slideOut 0.3s ease-out forwards;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .notification-container {
+    top: 0.5rem;
+    right: 0.5rem;
+    left: 0.5rem;
+    max-width: none;
+  }
+
+  .notification {
+    padding: 0.75rem;
+  }
+
+  .notification-title {
+    font-size: 0.8125rem;
+  }
+
+  .notification-message {
+    font-size: 0.8125rem;
+  }
+
+  .notification-actions {
+    flex-direction: column;
+  }
+}
+
+/* Progress bar for timed notifications */
+.notification-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-border);
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+}
+
+.notification-progress-bar {
+  height: 100%;
+  background: var(--color-primary);
+  transition: width linear;
+}
+
+.notification-success .notification-progress-bar {
+  background: var(--color-success);
+}
+
+.notification-error .notification-progress-bar {
+  background: var(--color-error);
+}
+
+.notification-warning .notification-progress-bar {
+  background: var(--color-warning);
+}
+
+.notification-info .notification-progress-bar {
+  background: var(--color-info);
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .notification {
+    border: 2px solid var(--color-text);
+  }
+
+  .notification-success {
+    border-left: 6px solid var(--color-success);
+  }
+
+  .notification-error {
+    border-left: 6px solid var(--color-error);
+  }
+
+  .notification-warning {
+    border-left: 6px solid var(--color-warning);
+  }
+
+  .notification-info {
+    border-left: 6px solid var(--color-info);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .notification {
+    animation: none;
+  }
+
+  .notification.removing {
+    animation: none;
+    opacity: 0;
+  }
+
+  .notification-progress-bar {
+    transition: none;
+  }
+}

@@ -1,0 +1,545 @@
+// Core TypeScript types for the IT ticket management system
+
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: UserRole;
+  department: string;
+  manager?: string;
+  phone?: string;
+  location: string;
+  isActive: boolean;
+  lastLogin?: Date;
+  permissions: Permission[];
+  avatar?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Ticket {
+  id: string;
+  title: string;
+  description: string;
+  status: TicketStatus;
+  priority: Priority;
+  category: Category;
+  createdBy: string;
+  assignedTo?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  resolvedAt?: Date;
+  closedAt?: Date;
+  slaDeadline: Date;
+  tags: string[];
+  attachments: Attachment[];
+  comments: Comment[];
+  estimatedHours?: number;
+  actualHours?: number;
+  satisfactionRating?: number;
+  requesterEmail?: string;
+  requesterPhone?: string;
+  location?: string;
+  asset?: string; // Asset ID
+}
+
+export interface Asset {
+  id: string;
+  name: string;
+  type: AssetType;
+  serialNumber: string;
+  model: string;
+  manufacturer: string;
+  purchaseDate: Date;
+  warrantyExpiry: Date;
+  location: string;
+  assignedTo?: string;
+  status: AssetStatus;
+  value: number;
+  depreciation?: number;
+  specifications: Record<string, unknown>;
+  maintenanceHistory: MaintenanceRecord[];
+  purchaseOrder?: string;
+  vendor?: string;
+  description?: string;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Comment {
+  id: string;
+  ticketId: string;
+  userId: string;
+  content: string;
+  isInternal: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  attachments?: Attachment[];
+}
+
+export interface Attachment {
+  id: string;
+  filename: string;
+  originalName: string;
+  size: number;
+  mimeType: string;
+  url: string;
+  uploadedBy: string;
+  uploadedAt: Date;
+}
+
+export interface KnowledgeArticle {
+  id: string;
+  title: string;
+  content: string;
+  summary: string;
+  categoryId: string;
+  authorId: string;
+  status: ArticleStatus;
+  tags: string[];
+  isPublic: boolean;
+  viewCount: number;
+  rating: number;
+  ratingCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  publishedAt?: Date;
+  version: number;
+}
+
+export interface MaintenanceRecord {
+  id: string;
+  assetId: string;
+  type: MaintenanceType;
+  description: string;
+  scheduledDate: Date;
+  completedDate?: Date;
+  performedBy?: string;
+  cost?: number;
+  notes?: string;
+  status: MaintenanceStatus;
+}
+
+export interface NetworkDevice {
+  id: string;
+  name: string;
+  type: DeviceType;
+  ipAddress: string;
+  macAddress?: string;
+  location: string;
+  status: DeviceStatus;
+  lastSeen: Date;
+  uptime?: number;
+  responseTime?: number;
+  description?: string;
+  manufacturer?: string;
+  model?: string;
+  firmwareVersion?: string;
+  configBackupDate?: Date;
+}
+
+export interface Report {
+  id: string;
+  name: string;
+  type: ReportType;
+  description: string;
+  parameters: Record<string, unknown>;
+  schedule?: ReportSchedule;
+  createdBy: string;
+  createdAt: Date;
+  lastRun?: Date;
+  isPublic: boolean;
+}
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAt: Date;
+  data?: Record<string, unknown>;
+}
+
+// Enums and constants
+export const UserRole = {
+  ADMIN: "admin",
+  IT_STAFF: "it_staff",
+  USER: "user",
+  MANAGER: "manager",
+} as const;
+
+export type UserRole = (typeof UserRole)[keyof typeof UserRole];
+
+export const TicketStatus = {
+  OPEN: "open",
+  IN_PROGRESS: "in_progress",
+  PENDING: "pending",
+  RESOLVED: "resolved",
+  CLOSED: "closed",
+  CANCELLED: "cancelled",
+} as const;
+
+export type TicketStatus = (typeof TicketStatus)[keyof typeof TicketStatus];
+
+export const Priority = {
+  LOW: "low",
+  MEDIUM: "medium",
+  HIGH: "high",
+  CRITICAL: "critical",
+} as const;
+
+export type Priority = (typeof Priority)[keyof typeof Priority];
+
+export const Category = {
+  HARDWARE: "hardware",
+  SOFTWARE: "software",
+  NETWORK: "network",
+  ACCESS: "access",
+  EMAIL: "email",
+  PHONE: "phone",
+  PRINTER: "printer",
+  MOBILE: "mobile",
+  OTHER: "other",
+} as const;
+
+export type Category = (typeof Category)[keyof typeof Category];
+
+export const AssetType = {
+  DESKTOP: "desktop",
+  LAPTOP: "laptop",
+  SERVER: "server",
+  NETWORK_DEVICE: "network_device",
+  PRINTER: "printer",
+  PHONE: "phone",
+  TABLET: "tablet",
+  MONITOR: "monitor",
+  SOFTWARE: "software",
+  LICENSE: "license",
+  OTHER: "other",
+} as const;
+
+export type AssetType = (typeof AssetType)[keyof typeof AssetType];
+
+export const AssetStatus = {
+  ACTIVE: "active",
+  INACTIVE: "inactive",
+  MAINTENANCE: "maintenance",
+  DISPOSED: "disposed",
+  LOST: "lost",
+  STOLEN: "stolen",
+} as const;
+
+export type AssetStatus = (typeof AssetStatus)[keyof typeof AssetStatus];
+
+export const ArticleStatus = {
+  DRAFT: "draft",
+  REVIEW: "review",
+  PUBLISHED: "published",
+  ARCHIVED: "archived",
+} as const;
+
+export type ArticleStatus = (typeof ArticleStatus)[keyof typeof ArticleStatus];
+
+export const MaintenanceType = {
+  PREVENTIVE: "preventive",
+  CORRECTIVE: "corrective",
+  EMERGENCY: "emergency",
+} as const;
+
+export type MaintenanceType =
+  (typeof MaintenanceType)[keyof typeof MaintenanceType];
+
+export const MaintenanceStatus = {
+  SCHEDULED: "scheduled",
+  IN_PROGRESS: "in_progress",
+  COMPLETED: "completed",
+  CANCELLED: "cancelled",
+} as const;
+
+export type MaintenanceStatus =
+  (typeof MaintenanceStatus)[keyof typeof MaintenanceStatus];
+
+export const DeviceType = {
+  ROUTER: "router",
+  SWITCH: "switch",
+  FIREWALL: "firewall",
+  ACCESS_POINT: "access_point",
+  SERVER: "server",
+  PRINTER: "printer",
+  OTHER: "other",
+} as const;
+
+export type DeviceType = (typeof DeviceType)[keyof typeof DeviceType];
+
+export const DeviceStatus = {
+  ONLINE: "online",
+  OFFLINE: "offline",
+  WARNING: "warning",
+  CRITICAL: "critical",
+  UNKNOWN: "unknown",
+} as const;
+
+export type DeviceStatus = (typeof DeviceStatus)[keyof typeof DeviceStatus];
+
+export const ReportType = {
+  TICKET_SUMMARY: "ticket_summary",
+  ASSET_INVENTORY: "asset_inventory",
+  USER_ACTIVITY: "user_activity",
+  SLA_PERFORMANCE: "sla_performance",
+  NETWORK_STATUS: "network_status",
+  CUSTOM: "custom",
+} as const;
+
+export type ReportType = (typeof ReportType)[keyof typeof ReportType];
+
+export const NotificationType = {
+  TICKET_ASSIGNED: "ticket_assigned",
+  TICKET_UPDATED: "ticket_updated",
+  TICKET_RESOLVED: "ticket_resolved",
+  ASSET_MAINTENANCE: "asset_maintenance",
+  NETWORK_ALERT: "network_alert",
+  SYSTEM_ALERT: "system_alert",
+} as const;
+
+export type NotificationType =
+  (typeof NotificationType)[keyof typeof NotificationType];
+
+export const Permission = {
+  // Ticket permissions
+  TICKET_CREATE: "ticket_create",
+  TICKET_VIEW: "ticket_view",
+  TICKET_UPDATE: "ticket_update",
+  TICKET_DELETE: "ticket_delete",
+  TICKET_ASSIGN: "ticket_assign",
+  TICKET_RESOLVE: "ticket_resolve",
+
+  // Asset permissions
+  ASSET_CREATE: "asset_create",
+  ASSET_VIEW: "asset_view",
+  ASSET_UPDATE: "asset_update",
+  ASSET_DELETE: "asset_delete",
+
+  // User permissions
+  USER_CREATE: "user_create",
+  USER_VIEW: "user_view",
+  USER_UPDATE: "user_update",
+  USER_DELETE: "user_delete",
+
+  // Knowledge permissions
+  KNOWLEDGE_CREATE: "knowledge_create",
+  KNOWLEDGE_VIEW: "knowledge_view",
+  KNOWLEDGE_UPDATE: "knowledge_update",
+  KNOWLEDGE_DELETE: "knowledge_delete",
+  KNOWLEDGE_PUBLISH: "knowledge_publish",
+
+  // Report permissions
+  REPORT_VIEW: "report_view",
+  REPORT_CREATE: "report_create",
+  REPORT_EXPORT: "report_export",
+
+  // Network permissions
+  NETWORK_VIEW: "network_view",
+  NETWORK_MANAGE: "network_manage",
+
+  // Admin permissions
+  ADMIN_SETTINGS: "admin_settings",
+  ADMIN_USERS: "admin_users",
+  ADMIN_SYSTEM: "admin_system",
+} as const;
+
+export type Permission = (typeof Permission)[keyof typeof Permission];
+
+export interface ReportSchedule {
+  frequency: "daily" | "weekly" | "monthly" | "quarterly" | "yearly";
+  dayOfWeek?: number;
+  dayOfMonth?: number;
+  hour: number;
+  minute: number;
+  isEnabled: boolean;
+  lastRun?: Date;
+  nextRun?: Date;
+}
+
+export interface DashboardStats {
+  totalTickets: number;
+  openTickets: number;
+  resolvedTickets: number;
+  overdueTickets: number;
+  avgResolutionTime: number;
+  totalAssets: number;
+  activeAssets: number;
+  maintenanceAssets: number;
+  totalUsers: number;
+  activeUsers: number;
+  networkDevices: number;
+  onlineDevices: number;
+}
+
+// Request types for API calls
+export interface CreateUserRequest {
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: UserRole;
+  department: string;
+  manager?: string;
+  phone?: string;
+  location: string;
+  password: string;
+  permissions?: Permission[];
+}
+
+export interface UpdateUserRequest {
+  username?: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: UserRole;
+  department?: string;
+  manager?: string;
+  phone?: string;
+  location?: string;
+  isActive?: boolean;
+  permissions?: Permission[];
+}
+
+export interface CreateTicketRequest {
+  title: string;
+  description: string;
+  priority: Priority;
+  category: Category;
+  assignedTo?: string;
+  tags?: string[];
+  attachments?: File[];
+  requesterEmail?: string;
+  requesterPhone?: string;
+  location?: string;
+  asset?: string;
+}
+
+export interface UpdateTicketRequest {
+  title?: string;
+  description?: string;
+  status?: TicketStatus;
+  priority?: Priority;
+  category?: Category;
+  assignedTo?: string;
+  tags?: string[];
+  estimatedHours?: number;
+  actualHours?: number;
+  location?: string;
+  asset?: string;
+}
+
+export interface CreateAssetRequest {
+  name: string;
+  type: AssetType;
+  serialNumber: string;
+  model: string;
+  manufacturer: string;
+  purchaseDate: Date;
+  warrantyExpiry: Date;
+  location: string;
+  assignedTo?: string;
+  value: number;
+  specifications?: Record<string, unknown>;
+  purchaseOrder?: string;
+  vendor?: string;
+  description?: string;
+  notes?: string;
+}
+
+export interface UpdateAssetRequest {
+  name?: string;
+  type?: AssetType;
+  serialNumber?: string;
+  model?: string;
+  manufacturer?: string;
+  purchaseDate?: Date;
+  warrantyExpiry?: Date;
+  location?: string;
+  assignedTo?: string;
+  status?: AssetStatus;
+  value?: number;
+  specifications?: Record<string, unknown>;
+  purchaseOrder?: string;
+  vendor?: string;
+  description?: string;
+  notes?: string;
+}
+
+// API Response types
+export interface ApiResponse<T> {
+  data: T;
+  success: boolean;
+  message?: string;
+  error?: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface FilterOptions {
+  search?: string;
+  status?: string[];
+  priority?: string[];
+  category?: string[];
+  assignedTo?: string[];
+  dateRange?: {
+    start: Date;
+    end: Date;
+  };
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+}
+
+export interface ThemeConfig {
+  primary: string;
+  secondary: string;
+  success: string;
+  warning: string;
+  error: string;
+  info: string;
+  background: string;
+  surface: string;
+  text: string;
+  textSecondary: string;
+  border: string;
+  shadow: string;
+}
+
+export interface AppConfig {
+  companyName: string;
+  appName: string;
+  version: string;
+  apiUrl: string;
+  websocketUrl: string;
+  supportEmail: string;
+  maxFileSize: number;
+  allowedFileTypes: string[];
+  defaultTicketPriority: Priority;
+  defaultTicketCategory: Category;
+  slaHours: Record<Priority, number>;
+  theme: ThemeConfig;
+  features: {
+    networkMonitoring: boolean;
+    assetManagement: boolean;
+    knowledgeBase: boolean;
+    reporting: boolean;
+    mobileApp: boolean;
+    emailIntegration: boolean;
+    ldapIntegration: boolean;
+    ssoIntegration: boolean;
+  };
+}

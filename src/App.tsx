@@ -14,6 +14,10 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { TicketsPage } from "./pages/TicketsPage";
 import { AssetsPage } from "./pages/AssetsPage";
 import { UsersPage } from "./pages/UsersPage";
+import { KnowledgePage } from "./pages/KnowledgePage";
+import { ReportsPage } from "./pages/ReportsPage";
+import { NetworkPage } from "./pages/NetworkPage";
+import { SettingsPage } from "./pages/SettingsPage";
 import { useAuth } from "./hooks/useAuth";
 import "./styles/globals.css";
 
@@ -211,12 +215,7 @@ const AppContent: React.FC = () => {
           path="/knowledge"
           element={
             <ProtectedRoute>
-              <PageLayout>
-                <div>
-                  <h1>Knowledge Base</h1>
-                  <p>Knowledge base coming soon...</p>
-                </div>
-              </PageLayout>
+              <KnowledgePage />
             </ProtectedRoute>
           }
         />
@@ -224,12 +223,7 @@ const AppContent: React.FC = () => {
           path="/reports"
           element={
             <ProtectedRoute>
-              <PageLayout>
-                <div>
-                  <h1>Reports</h1>
-                  <p>Reports coming soon...</p>
-                </div>
-              </PageLayout>
+              <ReportsPage />
             </ProtectedRoute>
           }
         />
@@ -237,12 +231,7 @@ const AppContent: React.FC = () => {
           path="/network"
           element={
             <ProtectedRoute>
-              <PageLayout>
-                <div>
-                  <h1>Network</h1>
-                  <p>Network monitoring coming soon...</p>
-                </div>
-              </PageLayout>
+              <NetworkPage />
             </ProtectedRoute>
           }
         />
@@ -250,12 +239,7 @@ const AppContent: React.FC = () => {
           path="/settings"
           element={
             <ProtectedRoute>
-              <PageLayout>
-                <div>
-                  <h1>Settings</h1>
-                  <p>Settings coming soon...</p>
-                </div>
-              </PageLayout>
+              <SettingsPage />
             </ProtectedRoute>
           }
         />

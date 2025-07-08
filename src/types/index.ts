@@ -110,6 +110,19 @@ export interface KnowledgeArticle {
   version: number;
 }
 
+export interface KnowledgeCategory {
+  id: string;
+  name: string;
+  description?: string;
+  parentId?: string;
+  icon?: string;
+  color?: string;
+  order: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface MaintenanceRecord {
   id: string;
   assetId: string;
@@ -472,6 +485,25 @@ export interface UpdateAssetRequest {
   vendor?: string;
   description?: string;
   notes?: string;
+}
+
+export interface CreateKnowledgeArticleRequest {
+  title: string;
+  content: string;
+  summary: string;
+  categoryId: string;
+  tags: string[];
+  isPublic: boolean;
+}
+
+export interface UpdateKnowledgeArticleRequest {
+  title?: string;
+  content?: string;
+  summary?: string;
+  categoryId?: string;
+  tags?: string[];
+  isPublic?: boolean;
+  status?: ArticleStatus;
 }
 
 // API Response types

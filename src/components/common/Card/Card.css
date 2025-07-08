@@ -1,10 +1,29 @@
-/* Card Component Styles */
+/* Professional Card Component Styles */
 
 .card {
-  background-color: var(--color-background);
-  border-radius: var(--border-radius-md);
-  transition: all var(--transition-fast);
+  background: var(--color-surface-elevated);
+  border-radius: var(--border-radius-lg);
+  transition: var(--transition-fast);
   overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: var(--transition-fast);
+}
+
+.card:hover::before {
+  opacity: 1;
 }
 
 .card-default {
@@ -14,40 +33,350 @@
 
 .card-outline {
   border: 1px solid var(--color-border);
+  background: transparent;
 }
 
 .card-elevated {
   border: 1px solid var(--color-border);
-  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+  box-shadow: var(--color-shadow-md);
 }
 
 .card-elevated:hover {
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-  transform: translateY(-1px);
+  box-shadow: var(--color-shadow-lg);
+  transform: translateY(-2px);
+}
+
+.card-primary {
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary-lightest);
+}
+
+.card-success {
+  border: 1px solid var(--color-success);
+  background: var(--color-success-lightest);
+}
+
+.card-warning {
+  border: 1px solid var(--color-warning);
+  background: var(--color-warning-lightest);
+}
+
+.card-error {
+  border: 1px solid var(--color-error);
+  background: var(--color-error-lightest);
+}
+
+.card-info {
+  border: 1px solid var(--color-info);
+  background: var(--color-info-lightest);
+}
+
+.card-glass {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .card-header {
-  padding: var(--spacing-md) var(--spacing-md) 0;
+  padding: var(--spacing-5) var(--spacing-5) var(--spacing-4);
   border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-surface);
-  font-weight: 600;
+  background: var(--color-surface);
+  position: relative;
+}
+
+.card-header-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text);
+  margin: 0;
+  font-family: var(--font-family-secondary);
+}
+
+.card-header-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-top: var(--spacing-1);
+  margin-bottom: 0;
+}
+
+.card-header-actions {
+  position: absolute;
+  top: var(--spacing-4);
+  right: var(--spacing-4);
+  display: flex;
+  gap: var(--spacing-2);
 }
 
 .card-body {
   flex: 1;
+  padding: var(--spacing-5);
   color: var(--color-text);
+  line-height: var(--line-height-relaxed);
 }
 
 .card-footer {
-  padding: 0 var(--spacing-md) var(--spacing-md);
+  padding: var(--spacing-4) var(--spacing-5) var(--spacing-5);
   border-top: 1px solid var(--color-border);
-  background-color: var(--color-surface);
-  color: var(--color-textSecondary);
-  font-size: 0.875rem;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-/* Padding variants */
+.card-footer-actions {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+/* Professional Padding Variants */
+.card-sm .card-header {
+  padding: var(--spacing-3) var(--spacing-4) var(--spacing-2);
+}
+
+.card-sm .card-body {
+  padding: var(--spacing-4);
+}
+
+.card-sm .card-footer {
+  padding: var(--spacing-2) var(--spacing-4) var(--spacing-3);
+}
+
+.card-lg .card-header {
+  padding: var(--spacing-6) var(--spacing-6) var(--spacing-5);
+}
+
+.card-lg .card-body {
+  padding: var(--spacing-6);
+}
+
+.card-lg .card-footer {
+  padding: var(--spacing-5) var(--spacing-6) var(--spacing-6);
+}
+
+.card-xl .card-header {
+  padding: var(--spacing-8) var(--spacing-8) var(--spacing-6);
+}
+
+.card-xl .card-body {
+  padding: var(--spacing-8);
+}
+
+.card-xl .card-footer {
+  padding: var(--spacing-6) var(--spacing-8) var(--spacing-8);
+}
+
+/* Professional Loading State */
+.card-loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.card-loading::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.card-loading::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border: 2px solid var(--color-primary);
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  z-index: 2;
+}
+
+/* Professional Interactive Cards */
+.card-interactive {
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--color-shadow-lg);
+}
+
+.card-interactive:active {
+  transform: translateY(0);
+  box-shadow: var(--color-shadow);
+}
+
+/* Professional Card Groups */
+.card-group {
+  display: flex;
+  gap: var(--spacing-4);
+  flex-wrap: wrap;
+}
+
+.card-group .card {
+  flex: 1;
+  min-width: 280px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-4);
+}
+
+/* Professional Status Cards */
+.card-status {
+  position: relative;
+  padding-left: var(--spacing-5);
+}
+
+.card-status::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--color-primary);
+  border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+}
+
+.card-status.card-status-success::before {
+  background: var(--color-success);
+}
+
+.card-status.card-status-warning::before {
+  background: var(--color-warning);
+}
+
+.card-status.card-status-error::before {
+  background: var(--color-error);
+}
+
+.card-status.card-status-info::before {
+  background: var(--color-info);
+}
+
+/* Professional Metric Cards */
+.card-metric {
+  text-align: center;
+  padding: var(--spacing-6);
+}
+
+.card-metric-value {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-2);
+  font-family: var(--font-family-secondary);
+}
+
+.card-metric-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.card-metric-change {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  margin-top: var(--spacing-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1);
+}
+
+.card-metric-change.positive {
+  color: var(--color-success);
+}
+
+.card-metric-change.negative {
+  color: var(--color-error);
+}
+
+/* Professional Responsive Design */
+@media (max-width: 768px) {
+  .card-group {
+    flex-direction: column;
+  }
+
+  .card-group .card {
+    min-width: auto;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card-header {
+    padding: var(--spacing-4) var(--spacing-4) var(--spacing-3);
+  }
+
+  .card-body {
+    padding: var(--spacing-4);
+  }
+
+  .card-footer {
+    padding: var(--spacing-3) var(--spacing-4) var(--spacing-4);
+  }
+}
+
+/* Professional Dark Theme Support */
+[data-theme="dark"] .card {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .card-header {
+  background: var(--color-surface);
+  border-bottom-color: var(--color-border);
+}
+
+[data-theme="dark"] .card-footer {
+  background: var(--color-surface);
+  border-top-color: var(--color-border);
+}
+
+[data-theme="dark"] .card-glass {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .card-loading::after {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* Professional Print Styles */
+@media print {
+  .card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+
+  .card-header {
+    background: transparent;
+  }
+
+  .card-footer {
+    background: transparent;
+  }
+}
 .card-padding-none .card-body {
   padding: 0;
 }

@@ -353,33 +353,33 @@
   .admin-settings {
     padding: 1rem;
   }
-  
+
   .settings-nav {
     flex-wrap: wrap;
     gap: 0.25rem;
   }
-  
+
   .settings-nav button {
     padding: 0.5rem 1rem;
     font-size: 0.8rem;
   }
-  
+
   .settings-content {
     padding: 1rem;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .integrations-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .backup-actions {
     flex-direction: column;
     align-items: flex-start;
@@ -390,22 +390,22 @@
   .admin-settings h1 {
     font-size: 1.5rem;
   }
-  
+
   .settings-section h2 {
     font-size: 1.1rem;
   }
-  
+
   .integration-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
-  
+
   .integration-actions {
     width: 100%;
     justify-content: space-between;
   }
-  
+
   .audit-log-item {
     flex-direction: column;
     align-items: flex-start;

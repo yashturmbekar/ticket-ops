@@ -1,8 +1,10 @@
 import { apiService } from "./api";
 import type { User, ApiResponse } from "../types";
+import { UserRole } from "../types";
 
 export interface LoginRequest {
-  username: string;
+  username?: string;
+  email?: string;
   password: string;
   rememberMe?: boolean;
 }
@@ -13,6 +15,73 @@ export interface LoginResponse {
   expiresAt: Date;
   refreshToken: string;
 }
+
+// Demo users for testing
+const DEMO_USERS: User[] = [
+  {
+    id: "1",
+    username: "admin",
+    email: "admin@redfish.com",
+    firstName: "Admin",
+    lastName: "User",
+    role: UserRole.ADMIN,
+    department: "IT",
+    location: "HQ",
+    isActive: true,
+    permissions: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: "2",
+    username: "manager",
+    email: "manager@redfish.com",
+    firstName: "Manager",
+    lastName: "User",
+    role: UserRole.MANAGER,
+    department: "Operations",
+    location: "HQ",
+    isActive: true,
+    permissions: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: "3",
+    username: "tech",
+    email: "tech@redfish.com",
+    firstName: "Tech",
+    lastName: "User",
+    role: UserRole.IT_STAFF,
+    department: "IT",
+    location: "HQ",
+    isActive: true,
+    permissions: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: "4",
+    username: "employee",
+    email: "employee@redfish.com",
+    firstName: "Employee",
+    lastName: "User",
+    role: UserRole.USER,
+    department: "Sales",
+    location: "HQ",
+    isActive: true,
+    permissions: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+];
+
+const DEMO_CREDENTIALS = {
+  "admin@redfish.com": "admin123",
+  "manager@redfish.com": "manager123",
+  "tech@redfish.com": "tech123",
+  "employee@redfish.com": "employee123",
+};
 
 export interface RegisterRequest {
   username: string;
@@ -41,6 +110,33 @@ export class AuthService {
   private endpoint = "/auth";
 
   async login(credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> {
+    const loginIdentifier = credentials.email || credentials.username;
+
+    // Check if it's a demo login
+    if (loginIdentifier && loginIdentifier in DEMO_CREDENTIALS) {
+      const expectedPassword =
+        DEMO_CREDENTIALS[loginIdentifier as keyof typeof DEMO_CREDENTIALS];
+
+      if (credentials.password === expectedPassword) {
+        const user = DEMO_USERS.find((u) => u.email === loginIdentifier);
+
+        if (user) {
+          const response: LoginResponse = {
+            user,
+            token: `demo-token-${user.id}`,
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+            refreshToken: `demo-refresh-${user.id}`,
+          };
+
+          apiService.setAuthToken(response.token);
+          return { success: true, data: response };
+        }
+      }
+
+      throw new Error("Invalid credentials");
+    }
+
+    // For production, use the actual API call
     const response = await apiService.post<LoginResponse>(
       `${this.endpoint}/login`,
       credentials

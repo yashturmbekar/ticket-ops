@@ -1,6 +1,17 @@
-# IT Ticket Management System
+# RedFish IT - Ticket Management System
 
 A comprehensive IT helpdesk and ticket management system built with React, TypeScript, and Vite. This system provides a modern, user-friendly interface for managing IT support tickets, assets, users, and more.
+
+## 🔐 Demo Credentials
+
+The system includes demo accounts for testing different user roles:
+
+| Role         | Email                | Password    | Access Level                                     |
+| ------------ | -------------------- | ----------- | ------------------------------------------------ |
+| **Admin**    | admin@redfish.com    | admin123    | Full system access, settings, user management    |
+| **Manager**  | manager@redfish.com  | manager123  | Department oversight, reporting, team management |
+| **IT Staff** | tech@redfish.com     | tech123     | Ticket management, asset tracking, operations    |
+| **Employee** | employee@redfish.com | employee123 | Submit tickets, view own tickets, knowledge base |
 
 ## 🚀 Features
 

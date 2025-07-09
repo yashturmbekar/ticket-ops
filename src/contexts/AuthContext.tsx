@@ -2,6 +2,9 @@ import React, { createContext, useReducer, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { User, UserRole, Permission } from "../types";
 import { AUTH_TOKEN_KEY, USER_DATA_KEY } from "../constants";
+import { AuthService } from "../services/authService";
+
+const authService = new AuthService();
 
 interface AuthState {
   user: User | null;
@@ -124,57 +127,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     dispatch({ type: "LOGIN_START" });
 
     try {
-      // Mock login - in production, this would be an actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+      const response = await authService.login({ email, password });
 
-      if (email === "admin@example.com" && password === "password123") {
-        // Mock user data
-        const mockUser: User = {
-          id: "1",
-          username: "admin",
-          email: "admin@example.com",
-          firstName: "Admin",
-          lastName: "User",
-          role: "admin" as UserRole,
-          department: "IT",
-          location: "Head Office",
-          isActive: true,
-          permissions: [
-            "ticket_create",
-            "ticket_view",
-            "ticket_update",
-            "ticket_delete",
-            "asset_create",
-            "asset_view",
-            "asset_update",
-            "asset_delete",
-            "user_create",
-            "user_view",
-            "user_update",
-            "user_delete",
-            "admin_settings",
-            "admin_users",
-            "admin_system",
-          ] as Permission[],
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-
-        const mockToken = "mock-jwt-token";
+      if (response.success && response.data) {
+        const { user, token } = response.data;
 
         // Store token and user data
-        localStorage.setItem(AUTH_TOKEN_KEY, mockToken);
-        localStorage.setItem(USER_DATA_KEY, JSON.stringify(mockUser));
+        localStorage.setItem(AUTH_TOKEN_KEY, token);
+        localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
 
         dispatch({
           type: "LOGIN_SUCCESS",
-          payload: {
-            user: mockUser,
-            token: mockToken,
-          },
+          payload: { user, token },
         });
       } else {
-        throw new Error("Invalid credentials");
+        throw new Error(response.error || "Login failed");
       }
     } catch (error) {
       dispatch({

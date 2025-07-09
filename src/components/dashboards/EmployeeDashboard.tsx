@@ -1,19 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  FaPlus,
-  FaTicketAlt,
-  FaClock,
-  FaCheckCircle,
-  FaExclamationTriangle,
-  FaBell,
-  FaUser,
-  FaCalendar,
-  FaComment,
-} from "react-icons/fa";
-import { Card } from "../common/Card";
-import { Button } from "../common/Button";
-import { Modal } from "../common/Modal";
-import { PageLayout } from "../common/PageLayout";
 import { useAuth } from "../../hooks/useAuth";
 import { ticketService } from "../../services";
 import type { Ticket, Priority, TicketStatus, Category } from "../../types";
@@ -45,504 +30,469 @@ export const EmployeeDashboard: React.FC = () => {
     resolved: 0,
     pending: 0,
   });
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [createForm, setCreateForm] = useState<CreateTicketForm>({
     title: "",
     category: "",
     description: "",
-    priority: "medium" as Priority,
+    priority: "medium",
     attachments: [],
   });
+  const [activeTab, setActiveTab] = useState<
+    "my-tickets" | "create" | "knowledge"
+  >("my-tickets");
 
-  const loadUserTickets = useCallback(async () => {
-    if (!user) return;
-
+  const loadTickets = useCallback(async () => {
     try {
       setLoading(true);
       const response = await ticketService.getTickets({
-        createdBy: user.id,
+        page: 1,
         limit: 50,
+        createdBy: user?.id,
       });
 
-      const userTickets = response.data.data;
-      setTickets(userTickets);
+      if (response.success) {
+        const userTickets = response.data.data;
+        setTickets(userTickets);
 
-      // Calculate counts
-      const counts = {
-        total: userTickets.length,
-        open: userTickets.filter((t) => t.status === "open").length,
-        inProgress: userTickets.filter((t) => t.status === "in_progress")
-          .length,
-        resolved: userTickets.filter((t) => t.status === "resolved").length,
-        pending: userTickets.filter((t) => t.status === "pending").length,
-      };
-      setTicketCounts(counts);
+        // Calculate counts
+        const counts: TicketCounts = {
+          total: userTickets.length,
+          open: userTickets.filter((t: Ticket) => t.status === "open").length,
+          inProgress: userTickets.filter(
+            (t: Ticket) => t.status === "in_progress"
+          ).length,
+          resolved: userTickets.filter((t: Ticket) => t.status === "resolved")
+            .length,
+          pending: userTickets.filter((t: Ticket) => t.status === "pending")
+            .length,
+        };
+        setTicketCounts(counts);
+      }
     } catch (error) {
-      console.error("Failed to load tickets:", error);
+      console.error("Error loading tickets:", error);
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user?.id]);
 
   useEffect(() => {
-    loadUserTickets();
-  }, [user, loadUserTickets]);
+    loadTickets();
+  }, [loadTickets]);
 
-  const handleCreateTicket = async () => {
+  const handleTicketClick = (ticket: Ticket) => {
+    // TODO: Implement ticket detail view or navigation
+    console.log("Ticket clicked:", ticket);
+  };
+
+  const handleCreateTicket = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      await ticketService.createTicket({
+      const response = await ticketService.createTicket({
         title: createForm.title,
         description: createForm.description,
-        category: createForm.category as Category, // Cast to Category type
+        category: createForm.category as Category,
         priority: createForm.priority,
-        tags: [],
-        attachments: [],
       });
 
-      setShowCreateModal(false);
-      setCreateForm({
-        title: "",
-        category: "",
-        description: "",
-        priority: "medium" as Priority,
-        attachments: [],
-      });
-      loadUserTickets();
+      if (response.success) {
+        setShowCreateModal(false);
+        setCreateForm({
+          title: "",
+          category: "",
+          description: "",
+          priority: "medium",
+          attachments: [],
+        });
+        loadTickets();
+      }
     } catch (error) {
-      console.error("Failed to create ticket:", error);
+      console.error("Error creating ticket:", error);
     }
   };
 
-  const getStatusColor = (status: TicketStatus): string => {
+  const getStatusBadge = (status: TicketStatus) => {
     switch (status) {
       case "open":
-        return "#dc3545";
+        return <span className="compact-badge open">Open</span>;
       case "in_progress":
-        return "#007bff";
-      case "pending":
-        return "#ffc107";
+        return <span className="compact-badge in-progress">In Progress</span>;
       case "resolved":
-        return "#28a745";
-      case "closed":
-        return "#6c757d";
+        return <span className="compact-badge closed">Resolved</span>;
+      case "pending":
+        return <span className="compact-badge warning">Pending</span>;
       default:
-        return "#6c757d";
+        return <span className="compact-badge">{status}</span>;
     }
   };
 
-  const getPriorityColor = (priority: Priority): string => {
+  const getPriorityBadge = (priority: Priority) => {
     switch (priority) {
-      case "critical":
-        return "#dc3545";
       case "high":
-        return "#fd7e14";
+        return <span className="compact-badge high">High</span>;
       case "medium":
-        return "#ffc107";
+        return <span className="compact-badge medium">Medium</span>;
       case "low":
-        return "#28a745";
+        return <span className="compact-badge low">Low</span>;
       default:
-        return "#6c757d";
-    }
-  };
-
-  const getStatusIcon = (status: TicketStatus) => {
-    switch (status) {
-      case "open":
-        return <FaExclamationTriangle />;
-      case "in_progress":
-        return <FaClock />;
-      case "pending":
-        return <FaClock />;
-      case "resolved":
-        return <FaCheckCircle />;
-      case "closed":
-        return <FaCheckCircle />;
-      default:
-        return <FaTicketAlt />;
+        return <span className="compact-badge">{priority}</span>;
     }
   };
 
   if (loading) {
     return (
-      <PageLayout>
-        <div className="employee-dashboard loading">
-          <div className="loading-spinner">Loading your tickets...</div>
-        </div>
-      </PageLayout>
+      <div className="compact-header">
+        <h1>Employee Dashboard</h1>
+        <p>Loading your tickets...</p>
+      </div>
     );
   }
 
   return (
-    <PageLayout>
-      <div className="employee-dashboard">
-        <div className="dashboard-header">
-          <div className="welcome-section">
-            <h1>Welcome back, {user?.firstName}!</h1>
-            <p>Manage your support tickets and requests</p>
-          </div>
-          <Button
-            variant="primary"
-            icon={<FaPlus />}
+    <>
+      <div className="compact-header">
+        <h1>Employee Dashboard</h1>
+        <div className="compact-actions">
+          <button
+            className="compact-btn primary"
             onClick={() => setShowCreateModal(true)}
           >
             Create Ticket
-          </Button>
+          </button>
+          <button className="compact-btn" onClick={loadTickets}>
+            Refresh
+          </button>
         </div>
+      </div>
 
-        {/* Ticket Overview Cards */}
-        <div className="ticket-overview">
-          <Card className="overview-card total">
-            <div className="card-icon">
-              <FaTicketAlt />
-            </div>
-            <div className="card-content">
-              <h3>Total Tickets</h3>
-              <p className="card-number">{ticketCounts.total}</p>
-            </div>
-          </Card>
-
-          <Card className="overview-card open">
-            <div className="card-icon">
-              <FaExclamationTriangle />
-            </div>
-            <div className="card-content">
-              <h3>Open</h3>
-              <p className="card-number">{ticketCounts.open}</p>
-            </div>
-          </Card>
-
-          <Card className="overview-card progress">
-            <div className="card-icon">
-              <FaClock />
-            </div>
-            <div className="card-content">
-              <h3>In Progress</h3>
-              <p className="card-number">{ticketCounts.inProgress}</p>
-            </div>
-          </Card>
-
-          <Card className="overview-card resolved">
-            <div className="card-icon">
-              <FaCheckCircle />
-            </div>
-            <div className="card-content">
-              <h3>Resolved</h3>
-              <p className="card-number">{ticketCounts.resolved}</p>
-            </div>
-          </Card>
+      {/* Ticket Counts */}
+      <div className="compact-stats">
+        <div className="compact-stat-card">
+          <div className="compact-stat-value">{ticketCounts.total}</div>
+          <div className="compact-stat-label">Total Tickets</div>
         </div>
-
-        {/* Notifications Section */}
-        {ticketCounts.open > 0 && (
-          <Card className="notifications-card">
-            <div className="notification-header">
-              <FaBell />
-              <h3>Recent Updates</h3>
-            </div>
-            <div className="notifications-list">
-              <div className="notification-item">
-                <span className="notification-text">
-                  You have {ticketCounts.open} open ticket
-                  {ticketCounts.open !== 1 ? "s" : ""} awaiting response
-                </span>
-                <span className="notification-time">Just now</span>
-              </div>
-            </div>
-          </Card>
-        )}
-
-        {/* My Tickets Section */}
-        <div className="tickets-section">
-          <div className="section-header">
-            <h2>My Tickets</h2>
-            <div className="ticket-filters">
-              <Button variant="outline" size="sm">
-                All
-              </Button>
-              <Button variant="outline" size="sm">
-                Open
-              </Button>
-              <Button variant="outline" size="sm">
-                In Progress
-              </Button>
-              <Button variant="outline" size="sm">
-                Resolved
-              </Button>
-            </div>
-          </div>
-
-          <div className="tickets-grid">
-            {tickets.length === 0 ? (
-              <Card className="empty-state">
-                <FaTicketAlt size={48} />
-                <h3>No tickets yet</h3>
-                <p>Create your first support ticket to get started</p>
-                <Button
-                  variant="primary"
-                  onClick={() => setShowCreateModal(true)}
-                >
-                  Create Ticket
-                </Button>
-              </Card>
-            ) : (
-              tickets.map((ticket) => (
-                <Card
-                  key={ticket.id}
-                  className="ticket-card"
-                  onClick={() => setSelectedTicket(ticket)}
-                >
-                  <div className="ticket-header">
-                    <div className="ticket-status">
-                      {getStatusIcon(ticket.status)}
-                      <span
-                        className="status-badge"
-                        style={{
-                          backgroundColor: getStatusColor(ticket.status),
-                        }}
-                      >
-                        {ticket.status.replace("_", " ")}
-                      </span>
-                    </div>
-                    <span
-                      className="priority-badge"
-                      style={{
-                        backgroundColor: getPriorityColor(ticket.priority),
-                      }}
-                    >
-                      {ticket.priority}
-                    </span>
-                  </div>
-
-                  <div className="ticket-content">
-                    <h3>{ticket.title}</h3>
-                    <p className="ticket-description">
-                      {ticket.description.length > 100
-                        ? `${ticket.description.substring(0, 100)}...`
-                        : ticket.description}
-                    </p>
-                  </div>
-
-                  <div className="ticket-footer">
-                    <div className="ticket-meta">
-                      <span className="ticket-id">#{ticket.id}</span>
-                      <span className="ticket-date">
-                        <FaCalendar />
-                        {new Date(ticket.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    {ticket.comments.length > 0 && (
-                      <div className="ticket-comments">
-                        <FaComment />
-                        <span>{ticket.comments.length}</span>
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              ))
-            )}
-          </div>
+        <div className="compact-stat-card">
+          <div className="compact-stat-value">{ticketCounts.open}</div>
+          <div className="compact-stat-label">Open</div>
         </div>
+        <div className="compact-stat-card">
+          <div className="compact-stat-value">{ticketCounts.inProgress}</div>
+          <div className="compact-stat-label">In Progress</div>
+        </div>
+        <div className="compact-stat-card">
+          <div className="compact-stat-value">{ticketCounts.resolved}</div>
+          <div className="compact-stat-label">Resolved</div>
+        </div>
+        <div className="compact-stat-card">
+          <div className="compact-stat-value">{ticketCounts.pending}</div>
+          <div className="compact-stat-label">Pending</div>
+        </div>
+      </div>
 
-        {/* Create Ticket Modal */}
-        <Modal
-          isOpen={showCreateModal}
-          onClose={() => setShowCreateModal(false)}
-          title="Create New Ticket"
+      {/* Navigation Tabs */}
+      <div className="compact-actions">
+        <button
+          className={`compact-btn ${
+            activeTab === "my-tickets" ? "primary" : ""
+          }`}
+          onClick={() => setActiveTab("my-tickets")}
         >
-          <div className="create-ticket-form">
-            <div className="form-group">
-              <label>Title *</label>
+          My Tickets
+        </button>
+        <button
+          className={`compact-btn ${activeTab === "create" ? "primary" : ""}`}
+          onClick={() => setActiveTab("create")}
+        >
+          Create Ticket
+        </button>
+        <button
+          className={`compact-btn ${
+            activeTab === "knowledge" ? "primary" : ""
+          }`}
+          onClick={() => setActiveTab("knowledge")}
+        >
+          Knowledge Base
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === "my-tickets" && (
+        <div className="compact-card">
+          <h3>My Tickets</h3>
+          <table className="compact-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Last Updated</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tickets.map((ticket) => (
+                <tr key={ticket.id} onClick={() => handleTicketClick(ticket)}>
+                  <td>#{ticket.id.slice(0, 8)}</td>
+                  <td>{ticket.title}</td>
+                  <td>{ticket.category}</td>
+                  <td>{getPriorityBadge(ticket.priority)}</td>
+                  <td>{getStatusBadge(ticket.status)}</td>
+                  <td>{new Date(ticket.createdAt).toLocaleDateString()}</td>
+                  <td>{new Date(ticket.updatedAt).toLocaleDateString()}</td>
+                  <td>
+                    <button className="compact-btn">View</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {activeTab === "create" && (
+        <div className="compact-card">
+          <h3>Create New Ticket</h3>
+          <form onSubmit={handleCreateTicket} className="compact-form">
+            <div className="compact-form-group">
+              <label>Title</label>
               <input
                 type="text"
                 value={createForm.title}
                 onChange={(e) =>
-                  setCreateForm((prev) => ({ ...prev, title: e.target.value }))
+                  setCreateForm({ ...createForm, title: e.target.value })
                 }
-                placeholder="Brief description of the issue"
                 required
+                className="compact-input"
               />
             </div>
-
-            <div className="form-group">
-              <label>Category *</label>
+            <div className="compact-form-group">
+              <label>Category</label>
               <select
                 value={createForm.category}
                 onChange={(e) =>
-                  setCreateForm((prev) => ({
-                    ...prev,
-                    category: e.target.value,
-                  }))
+                  setCreateForm({ ...createForm, category: e.target.value })
                 }
                 required
+                className="compact-input"
               >
-                <option value="">Select a category</option>
+                <option value="">Select Category</option>
                 <option value="hardware">Hardware</option>
                 <option value="software">Software</option>
                 <option value="network">Network</option>
-                <option value="access">Access Request</option>
-                <option value="email">Email</option>
+                <option value="security">Security</option>
+                <option value="access">Access</option>
                 <option value="other">Other</option>
               </select>
             </div>
-
-            <div className="form-group">
+            <div className="compact-form-group">
               <label>Priority</label>
               <select
                 value={createForm.priority}
                 onChange={(e) =>
-                  setCreateForm((prev) => ({
-                    ...prev,
+                  setCreateForm({
+                    ...createForm,
                     priority: e.target.value as Priority,
-                  }))
+                  })
                 }
+                className="compact-input"
               >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
-                <option value="critical">Critical</option>
               </select>
             </div>
-
-            <div className="form-group">
-              <label>Description *</label>
+            <div className="compact-form-group">
+              <label>Description</label>
               <textarea
                 value={createForm.description}
                 onChange={(e) =>
-                  setCreateForm((prev) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
+                  setCreateForm({ ...createForm, description: e.target.value })
                 }
-                placeholder="Detailed description of the issue..."
-                rows={4}
                 required
+                rows={4}
+                className="compact-input"
               />
             </div>
-
-            <div className="form-group">
-              <label>Attachments (Optional)</label>
-              <input
-                type="file"
-                multiple
-                onChange={(e) =>
-                  setCreateForm((prev) => ({
-                    ...prev,
-                    attachments: Array.from(e.target.files || []),
-                  }))
-                }
-              />
-            </div>
-
-            <div className="modal-actions">
-              <Button
-                variant="outline"
-                onClick={() => setShowCreateModal(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                onClick={handleCreateTicket}
-                disabled={
-                  !createForm.title ||
-                  !createForm.category ||
-                  !createForm.description
-                }
-              >
+            <div className="compact-actions">
+              <button type="submit" className="compact-btn primary">
                 Create Ticket
-              </Button>
+              </button>
+              <button
+                type="button"
+                className="compact-btn"
+                onClick={() =>
+                  setCreateForm({
+                    title: "",
+                    category: "",
+                    description: "",
+                    priority: "medium",
+                    attachments: [],
+                  })
+                }
+              >
+                Reset
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {activeTab === "knowledge" && (
+        <div className="compact-card">
+          <h3>Knowledge Base</h3>
+          <div className="compact-actions">
+            <input
+              type="search"
+              placeholder="Search knowledge base..."
+              className="compact-search"
+            />
+            <button className="compact-btn">Search</button>
+          </div>
+          <div className="compact-grid compact-grid-2">
+            <div className="compact-card">
+              <h4>Common Issues</h4>
+              <ul>
+                <li>
+                  <a href="#">Password Reset</a>
+                </li>
+                <li>
+                  <a href="#">VPN Connection Issues</a>
+                </li>
+                <li>
+                  <a href="#">Software Installation</a>
+                </li>
+                <li>
+                  <a href="#">Email Setup</a>
+                </li>
+                <li>
+                  <a href="#">Printer Problems</a>
+                </li>
+              </ul>
+            </div>
+            <div className="compact-card">
+              <h4>IT Policies</h4>
+              <ul>
+                <li>
+                  <a href="#">Security Policy</a>
+                </li>
+                <li>
+                  <a href="#">Acceptable Use Policy</a>
+                </li>
+                <li>
+                  <a href="#">Remote Work Guidelines</a>
+                </li>
+                <li>
+                  <a href="#">Software Licensing</a>
+                </li>
+                <li>
+                  <a href="#">Data Protection</a>
+                </li>
+              </ul>
             </div>
           </div>
-        </Modal>
+        </div>
+      )}
 
-        {/* Ticket Detail Modal */}
-        <Modal
-          isOpen={!!selectedTicket}
-          onClose={() => setSelectedTicket(null)}
-          title={`Ticket #${selectedTicket?.id}`}
+      {/* Create Ticket Modal */}
+      {showCreateModal && (
+        <div
+          className="compact-modal-overlay"
+          onClick={() => setShowCreateModal(false)}
         >
-          {selectedTicket && (
-            <div className="ticket-detail">
-              <div className="detail-header">
-                <h3>{selectedTicket.title}</h3>
-                <div className="detail-badges">
-                  <span
-                    className="status-badge"
-                    style={{
-                      backgroundColor: getStatusColor(selectedTicket.status),
-                    }}
-                  >
-                    {selectedTicket.status.replace("_", " ")}
-                  </span>
-                  <span
-                    className="priority-badge"
-                    style={{
-                      backgroundColor: getPriorityColor(
-                        selectedTicket.priority
-                      ),
-                    }}
-                  >
-                    {selectedTicket.priority}
-                  </span>
-                </div>
-              </div>
-
-              <div className="detail-content">
-                <div className="detail-section">
-                  <h4>Description</h4>
-                  <p>{selectedTicket.description}</p>
-                </div>
-
-                <div className="detail-section">
-                  <h4>Details</h4>
-                  <div className="detail-meta">
-                    <div className="meta-item">
-                      <span className="meta-label">Created:</span>
-                      <span>
-                        {new Date(selectedTicket.createdAt).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="meta-item">
-                      <span className="meta-label">Category:</span>
-                      <span>{selectedTicket.category}</span>
-                    </div>
-                    {selectedTicket.assignedTo && (
-                      <div className="meta-item">
-                        <span className="meta-label">Assigned to:</span>
-                        <span>{selectedTicket.assignedTo}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {selectedTicket.comments.length > 0 && (
-                  <div className="detail-section">
-                    <h4>Comments</h4>
-                    <div className="comments-list">
-                      {selectedTicket.comments.map((comment) => (
-                        <div key={comment.id} className="comment-item">
-                          <div className="comment-header">
-                            <FaUser />
-                            <span className="comment-author">
-                              {comment.userId}
-                            </span>
-                            <span className="comment-date">
-                              {new Date(comment.createdAt).toLocaleString()}
-                            </span>
-                          </div>
-                          <p className="comment-content">{comment.content}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+          <div className="compact-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="compact-modal-header">
+              <h3>Create New Ticket</h3>
+              <button
+                className="compact-modal-close"
+                onClick={() => setShowCreateModal(false)}
+              >
+                ×
+              </button>
             </div>
-          )}
-        </Modal>
-      </div>
-    </PageLayout>
+            <form onSubmit={handleCreateTicket} className="compact-form">
+              <div className="compact-form-group">
+                <label>Title</label>
+                <input
+                  type="text"
+                  value={createForm.title}
+                  onChange={(e) =>
+                    setCreateForm({ ...createForm, title: e.target.value })
+                  }
+                  required
+                  className="compact-input"
+                />
+              </div>
+              <div className="compact-form-group">
+                <label>Category</label>
+                <select
+                  value={createForm.category}
+                  onChange={(e) =>
+                    setCreateForm({ ...createForm, category: e.target.value })
+                  }
+                  required
+                  className="compact-input"
+                >
+                  <option value="">Select Category</option>
+                  <option value="hardware">Hardware</option>
+                  <option value="software">Software</option>
+                  <option value="network">Network</option>
+                  <option value="security">Security</option>
+                  <option value="access">Access</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div className="compact-form-group">
+                <label>Priority</label>
+                <select
+                  value={createForm.priority}
+                  onChange={(e) =>
+                    setCreateForm({
+                      ...createForm,
+                      priority: e.target.value as Priority,
+                    })
+                  }
+                  className="compact-input"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+              <div className="compact-form-group">
+                <label>Description</label>
+                <textarea
+                  value={createForm.description}
+                  onChange={(e) =>
+                    setCreateForm({
+                      ...createForm,
+                      description: e.target.value,
+                    })
+                  }
+                  required
+                  rows={4}
+                  className="compact-input"
+                />
+              </div>
+              <div className="compact-actions">
+                <button type="submit" className="compact-btn primary">
+                  Create Ticket
+                </button>
+                <button
+                  type="button"
+                  className="compact-btn"
+                  onClick={() => setShowCreateModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   );
 };

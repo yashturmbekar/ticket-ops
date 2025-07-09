@@ -1,19 +1,4 @@
-import React, { useState, useEffect } from "react";
-import {
-  FaPlus,
-  FaFilter,
-  FaSearch,
-  FaEye,
-  FaEdit,
-  FaTrash,
-  FaDesktop,
-  FaLaptop,
-  FaServer,
-  FaPrint,
-} from "react-icons/fa";
-import { Button } from "../components/common/Button";
-import { Card } from "../components/common/Card";
-import { PageLayout } from "../components/common/PageLayout";
+﻿import React, { useState, useEffect } from "react";
 import type { Asset, AssetType, AssetStatus } from "../types";
 import { AssetType as AT, AssetStatus as AS } from "../types";
 import "../styles/assets.css";
@@ -49,12 +34,36 @@ export const AssetsPage: React.FC = () => {
           os: "Windows 11 Pro",
         },
         maintenanceHistory: [],
+        notes: "Primary workstation",
+        createdAt: new Date("2023-01-15"),
+        updatedAt: new Date("2023-01-15"),
+      },
+      {
+        id: "2",
+        name: "Dell XPS 13",
+        type: AT.LAPTOP,
+        status: AS.ACTIVE,
+        serialNumber: "DPTX13-001",
+        model: "XPS 13 9310",
+        manufacturer: "Dell",
+        purchaseDate: new Date("2022-01-15"),
+        warrantyExpiry: new Date("2025-01-15"),
+        location: "Office",
+        assignedTo: "john.doe@company.com",
+        value: 1499.99,
+        specifications: {
+          processor: "Intel i7-1185G7",
+          memory: "16GB LPDDR4x",
+          storage: "512GB SSD",
+          os: "Windows 11 Pro",
+        },
+        maintenanceHistory: [],
         notes: "Primary workstation for John Doe",
         createdAt: new Date("2023-01-15T10:00:00Z"),
         updatedAt: new Date("2023-01-15T10:00:00Z"),
       },
       {
-        id: "2",
+        id: "3",
         name: 'MacBook Pro 16"',
         type: AT.LAPTOP,
         status: AS.ACTIVE,
@@ -78,7 +87,7 @@ export const AssetsPage: React.FC = () => {
         updatedAt: new Date("2023-03-20T14:30:00Z"),
       },
       {
-        id: "3",
+        id: "4",
         name: "HP ProLiant DL380",
         type: AT.SERVER,
         status: AS.ACTIVE,
@@ -101,7 +110,7 @@ export const AssetsPage: React.FC = () => {
         updatedAt: new Date("2022-08-10T09:00:00Z"),
       },
       {
-        id: "4",
+        id: "5",
         name: "Canon ImageRunner 2630",
         type: AT.PRINTER,
         status: AS.MAINTENANCE,
@@ -124,7 +133,7 @@ export const AssetsPage: React.FC = () => {
         updatedAt: new Date("2024-01-15T16:00:00Z"),
       },
       {
-        id: "5",
+        id: "6",
         name: "Lenovo ThinkPad X1",
         type: AT.LAPTOP,
         status: AS.DISPOSED,
@@ -181,37 +190,18 @@ export const AssetsPage: React.FC = () => {
     setFilteredAssets(filtered);
   }, [assets, searchTerm, typeFilter, statusFilter]);
 
-  const getAssetIcon = (type: AssetType) => {
-    switch (type) {
-      case AT.DESKTOP:
-        return <FaDesktop />;
-      case AT.LAPTOP:
-        return <FaLaptop />;
-      case AT.SERVER:
-        return <FaServer />;
-      case AT.PRINTER:
-        return <FaPrint />;
-      default:
-        return <FaDesktop />;
-    }
-  };
-
-  const getStatusColor = (status: AssetStatus) => {
+  const getStatusBadge = (status: AssetStatus) => {
     switch (status) {
       case AS.ACTIVE:
-        return "status-active";
+        return <span className="compact-badge success">Active</span>;
       case AS.INACTIVE:
-        return "status-inactive";
+        return <span className="compact-badge">Inactive</span>;
       case AS.MAINTENANCE:
-        return "status-maintenance";
+        return <span className="compact-badge warning">Maintenance</span>;
       case AS.DISPOSED:
-        return "status-disposed";
-      case AS.LOST:
-        return "status-lost";
-      case AS.STOLEN:
-        return "status-stolen";
+        return <span className="compact-badge error">Disposed</span>;
       default:
-        return "status-active";
+        return <span className="compact-badge">{status}</span>;
     }
   };
 
@@ -231,240 +221,177 @@ export const AssetsPage: React.FC = () => {
   };
 
   const handleCreateAsset = () => {
-    // TODO: Implement create asset modal
     console.log("Create asset");
   };
 
   const handleViewAsset = (assetId: string) => {
-    // TODO: Navigate to asset details
     console.log("View asset", assetId);
   };
 
   const handleEditAsset = (assetId: string) => {
-    // TODO: Open edit asset modal
     console.log("Edit asset", assetId);
-  };
-
-  const handleDeleteAsset = (assetId: string) => {
-    // TODO: Implement delete confirmation
-    console.log("Delete asset", assetId);
   };
 
   if (loading) {
     return (
-      <PageLayout>
-        <div className="loading-spinner">Loading assets...</div>
-      </PageLayout>
+      <div className="compact-header">
+        <h1>Assets</h1>
+        <p>Loading assets...</p>
+      </div>
     );
   }
 
   return (
-    <PageLayout>
-      <div className="assets-page">
-        <div className="page-header">
-          <h1>Assets</h1>
+    <>
+      <div className="compact-header">
+        <h1>Asset Management</h1>
+        <div className="compact-actions">
+          <button className="compact-btn primary" onClick={handleCreateAsset}>
+            Add Asset
+          </button>
+          <button className="compact-btn">Export</button>
         </div>
-
-        <div className="assets-header">
-          <div className="assets-actions">
-            <Button
-              variant="primary"
-              icon={<FaPlus />}
-              onClick={handleCreateAsset}
-            >
-              Add Asset
-            </Button>
-          </div>
-
-          <div className="assets-filters">
-            <div className="search-box">
-              <FaSearch className="search-icon" />
-              <input
-                type="text"
-                placeholder="Search assets..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-
-            <select
-              value={typeFilter}
-              onChange={(e) =>
-                setTypeFilter(e.target.value as AssetType | "all")
-              }
-            >
-              <option value="all">All Types</option>
-              <option value={AT.DESKTOP}>Desktop</option>
-              <option value={AT.LAPTOP}>Laptop</option>
-              <option value={AT.SERVER}>Server</option>
-              <option value={AT.PRINTER}>Printer</option>
-              <option value={AT.PHONE}>Phone</option>
-              <option value={AT.TABLET}>Tablet</option>
-              <option value={AT.MONITOR}>Monitor</option>
-              <option value={AT.SOFTWARE}>Software</option>
-              <option value={AT.LICENSE}>License</option>
-              <option value={AT.OTHER}>Other</option>
-            </select>
-
-            <select
-              value={statusFilter}
-              onChange={(e) =>
-                setStatusFilter(e.target.value as AssetStatus | "all")
-              }
-            >
-              <option value="all">All Statuses</option>
-              <option value={AS.ACTIVE}>Active</option>
-              <option value={AS.INACTIVE}>Inactive</option>
-              <option value={AS.MAINTENANCE}>Maintenance</option>
-              <option value={AS.DISPOSED}>Disposed</option>
-              <option value={AS.LOST}>Lost</option>
-              <option value={AS.STOLEN}>Stolen</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="assets-stats">
-          <Card className="stat-card">
-            <div className="stat-content">
-              <h3>Total Assets</h3>
-              <p className="stat-number">{assets.length}</p>
-            </div>
-          </Card>
-          <Card className="stat-card">
-            <div className="stat-content">
-              <h3>Active</h3>
-              <p className="stat-number">
-                {assets.filter((a) => a.status === AS.ACTIVE).length}
-              </p>
-            </div>
-          </Card>
-          <Card className="stat-card">
-            <div className="stat-content">
-              <h3>Maintenance</h3>
-              <p className="stat-number">
-                {assets.filter((a) => a.status === AS.MAINTENANCE).length}
-              </p>
-            </div>
-          </Card>
-          <Card className="stat-card">
-            <div className="stat-content">
-              <h3>Warranty Expiring</h3>
-              <p className="stat-number">
-                {
-                  assets.filter(
-                    (a) =>
-                      a.warrantyExpiry &&
-                      isWarrantyExpiringSoon(a.warrantyExpiry)
-                  ).length
-                }
-              </p>
-            </div>
-          </Card>
-        </div>
-
-        <Card className="assets-table">
-          <div className="table-header">
-            <h3>Assets ({filteredAssets.length})</h3>
-            <Button variant="secondary" icon={<FaFilter />}>
-              More Filters
-            </Button>
-          </div>
-
-          <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Asset</th>
-                  <th>Type</th>
-                  <th>Status</th>
-                  <th>Serial Number</th>
-                  <th>Assigned To</th>
-                  <th>Location</th>
-                  <th>Warranty</th>
-                  <th>Cost</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAssets.map((asset) => (
-                  <tr key={asset.id}>
-                    <td>
-                      <div className="asset-info">
-                        <div className="asset-icon">
-                          {getAssetIcon(asset.type)}
-                        </div>
-                        <div className="asset-details">
-                          <span className="asset-name">{asset.name}</span>
-                          <span className="asset-model">
-                            {asset.manufacturer} {asset.model}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="asset-type">{asset.type}</span>
-                    </td>
-                    <td>
-                      <span
-                        className={`status-badge ${getStatusColor(
-                          asset.status
-                        )}`}
-                      >
-                        {asset.status}
-                      </span>
-                    </td>
-                    <td>{asset.serialNumber}</td>
-                    <td>{asset.assignedTo || "Unassigned"}</td>
-                    <td>{asset.location}</td>
-                    <td>
-                      {asset.warrantyExpiry && (
-                        <span
-                          className={`warranty-status ${
-                            isWarrantyExpiringSoon(asset.warrantyExpiry)
-                              ? "expiring"
-                              : ""
-                          }`}
-                        >
-                          {asset.warrantyExpiry.toLocaleDateString()}
-                        </span>
-                      )}
-                    </td>
-                    <td>{formatCurrency(asset.value)}</td>
-                    <td>
-                      <div className="action-buttons">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          icon={<FaEye />}
-                          onClick={() => handleViewAsset(asset.id)}
-                        >
-                          View
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          icon={<FaEdit />}
-                          onClick={() => handleEditAsset(asset.id)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          icon={<FaTrash />}
-                          onClick={() => handleDeleteAsset(asset.id)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
       </div>
-    </PageLayout>
+
+      <div className="compact-stats">
+        <div className="compact-stat-card">
+          <div className="compact-stat-value">{assets.length}</div>
+          <div className="compact-stat-label">Total Assets</div>
+        </div>
+        <div className="compact-stat-card">
+          <div className="compact-stat-value">
+            {assets.filter((a) => a.status === AS.ACTIVE).length}
+          </div>
+          <div className="compact-stat-label">Active</div>
+        </div>
+        <div className="compact-stat-card">
+          <div className="compact-stat-value">
+            {assets.filter((a) => a.status === AS.MAINTENANCE).length}
+          </div>
+          <div className="compact-stat-label">Maintenance</div>
+        </div>
+        <div className="compact-stat-card">
+          <div className="compact-stat-value">
+            {
+              assets.filter(
+                (a) =>
+                  a.warrantyExpiry && isWarrantyExpiringSoon(a.warrantyExpiry)
+              ).length
+            }
+          </div>
+          <div className="compact-stat-label">Warranty Expiring</div>
+        </div>
+        <div className="compact-stat-card">
+          <div className="compact-stat-value">
+            {formatCurrency(
+              assets.reduce((sum, asset) => sum + asset.value, 0)
+            )}
+          </div>
+          <div className="compact-stat-label">Total Value</div>
+        </div>
+      </div>
+
+      <div className="compact-actions">
+        <input
+          type="search"
+          placeholder="Search assets..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="compact-search"
+        />
+        <select
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value as AssetType | "all")}
+          className="compact-btn"
+        >
+          <option value="all">All Types</option>
+          <option value={AT.DESKTOP}>Desktop</option>
+          <option value={AT.LAPTOP}>Laptop</option>
+          <option value={AT.SERVER}>Server</option>
+          <option value={AT.PRINTER}>Printer</option>
+        </select>
+        <select
+          value={statusFilter}
+          onChange={(e) =>
+            setStatusFilter(e.target.value as AssetStatus | "all")
+          }
+          className="compact-btn"
+        >
+          <option value="all">All Statuses</option>
+          <option value={AS.ACTIVE}>Active</option>
+          <option value={AS.INACTIVE}>Inactive</option>
+          <option value={AS.MAINTENANCE}>Maintenance</option>
+          <option value={AS.DISPOSED}>Disposed</option>
+        </select>
+      </div>
+
+      <div className="compact-card">
+        <h3>Assets ({filteredAssets.length})</h3>
+        <table className="compact-table">
+          <thead>
+            <tr>
+              <th>Asset</th>
+              <th>Type</th>
+              <th>Serial Number</th>
+              <th>Status</th>
+              <th>Location</th>
+              <th>Assigned To</th>
+              <th>Warranty</th>
+              <th>Value</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredAssets.map((asset) => (
+              <tr key={asset.id}>
+                <td>
+                  <div>
+                    <div style={{ fontWeight: "bold" }}>{asset.name}</div>
+                    <div style={{ fontSize: "12px", color: "#666" }}>
+                      {asset.manufacturer} {asset.model}
+                    </div>
+                  </div>
+                </td>
+                <td>{asset.type}</td>
+                <td>{asset.serialNumber}</td>
+                <td>{getStatusBadge(asset.status)}</td>
+                <td>{asset.location}</td>
+                <td>{asset.assignedTo || "Unassigned"}</td>
+                <td>
+                  {asset.warrantyExpiry && (
+                    <span
+                      className={`warranty-status ${
+                        isWarrantyExpiringSoon(asset.warrantyExpiry)
+                          ? "expiring"
+                          : ""
+                      }`}
+                    >
+                      {asset.warrantyExpiry.toLocaleDateString()}
+                    </span>
+                  )}
+                </td>
+                <td>{formatCurrency(asset.value)}</td>
+                <td>
+                  <div className="compact-actions">
+                    <button
+                      className="compact-btn"
+                      onClick={() => handleViewAsset(asset.id)}
+                    >
+                      View
+                    </button>
+                    <button
+                      className="compact-btn"
+                      onClick={() => handleEditAsset(asset.id)}
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 };

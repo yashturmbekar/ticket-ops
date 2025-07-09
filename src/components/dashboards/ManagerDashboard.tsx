@@ -1,22 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  FaUsers,
-  FaTicketAlt,
-  FaTasks,
-  FaChartLine,
-  FaExclamationTriangle,
-  FaCheckCircle,
-  FaClock,
-  FaEye,
-  FaCalendar,
-  FaUser,
-  FaComment,
-  FaClipboardList,
-} from "react-icons/fa";
-import { Card } from "../common/Card";
-import { Button } from "../common/Button";
-import { Modal } from "../common/Modal";
-import { PageLayout } from "../common/PageLayout";
 import { useAuth } from "../../hooks/useAuth";
 import { ticketService } from "../../services";
 import type { Ticket, TicketStatus, Priority } from "../../types";
@@ -41,7 +23,7 @@ interface TeamMember {
 }
 
 export const ManagerDashboard: React.FC = () => {
-  const { user } = useAuth();
+  useAuth();
   const [metrics, setMetrics] = useState<ManagerMetrics>({
     totalTickets: 0,
     teamTickets: 0,
@@ -52,7 +34,6 @@ export const ManagerDashboard: React.FC = () => {
   });
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [activeTab, setActiveTab] = useState<
     "overview" | "team" | "approvals" | "performance"
   >("overview");
@@ -98,28 +79,28 @@ export const ManagerDashboard: React.FC = () => {
           name: "John Doe",
           role: "Support Agent",
           ticketsAssigned: 15,
-          avgResolutionTime: 2.1,
+          avgResolutionTime: 2.3,
           status: "online",
         },
         {
           id: "2",
           name: "Jane Smith",
-          role: "IT Specialist",
+          role: "Senior Agent",
           ticketsAssigned: 12,
           avgResolutionTime: 1.8,
           status: "online",
         },
         {
           id: "3",
-          name: "Mike Chen",
-          role: "Network Administrator",
-          ticketsAssigned: 8,
-          avgResolutionTime: 3.2,
+          name: "Mike Johnson",
+          role: "Support Agent",
+          ticketsAssigned: 18,
+          avgResolutionTime: 2.7,
           status: "away",
         },
       ]);
     } catch (error) {
-      console.error("Error loading dashboard data:", error);
+      console.error("Error loading manager dashboard:", error);
     } finally {
       setLoading(false);
     }
@@ -129,421 +110,322 @@ export const ManagerDashboard: React.FC = () => {
     loadDashboardData();
   }, [loadDashboardData]);
 
-  const handleTicketAction = async (
-    ticketId: string,
-    action: "assign" | "escalate" | "approve"
-  ) => {
-    try {
-      // Implementation would depend on the specific action
-      console.log(`Performing ${action} on ticket ${ticketId}`);
-      // Reload data after action
-      loadDashboardData();
-    } catch (error) {
-      console.error(`Error performing ${action}:`, error);
-    }
+  const handleTicketClick = (ticket: Ticket) => {
+    // TODO: Implement ticket detail view or navigation
+    console.log("Ticket clicked:", ticket);
   };
 
-  const getStatusColor = (status: TicketStatus) => {
+  const formatTime = (hours: number) => {
+    if (hours < 1) return `${Math.round(hours * 60)}m`;
+    return `${hours.toFixed(1)}h`;
+  };
+
+  const getStatusBadge = (status: TicketStatus) => {
     switch (status) {
       case "open":
-        return "#f44336";
+        return <span className="compact-badge open">Open</span>;
       case "in_progress":
-        return "#2196f3";
-      case "pending":
-        return "#ff9800";
+        return <span className="compact-badge in-progress">In Progress</span>;
       case "resolved":
-        return "#4caf50";
-      case "closed":
-        return "#9e9e9e";
+        return <span className="compact-badge closed">Resolved</span>;
       default:
-        return "#757575";
+        return <span className="compact-badge">{status}</span>;
     }
   };
 
-  const getPriorityColor = (priority: Priority) => {
+  const getPriorityBadge = (priority: Priority) => {
     switch (priority) {
-      case "critical":
-        return "#d32f2f";
       case "high":
-        return "#f57c00";
+        return <span className="compact-badge high">High</span>;
       case "medium":
-        return "#1976d2";
+        return <span className="compact-badge medium">Medium</span>;
       case "low":
-        return "#388e3c";
+        return <span className="compact-badge low">Low</span>;
       default:
-        return "#757575";
+        return <span className="compact-badge">{priority}</span>;
     }
   };
 
   if (loading) {
     return (
-      <PageLayout>
-        <div className="manager-dashboard">
-          <div className="loading-spinner">Loading dashboard...</div>
-        </div>
-      </PageLayout>
+      <div className="compact-header">
+        <h1>Manager Dashboard</h1>
+        <p>Loading manager dashboard...</p>
+      </div>
     );
   }
 
   return (
-    <PageLayout>
-      <div className="manager-dashboard">
-        <div className="dashboard-header">
-          <h1>Manager Dashboard</h1>
-          <p>
-            Welcome back, {user?.firstName || user?.email}! Here's your team
-            overview.
-          </p>
+    <>
+      <div className="compact-header">
+        <h1>Manager Dashboard</h1>
+        <div className="compact-actions">
+          <button className="compact-btn primary">Generate Report</button>
+          <button className="compact-btn">Export Data</button>
         </div>
-
-        {/* Metrics Grid */}
-        <div className="metrics-grid">
-          <Card className="metric-card">
-            <div className="metric-content">
-              <div className="metric-icon">
-                <FaTicketAlt />
-              </div>
-              <div className="metric-details">
-                <h3>{metrics.totalTickets}</h3>
-                <p>Total Tickets</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="metric-card">
-            <div className="metric-content">
-              <div className="metric-icon">
-                <FaTasks />
-              </div>
-              <div className="metric-details">
-                <h3>{metrics.teamTickets}</h3>
-                <p>Team Tickets</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="metric-card">
-            <div className="metric-content">
-              <div className="metric-icon">
-                <FaClock />
-              </div>
-              <div className="metric-details">
-                <h3>{metrics.avgResolutionTime}h</h3>
-                <p>Avg Resolution Time</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="metric-card">
-            <div className="metric-content">
-              <div className="metric-icon">
-                <FaChartLine />
-              </div>
-              <div className="metric-details">
-                <h3>{metrics.teamPerformance}%</h3>
-                <p>Team Performance</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="metric-card">
-            <div className="metric-content">
-              <div className="metric-icon">
-                <FaClipboardList />
-              </div>
-              <div className="metric-details">
-                <h3>{metrics.pendingApprovals}</h3>
-                <p>Pending Approvals</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="metric-card">
-            <div className="metric-content">
-              <div className="metric-icon">
-                <FaExclamationTriangle />
-              </div>
-              <div className="metric-details">
-                <h3>{metrics.slaBreaches}</h3>
-                <p>SLA Breaches</p>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Dashboard Tabs */}
-        <div className="dashboard-tabs">
-          <button
-            className={`tab-button ${activeTab === "overview" ? "active" : ""}`}
-            onClick={() => setActiveTab("overview")}
-          >
-            <FaTicketAlt />
-            Overview
-          </button>
-          <button
-            className={`tab-button ${activeTab === "team" ? "active" : ""}`}
-            onClick={() => setActiveTab("team")}
-          >
-            <FaUsers />
-            Team Management
-          </button>
-          <button
-            className={`tab-button ${
-              activeTab === "approvals" ? "active" : ""
-            }`}
-            onClick={() => setActiveTab("approvals")}
-          >
-            <FaClipboardList />
-            Approvals
-          </button>
-          <button
-            className={`tab-button ${
-              activeTab === "performance" ? "active" : ""
-            }`}
-            onClick={() => setActiveTab("performance")}
-          >
-            <FaChartLine />
-            Performance
-          </button>
-        </div>
-
-        {/* Tab Content */}
-        <div className="tab-content">
-          {activeTab === "overview" && (
-            <div className="overview-grid">
-              <Card className="recent-tickets">
-                <h3>Recent Team Tickets</h3>
-                <div className="ticket-list">
-                  {tickets.slice(0, 5).map((ticket) => (
-                    <div
-                      key={ticket.id}
-                      className="ticket-item"
-                      onClick={() => setSelectedTicket(ticket)}
-                    >
-                      <div className="ticket-info">
-                        <h4>{ticket.title}</h4>
-                        <p>
-                          <span className="ticket-id">#{ticket.id}</span>
-                          <FaCalendar />{" "}
-                          {new Date(ticket.createdAt).toLocaleDateString()}
-                          <FaUser /> {ticket.assignedTo || "Unassigned"}
-                        </p>
-                      </div>
-                      <div className="ticket-meta">
-                        <span
-                          className="status-badge"
-                          style={{
-                            backgroundColor: getStatusColor(ticket.status),
-                          }}
-                        >
-                          {ticket.status}
-                        </span>
-                        <span
-                          className="priority-badge"
-                          style={{
-                            backgroundColor: getPriorityColor(ticket.priority),
-                          }}
-                        >
-                          {ticket.priority}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              <Card className="team-overview">
-                <h3>Team Overview</h3>
-                <div className="team-stats">
-                  <div className="stat-item">
-                    <FaUsers />
-                    <div>
-                      <h4>{teamMembers.length}</h4>
-                      <p>Team Members</p>
-                    </div>
-                  </div>
-                  <div className="stat-item">
-                    <FaCheckCircle />
-                    <div>
-                      <h4>
-                        {
-                          teamMembers.filter((m) => m.status === "online")
-                            .length
-                        }
-                      </h4>
-                      <p>Online Now</p>
-                    </div>
-                  </div>
-                  <div className="stat-item">
-                    <FaClock />
-                    <div>
-                      <h4>
-                        {(
-                          teamMembers.reduce(
-                            (acc, m) => acc + m.avgResolutionTime,
-                            0
-                          ) / teamMembers.length
-                        ).toFixed(1)}
-                        h
-                      </h4>
-                      <p>Team Avg Resolution</p>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          )}
-
-          {activeTab === "team" && (
-            <div>
-              <div className="team-header">
-                <h3>Team Management</h3>
-                <Button variant="primary">Add Member</Button>
-              </div>
-              <div className="team-grid">
-                {teamMembers.map((member) => (
-                  <Card key={member.id} className="team-member-card">
-                    <div className="member-info">
-                      <div className="member-avatar">
-                        {member.name.charAt(0)}
-                      </div>
-                      <div className="member-details">
-                        <h4>{member.name}</h4>
-                        <p>{member.role}</p>
-                        <span className={`status-indicator ${member.status}`}>
-                          {member.status}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="member-stats">
-                      <div className="stat">
-                        <span className="stat-value">
-                          {member.ticketsAssigned}
-                        </span>
-                        <span className="stat-label">Assigned</span>
-                      </div>
-                      <div className="stat">
-                        <span className="stat-value">
-                          {member.avgResolutionTime}h
-                        </span>
-                        <span className="stat-label">Avg Time</span>
-                      </div>
-                    </div>
-                    <div className="member-actions">
-                      <Button variant="outline" size="sm">
-                        <FaEye />
-                        View
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <FaComment />
-                        Message
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeTab === "approvals" && (
-            <div>
-              <h3>Pending Approvals</h3>
-              <div className="approval-list">
-                {tickets
-                  .filter((t) => t.status === "pending")
-                  .map((ticket) => (
-                    <div key={ticket.id} className="approval-item">
-                      <div className="approval-info">
-                        <h4>{ticket.title}</h4>
-                        <p>
-                          <FaUser /> {ticket.createdBy}
-                          <FaCalendar />{" "}
-                          {new Date(ticket.createdAt).toLocaleDateString()}
-                          <span className="ticket-id">#{ticket.id}</span>
-                        </p>
-                      </div>
-                      <div className="approval-actions">
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          onClick={() =>
-                            handleTicketAction(ticket.id, "approve")
-                          }
-                        >
-                          <FaCheckCircle />
-                          Approve
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedTicket(ticket)}
-                        >
-                          <FaEye />
-                          View Details
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
-
-          {activeTab === "performance" && (
-            <div className="performance-grid">
-              <Card className="performance-chart">
-                <h3>Performance Chart</h3>
-                <p>Chart placeholder - would integrate with charting library</p>
-              </Card>
-              <Card className="sla-metrics">
-                <h3>SLA Metrics</h3>
-                <div className="sla-item">
-                  <span className="sla-label">On-time Resolution</span>
-                  <span className="sla-value">87%</span>
-                </div>
-                <div className="sla-item">
-                  <span className="sla-label">Response Time</span>
-                  <span className="sla-value">2.3h</span>
-                </div>
-                <div className="sla-item">
-                  <span className="sla-label">Customer Satisfaction</span>
-                  <span className="sla-value">4.2/5</span>
-                </div>
-              </Card>
-            </div>
-          )}
-        </div>
-
-        {/* Ticket Detail Modal */}
-        {selectedTicket && (
-          <Modal
-            isOpen={!!selectedTicket}
-            onClose={() => setSelectedTicket(null)}
-            title={`Ticket #${selectedTicket.id}`}
-          >
-            <div className="ticket-detail">
-              <h3>{selectedTicket.title}</h3>
-              <p>
-                <strong>Status:</strong> {selectedTicket.status}
-              </p>
-              <p>
-                <strong>Priority:</strong> {selectedTicket.priority}
-              </p>
-              <p>
-                <strong>Assigned to:</strong>{" "}
-                {selectedTicket.assignedTo || "Unassigned"}
-              </p>
-              <p>
-                <strong>Created:</strong>{" "}
-                {new Date(selectedTicket.createdAt).toLocaleDateString()}
-              </p>
-              <p>
-                <strong>Description:</strong>
-              </p>
-              <p>{selectedTicket.description}</p>
-            </div>
-          </Modal>
-        )}
       </div>
-    </PageLayout>
+
+      {/* Metrics Overview */}
+      <div className="compact-stats">
+        <div className="compact-stat-card">
+          <div className="compact-stat-value">{metrics.totalTickets}</div>
+          <div className="compact-stat-label">Total Tickets</div>
+        </div>
+        <div className="compact-stat-card">
+          <div className="compact-stat-value">{metrics.teamTickets}</div>
+          <div className="compact-stat-label">Team Tickets</div>
+        </div>
+        <div className="compact-stat-card">
+          <div className="compact-stat-value">
+            {formatTime(metrics.avgResolutionTime)}
+          </div>
+          <div className="compact-stat-label">Avg Resolution</div>
+        </div>
+        <div className="compact-stat-card">
+          <div className="compact-stat-value">{metrics.teamPerformance}%</div>
+          <div className="compact-stat-label">Team Performance</div>
+        </div>
+        <div className="compact-stat-card">
+          <div className="compact-stat-value">{metrics.pendingApprovals}</div>
+          <div className="compact-stat-label">Pending Approvals</div>
+        </div>
+        <div className="compact-stat-card">
+          <div className="compact-stat-value">{metrics.slaBreaches}</div>
+          <div className="compact-stat-label">SLA Breaches</div>
+        </div>
+      </div>
+
+      {/* Navigation Tabs */}
+      <div className="compact-actions">
+        <button
+          className={`compact-btn ${activeTab === "overview" ? "primary" : ""}`}
+          onClick={() => setActiveTab("overview")}
+        >
+          Overview
+        </button>
+        <button
+          className={`compact-btn ${activeTab === "team" ? "primary" : ""}`}
+          onClick={() => setActiveTab("team")}
+        >
+          Team
+        </button>
+        <button
+          className={`compact-btn ${
+            activeTab === "approvals" ? "primary" : ""
+          }`}
+          onClick={() => setActiveTab("approvals")}
+        >
+          Approvals
+        </button>
+        <button
+          className={`compact-btn ${
+            activeTab === "performance" ? "primary" : ""
+          }`}
+          onClick={() => setActiveTab("performance")}
+        >
+          Performance
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === "overview" && (
+        <div className="compact-grid compact-grid-2">
+          <div className="compact-card">
+            <h3>Recent Team Tickets</h3>
+            <table className="compact-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Title</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Assigned</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tickets.slice(0, 10).map((ticket) => (
+                  <tr key={ticket.id} onClick={() => handleTicketClick(ticket)}>
+                    <td>#{ticket.id.slice(0, 8)}</td>
+                    <td>{ticket.title}</td>
+                    <td>{getPriorityBadge(ticket.priority)}</td>
+                    <td>{getStatusBadge(ticket.status)}</td>
+                    <td>{ticket.assignedTo || "Unassigned"}</td>
+                    <td>{new Date(ticket.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="compact-card">
+            <h3>Team Overview</h3>
+            <table className="compact-table">
+              <thead>
+                <tr>
+                  <th>Member</th>
+                  <th>Role</th>
+                  <th>Tickets</th>
+                  <th>Avg Time</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {teamMembers.map((member) => (
+                  <tr key={member.id}>
+                    <td>{member.name}</td>
+                    <td>{member.role}</td>
+                    <td>{member.ticketsAssigned}</td>
+                    <td>{formatTime(member.avgResolutionTime)}</td>
+                    <td>
+                      <span
+                        className={`compact-badge ${
+                          member.status === "online"
+                            ? "success"
+                            : member.status === "away"
+                            ? "warning"
+                            : "error"
+                        }`}
+                      >
+                        {member.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "team" && (
+        <div className="compact-card">
+          <h3>Team Management</h3>
+          <div className="compact-actions">
+            <button className="compact-btn primary">Add Member</button>
+            <button className="compact-btn">Import Members</button>
+          </div>
+          <table className="compact-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Tickets Assigned</th>
+                <th>Avg Resolution Time</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {teamMembers.map((member) => (
+                <tr key={member.id}>
+                  <td>{member.name}</td>
+                  <td>{member.role}</td>
+                  <td>{member.ticketsAssigned}</td>
+                  <td>{formatTime(member.avgResolutionTime)}</td>
+                  <td>
+                    <span
+                      className={`compact-badge ${
+                        member.status === "online"
+                          ? "success"
+                          : member.status === "away"
+                          ? "warning"
+                          : "error"
+                      }`}
+                    >
+                      {member.status}
+                    </span>
+                  </td>
+                  <td>
+                    <button className="compact-btn">Edit</button>
+                    <button className="compact-btn">View</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {activeTab === "approvals" && (
+        <div className="compact-card">
+          <h3>Pending Approvals</h3>
+          <table className="compact-table">
+            <thead>
+              <tr>
+                <th>Request</th>
+                <th>Type</th>
+                <th>Requested By</th>
+                <th>Date</th>
+                <th>Priority</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Software License Request</td>
+                <td>Purchase</td>
+                <td>John Doe</td>
+                <td>2024-01-15</td>
+                <td>
+                  <span className="compact-badge high">High</span>
+                </td>
+                <td>
+                  <button className="compact-btn success">Approve</button>
+                  <button className="compact-btn danger">Reject</button>
+                </td>
+              </tr>
+              <tr>
+                <td>Hardware Upgrade</td>
+                <td>Asset</td>
+                <td>Jane Smith</td>
+                <td>2024-01-14</td>
+                <td>
+                  <span className="compact-badge medium">Medium</span>
+                </td>
+                <td>
+                  <button className="compact-btn success">Approve</button>
+                  <button className="compact-btn danger">Reject</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {activeTab === "performance" && (
+        <div className="compact-grid compact-grid-2">
+          <div className="compact-card">
+            <h3>Team Performance Metrics</h3>
+            <div className="compact-stats">
+              <div className="compact-stat-card">
+                <div className="compact-stat-value">85%</div>
+                <div className="compact-stat-label">Overall Performance</div>
+              </div>
+              <div className="compact-stat-card">
+                <div className="compact-stat-value">2.3h</div>
+                <div className="compact-stat-label">Avg Resolution Time</div>
+              </div>
+              <div className="compact-stat-card">
+                <div className="compact-stat-value">92%</div>
+                <div className="compact-stat-label">SLA Compliance</div>
+              </div>
+              <div className="compact-stat-card">
+                <div className="compact-stat-value">4.2/5</div>
+                <div className="compact-stat-label">Customer Satisfaction</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="compact-card">
+            <h3>Performance Trends</h3>
+            <p>
+              Performance analytics would be displayed here with charts and
+              graphs.
+            </p>
+          </div>
+        </div>
+      )}
+    </>
   );
 };

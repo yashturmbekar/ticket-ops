@@ -1,354 +1,276 @@
 import React, { useState } from "react";
-import { PageLayout } from "../components/common/PageLayout";
-import { Card } from "../components/common/Card";
-import { Button } from "../components/common/Button";
-import "../styles/reports.css";
-
-interface ReportMetric {
-  id: string;
-  title: string;
-  value: number;
-  change: number;
-  trend: "up" | "down" | "stable";
-  color: string;
-}
-
-interface ChartData {
-  labels: string[];
-  datasets: {
-    label: string;
-    data: number[];
-    borderColor: string;
-    backgroundColor: string;
-  }[];
-}
 
 const ReportsPage: React.FC = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("month");
   const [selectedReport, setSelectedReport] = useState("overview");
 
-  // Mock metrics data
-  const metrics: ReportMetric[] = [
+  const metrics = [
     {
-      id: "total-tickets",
       title: "Total Tickets",
       value: 1247,
       change: 12.5,
       trend: "up",
-      color: "var(--color-primary)",
+      color: "#2563eb",
     },
     {
-      id: "resolved-tickets",
       title: "Resolved Tickets",
       value: 1089,
       change: 8.3,
       trend: "up",
-      color: "var(--color-success)",
+      color: "#10b981",
     },
     {
-      id: "avg-resolution-time",
       title: "Avg Resolution Time",
-      value: 4.2,
+      value: 2.4,
       change: -15.2,
       trend: "down",
-      color: "var(--color-warning)",
+      color: "#f59e0b",
     },
     {
-      id: "satisfaction-score",
-      title: "Satisfaction Score",
-      value: 87,
-      change: 3.1,
+      title: "Customer Satisfaction",
+      value: 4.2,
+      change: 5.8,
       trend: "up",
-      color: "var(--color-info)",
+      color: "#8b5cf6",
     },
   ];
 
-  // Mock chart data
-  const ticketVolumeData: ChartData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-    datasets: [
-      {
-        label: "Created",
-        data: [65, 59, 80, 81, 56, 55],
-        borderColor: "var(--color-primary)",
-        backgroundColor: "var(--color-primary-light)",
-      },
-      {
-        label: "Resolved",
-        data: [45, 69, 70, 75, 66, 60],
-        borderColor: "var(--color-success)",
-        backgroundColor: "var(--color-success-light)",
-      },
-    ],
-  };
-
-  const reportTypes = [
-    { id: "overview", name: "Overview", icon: "📊" },
-    { id: "tickets", name: "Ticket Analytics", icon: "🎫" },
-    { id: "assets", name: "Asset Reports", icon: "💻" },
-    { id: "users", name: "User Analytics", icon: "👥" },
-    { id: "sla", name: "SLA Reports", icon: "⏱️" },
-    { id: "custom", name: "Custom Reports", icon: "🔧" },
-  ];
-
-  const periods = [
-    { value: "week", label: "This Week" },
-    { value: "month", label: "This Month" },
-    { value: "quarter", label: "This Quarter" },
-    { value: "year", label: "This Year" },
-    { value: "custom", label: "Custom Range" },
-  ];
-
-  const renderMetricCard = (metric: ReportMetric) => (
-    <Card key={metric.id} className="metric-card">
-      <div className="metric-header">
-        <h3>{metric.title}</h3>
-        <span className={`trend-indicator ${metric.trend}`}>
-          {metric.trend === "up" ? "↗" : metric.trend === "down" ? "↘" : "→"}
-        </span>
-      </div>
-      <div className="metric-value" style={{ color: metric.color }}>
-        {metric.title.includes("Time")
-          ? `${metric.value}h`
-          : metric.title.includes("Score")
-          ? `${metric.value}%`
-          : metric.value}
-      </div>
-      <div
-        className={`metric-change ${
-          metric.change > 0 ? "positive" : "negative"
-        }`}
-      >
-        {metric.change > 0 ? "+" : ""}
-        {metric.change}% from last period
-      </div>
-    </Card>
-  );
-
-  const renderChart = () => (
-    <Card className="chart-card">
-      <div className="chart-header">
-        <h3>Ticket Volume Trends</h3>
-        <div className="chart-controls">
-          <Button variant="outline" size="sm">
-            Export
-          </Button>
-        </div>
-      </div>
-      <div className="chart-placeholder">
-        <div className="chart-mock">
-          <div className="chart-bars">
-            {ticketVolumeData.labels.map((label, index) => (
-              <div key={label} className="chart-bar-group">
-                <div className="chart-label">{label}</div>
-                <div className="chart-bars-container">
-                  <div
-                    className="chart-bar created"
-                    style={{
-                      height: `${ticketVolumeData.datasets[0].data[index]}%`,
-                      backgroundColor: ticketVolumeData.datasets[0].borderColor,
-                    }}
-                  />
-                  <div
-                    className="chart-bar resolved"
-                    style={{
-                      height: `${ticketVolumeData.datasets[1].data[index]}%`,
-                      backgroundColor: ticketVolumeData.datasets[1].borderColor,
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="chart-legend">
-            <div className="legend-item">
-              <span
-                className="legend-color"
-                style={{ backgroundColor: "var(--color-primary)" }}
-              />
-              Created
-            </div>
-            <div className="legend-item">
-              <span
-                className="legend-color"
-                style={{ backgroundColor: "var(--color-success)" }}
-              />
-              Resolved
-            </div>
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
-
-  const renderTopIssues = () => (
-    <Card className="top-issues-card">
-      <h3>Top Issues This Month</h3>
-      <div className="issues-list">
-        {[
-          { category: "Password Reset", count: 145, percentage: 23 },
-          { category: "Software Installation", count: 89, percentage: 14 },
-          { category: "Hardware Issues", count: 76, percentage: 12 },
-          { category: "Network Connectivity", count: 65, percentage: 10 },
-          { category: "Email Problems", count: 43, percentage: 7 },
-        ].map((issue, index) => (
-          <div key={index} className="issue-item">
-            <div className="issue-info">
-              <span className="issue-category">{issue.category}</span>
-              <span className="issue-count">{issue.count} tickets</span>
-            </div>
-            <div className="issue-progress">
-              <div
-                className="progress-bar"
-                style={{ width: `${issue.percentage}%` }}
-              />
-              <span className="percentage">{issue.percentage}%</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </Card>
-  );
-
-  const renderPerformanceMetrics = () => (
-    <Card className="performance-card">
-      <h3>Team Performance</h3>
-      <div className="performance-grid">
-        {[
-          { name: "John Doe", tickets: 45, avgTime: "3.2h", rating: 4.8 },
-          { name: "Jane Smith", tickets: 38, avgTime: "2.9h", rating: 4.9 },
-          { name: "Mike Johnson", tickets: 52, avgTime: "4.1h", rating: 4.6 },
-          { name: "Sarah Wilson", tickets: 29, avgTime: "3.8h", rating: 4.7 },
-        ].map((member, index) => (
-          <div key={index} className="performance-item">
-            <div className="member-name">{member.name}</div>
-            <div className="member-stats">
-              <div className="stat">
-                <span className="stat-label">Tickets</span>
-                <span className="stat-value">{member.tickets}</span>
-              </div>
-              <div className="stat">
-                <span className="stat-label">Avg Time</span>
-                <span className="stat-value">{member.avgTime}</span>
-              </div>
-              <div className="stat">
-                <span className="stat-label">Rating</span>
-                <span className="stat-value">{member.rating}★</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </Card>
-  );
+  const ticketTrendData = [65, 78, 89, 95, 102, 115];
+  const resolvedData = [59, 75, 85, 91, 98, 112];
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
 
   return (
-    <PageLayout>
-      <div className="reports-page">
-        <div className="reports-header">
-          <div className="header-content">
-            <h1>Reports & Analytics</h1>
-            <p>Insights and metrics for your IT support operations</p>
-          </div>
-          <div className="header-actions">
-            <select
-              value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="period-select"
-            >
-              {periods.map((period) => (
-                <option key={period.value} value={period.value}>
-                  {period.label}
-                </option>
-              ))}
-            </select>
-            <Button variant="primary" size="sm">
-              Generate Report
-            </Button>
-          </div>
-        </div>
-
-        <div className="reports-sidebar">
-          <div className="report-types">
-            {reportTypes.map((type) => (
-              <button
-                key={type.id}
-                className={`report-type ${
-                  selectedReport === type.id ? "active" : ""
-                }`}
-                onClick={() => setSelectedReport(type.id)}
-              >
-                <span className="report-icon">{type.icon}</span>
-                <span className="report-name">{type.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="reports-content">
-          {selectedReport === "overview" && (
-            <>
-              <div className="metrics-grid">
-                {metrics.map(renderMetricCard)}
-              </div>
-
-              <div className="charts-section">{renderChart()}</div>
-
-              <div className="insights-grid">
-                {renderTopIssues()}
-                {renderPerformanceMetrics()}
-              </div>
-            </>
-          )}
-
-          {selectedReport === "tickets" && (
-            <div className="report-placeholder">
-              <h2>Ticket Analytics</h2>
-              <p>
-                Detailed ticket analytics and trends will be displayed here.
-              </p>
-            </div>
-          )}
-
-          {selectedReport === "assets" && (
-            <div className="report-placeholder">
-              <h2>Asset Reports</h2>
-              <p>
-                Asset utilization and maintenance reports will be displayed
-                here.
-              </p>
-            </div>
-          )}
-
-          {selectedReport === "users" && (
-            <div className="report-placeholder">
-              <h2>User Analytics</h2>
-              <p>User activity and support metrics will be displayed here.</p>
-            </div>
-          )}
-
-          {selectedReport === "sla" && (
-            <div className="report-placeholder">
-              <h2>SLA Reports</h2>
-              <p>
-                Service level agreement performance metrics will be displayed
-                here.
-              </p>
-            </div>
-          )}
-
-          {selectedReport === "custom" && (
-            <div className="report-placeholder">
-              <h2>Custom Reports</h2>
-              <p>
-                Custom report builder and saved reports will be displayed here.
-              </p>
-            </div>
-          )}
+    <div className="compact-page">
+      {/* Header */}
+      <div className="compact-header">
+        <h1>Reports & Analytics</h1>
+        <div className="compact-actions">
+          <select
+            value={selectedPeriod}
+            onChange={(e) => setSelectedPeriod(e.target.value)}
+            className="compact-select"
+          >
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="quarter">This Quarter</option>
+            <option value="year">This Year</option>
+          </select>
+          <select
+            value={selectedReport}
+            onChange={(e) => setSelectedReport(e.target.value)}
+            className="compact-select"
+          >
+            <option value="overview">Overview</option>
+            <option value="tickets">Ticket Analysis</option>
+            <option value="performance">Performance</option>
+            <option value="sla">SLA Compliance</option>
+          </select>
+          <button className="compact-btn compact-btn-primary">Export</button>
+          <button className="compact-btn compact-btn-secondary">
+            Schedule
+          </button>
         </div>
       </div>
-    </PageLayout>
+
+      {/* Metrics Grid */}
+      <div className="compact-grid compact-grid-4">
+        {metrics.map((metric, index) => (
+          <div key={index} className="compact-card">
+            <div className="compact-stats-header">
+              <h3>{metric.title}</h3>
+              <span className={`compact-trend compact-trend-${metric.trend}`}>
+                {metric.trend === "up"
+                  ? "↗"
+                  : metric.trend === "down"
+                  ? "↘"
+                  : "→"}
+              </span>
+            </div>
+            <div
+              className="compact-stats-value"
+              style={{ color: metric.color }}
+            >
+              {metric.title.includes("Time")
+                ? `${metric.value}h`
+                : metric.value}
+            </div>
+            <div
+              className={`compact-stats-change compact-change-${metric.trend}`}
+            >
+              {metric.change > 0 ? "+" : ""}
+              {metric.change}%
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Charts */}
+      <div className="compact-grid compact-grid-2">
+        <div className="compact-card">
+          <h3>Ticket Trends</h3>
+          <div className="compact-chart">
+            <div className="compact-chart-bars">
+              {ticketTrendData.map((value, index) => (
+                <div key={index} className="compact-bar-group">
+                  <div
+                    className="compact-bar compact-bar-primary"
+                    style={{ height: `${(value / 115) * 100}%` }}
+                    title={`Created: ${value}`}
+                  />
+                  <div
+                    className="compact-bar compact-bar-success"
+                    style={{ height: `${(resolvedData[index] / 115) * 100}%` }}
+                    title={`Resolved: ${resolvedData[index]}`}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="compact-chart-labels">
+              {months.map((month) => (
+                <span key={month}>{month}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="compact-card">
+          <h3>Resolution Time by Priority</h3>
+          <div className="compact-chart">
+            <div className="compact-horizontal-bars">
+              {[
+                { label: "P1", value: 2.1 },
+                { label: "P2", value: 8.5 },
+                { label: "P3", value: 24.2 },
+                { label: "P4", value: 72.8 },
+              ].map((item, index) => (
+                <div key={index} className="compact-horizontal-bar">
+                  <span className="compact-bar-label">{item.label}</span>
+                  <div className="compact-bar-track">
+                    <div
+                      className="compact-bar-fill"
+                      style={{ width: `${(item.value / 73) * 100}%` }}
+                    />
+                  </div>
+                  <span className="compact-bar-value">{item.value}h</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Data Tables */}
+      <div className="compact-grid compact-grid-2">
+        <div className="compact-card">
+          <h3>Top Performers</h3>
+          <div className="compact-table-container">
+            <table className="compact-table">
+              <thead>
+                <tr>
+                  <th>Technician</th>
+                  <th>Resolved</th>
+                  <th>Avg Time</th>
+                  <th>Rating</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>John Doe</td>
+                  <td>42</td>
+                  <td>2.1h</td>
+                  <td>4.8</td>
+                </tr>
+                <tr>
+                  <td>Jane Smith</td>
+                  <td>38</td>
+                  <td>2.3h</td>
+                  <td>4.6</td>
+                </tr>
+                <tr>
+                  <td>Mike Johnson</td>
+                  <td>35</td>
+                  <td>2.7h</td>
+                  <td>4.4</td>
+                </tr>
+                <tr>
+                  <td>Sarah Wilson</td>
+                  <td>33</td>
+                  <td>2.9h</td>
+                  <td>4.3</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="compact-card">
+          <h3>Issue Categories</h3>
+          <div className="compact-table-container">
+            <table className="compact-table">
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Count</th>
+                  <th>% Total</th>
+                  <th>Avg Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Hardware</td>
+                  <td>156</td>
+                  <td>25%</td>
+                  <td>3.2h</td>
+                </tr>
+                <tr>
+                  <td>Software</td>
+                  <td>248</td>
+                  <td>40%</td>
+                  <td>1.8h</td>
+                </tr>
+                <tr>
+                  <td>Network</td>
+                  <td>89</td>
+                  <td>14%</td>
+                  <td>4.5h</td>
+                </tr>
+                <tr>
+                  <td>Access</td>
+                  <td>132</td>
+                  <td>21%</td>
+                  <td>0.9h</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* SLA Compliance */}
+      <div className="compact-card">
+        <h3>SLA Compliance</h3>
+        <div className="compact-sla-metrics">
+          {[
+            { label: "Response Time SLA", value: 92 },
+            { label: "Resolution Time SLA", value: 87 },
+            { label: "Customer Satisfaction SLA", value: 95 },
+          ].map((sla, index) => (
+            <div key={index} className="compact-sla-metric">
+              <span className="compact-sla-label">{sla.label}</span>
+              <div className="compact-sla-bar">
+                <div
+                  className="compact-sla-progress"
+                  style={{ width: `${sla.value}%` }}
+                />
+              </div>
+              <span className="compact-sla-value">{sla.value}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 
 export { ReportsPage };
+export default ReportsPage;

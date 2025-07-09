@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Header } from "./Header";
 import SideNav from "./SideNav";
 import { Breadcrumb } from "../common/Breadcrumb";
 import "./AppLayout.css";
@@ -14,26 +15,35 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isMobileMenuOpen && !(event.target as Element).closest(".side-nav")) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMobileMenuOpen]);
+
   return (
     <div className="app-layout">
-      <SideNav
-        isMobileMenuOpen={isMobileMenuOpen}
-        onMobileMenuToggle={toggleMobileMenu}
-      />
-      <div className="app-content">
-        <div className="mobile-header">
-          <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
-            </svg>
-          </button>
-          <div className="mobile-brand">
-            <img src="/redfish-logo.svg" alt="Redfish" width="24" height="24" />
-            <span>IT Ticket System</span>
-          </div>
+      <Header onMenuToggle={toggleMobileMenu} isMenuOpen={isMobileMenuOpen} />
+      <div className="app-layout-body">
+        <SideNav
+          isMobileMenuOpen={isMobileMenuOpen}
+          onMobileMenuToggle={toggleMobileMenu}
+        />
+        <div className="app-content">
+          <Breadcrumb />
+          <main className="main-content">{children}</main>
         </div>
-        <Breadcrumb />
-        <main className="main-content">{children}</main>
       </div>
     </div>
   );

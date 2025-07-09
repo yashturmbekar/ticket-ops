@@ -1,4 +1,4 @@
-# RedFish IT - Ticket Management System
+# RedFish Ticket-Ops - Ticket Management System
 
 A comprehensive IT helpdesk and ticket management system built with React, TypeScript, and Vite. This system provides a modern, user-friendly interface for managing IT support tickets, assets, users, and more.
 

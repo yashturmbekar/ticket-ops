@@ -21,7 +21,7 @@ const SideNav: React.FC<SideNavProps> = ({
   isMobileMenuOpen = false,
   onMobileMenuToggle,
 }) => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [localMobileMenuOpen, setLocalMobileMenuOpen] = useState(false);
@@ -148,10 +148,6 @@ const SideNav: React.FC<SideNavProps> = ({
     return item.roles.includes(user?.role as UserRole);
   };
 
-  const handleLogout = () => {
-    logout();
-  };
-
   return (
     <>
       {effectiveMobileMenuOpen && (
@@ -166,7 +162,7 @@ const SideNav: React.FC<SideNavProps> = ({
           <div className="brand">
             <img src="/redfish-logo.svg" alt="Redfish" width="24" height="24" />
             {!isCollapsed && (
-              <span className="brand-text">IT Ticket System</span>
+              <span className="brand-text">Redfish Ticket-Ops</span>
             )}
           </div>
           <button
@@ -221,11 +217,6 @@ const SideNav: React.FC<SideNavProps> = ({
               </div>
             )}
           </div>
-          <button className="logout-btn" onClick={handleLogout} title="Logout">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M16 17v-3H9v-4h7V7l5 5-5 5M14 2a2 2 0 0 1 2 2v2h-2V4H4v16h10v-2h2v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10z" />
-            </svg>
-          </button>
         </div>
       </nav>
     </>

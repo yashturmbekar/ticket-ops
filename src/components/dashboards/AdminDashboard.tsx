@@ -1,13 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  FaTicketAlt,
-  FaBell,
-  FaFilter,
-  FaShieldAlt,
-  FaCog,
-  FaChartLine,
-} from "react-icons/fa";
+import { FaBell, FaFilter, FaCog } from "react-icons/fa";
 import type { Ticket, TicketStatus, Priority } from "../../types";
 import "./AdminDashboard.css";
 
@@ -333,31 +326,6 @@ export const AdminDashboard: React.FC = () => {
               ))}
             </tbody>
           </table>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="compact-card">
-          <h3>Quick Actions</h3>
-          <div className="compact-actions">
-            <button
-              className="compact-btn"
-              onClick={() => navigate("/tickets")}
-            >
-              <FaTicketAlt /> All Tickets
-            </button>
-            <button className="compact-btn" onClick={() => navigate("/users")}>
-              <FaShieldAlt /> Manage Users
-            </button>
-            <button
-              className="compact-btn"
-              onClick={() => navigate("/reports")}
-            >
-              <FaChartLine /> Reports
-            </button>
-            <button className="compact-btn" onClick={() => navigate("/assets")}>
-              <FaCog /> Assets
-            </button>
-          </div>
         </div>
       </div>
     </div>

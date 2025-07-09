@@ -91,10 +91,10 @@ export const LoginPage: React.FC = () => {
           <div className="logo">
             <img
               src="/redfish-logo.svg"
-              alt="RedFish IT"
+              alt="RedFish Ticket-Ops"
               className="logo-image"
             />
-            <h1 className="logo-text">RedFish IT</h1>
+            <h1 className="logo-text">RedFish Ticket-Ops</h1>
           </div>
           <p className="login-subtitle">IT Service Management Platform</p>
         </div>
@@ -169,7 +169,7 @@ export const LoginPage: React.FC = () => {
         </div>
 
         <div className="login-footer">
-          <p>&copy; 2025 RedFish IT. All rights reserved.</p>
+          <p>&copy; 2025 RedFish Ticket-Ops. All rights reserved.</p>
         </div>
       </div>
     </div>

@@ -28,7 +28,7 @@ const CompactNav: React.FC = () => {
     <nav className="compact-navigation">
       <a href="#" className="compact-logo" onClick={() => navigate("/")}>
         <img src="/redfish-logo.svg" alt="Redfish" width="24" height="24" />
-        IT Ticket System
+        Redfish Ticket-Ops
       </a>
 
       <div className="compact-nav-divider"></div>

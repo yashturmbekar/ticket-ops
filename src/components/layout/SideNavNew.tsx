@@ -145,7 +145,7 @@ const SideNav: React.FC = () => {
           <div className="brand">
             <img src="/redfish-logo.svg" alt="Redfish" width="24" height="24" />
             {!isCollapsed && (
-              <span className="brand-text">IT Ticket System</span>
+              <span className="brand-text">Ticket-Ops</span>
             )}
           </div>
           <button

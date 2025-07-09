@@ -2,11 +2,12 @@
 .breadcrumb-nav {
   background: var(--color-surface-elevated);
   border-bottom: 1px solid var(--color-border);
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 1.5rem;
   position: sticky;
-  top: 0;
+  top: 70px;
   z-index: 100;
   box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(10px);
 }
 
 .breadcrumb-container {
@@ -84,6 +85,7 @@
 @media (max-width: 768px) {
   .breadcrumb-nav {
     padding: 0.5rem 1rem;
+    top: 60px;
   }
 
   .breadcrumb-container {

@@ -57,10 +57,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   useEffect(() => {
     // Apply theme to document root
     const root = document.documentElement;
+    root.setAttribute("data-theme", state.themeName);
     Object.entries(state.theme).forEach(([key, value]) => {
       root.style.setProperty(`--color-${key}`, value);
     });
-  }, [state.theme]);
+  }, [state.theme, state.themeName]);
 
   const setTheme = (themeName: ThemeName): void => {
     localStorage.setItem(THEME_STORAGE_KEY, themeName);

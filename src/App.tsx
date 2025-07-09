@@ -10,7 +10,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { LoginPage } from "./components/auth";
 import { NotificationContainer } from "./components/common/NotificationContainer";
-import CompactNav from "./components/layout/CompactNav";
+import AppLayout from "./components/layout/AppLayout";
 import { DashboardPage } from "./pages/DashboardPage";
 import { TicketsPage } from "./pages/TicketsPage.tsx";
 import { AssetsPage } from "./pages/AssetsPage.tsx";
@@ -65,12 +65,7 @@ const AdminOnlyRoute: React.FC<{ children: React.ReactNode }> = ({
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  return (
-    <>
-      <CompactNav />
-      <div className="compact-layout">{children}</div>
-    </>
-  );
+  return <AppLayout>{children}</AppLayout>;
 };
 
 // Main App component

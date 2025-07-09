@@ -2,15 +2,15 @@ import React, { useState } from "react";
 import { Card } from "../components/common/Card";
 import { Button } from "../components/common/Button";
 import { FormField, Input, Select } from "../components/common/Form";
-import { 
-  FaCog, 
-  FaBell, 
-  FaLock, 
-  FaDatabase, 
-  FaClock, 
+import {
+  FaCog,
+  FaBell,
+  FaLock,
+  FaDatabase,
+  FaClock,
   FaPlug,
   FaSave,
-  FaUndo
+  FaUndo,
 } from "react-icons/fa";
 import "../styles/settings.css";
 
@@ -80,7 +80,9 @@ const SettingsPage: React.FC = () => {
         <FormField label="Default Priority">
           <Select
             value={formData.defaultPriority}
-            onChange={(e) => handleInputChange("defaultPriority", e.target.value)}
+            onChange={(e) =>
+              handleInputChange("defaultPriority", e.target.value)
+            }
             options={[
               { value: "low", label: "Low" },
               { value: "medium", label: "Medium" },
@@ -95,9 +97,13 @@ const SettingsPage: React.FC = () => {
               type="checkbox"
               id="autoAssignment"
               checked={formData.autoAssignment}
-              onChange={(e) => handleInputChange("autoAssignment", e.target.checked)}
+              onChange={(e) =>
+                handleInputChange("autoAssignment", e.target.checked)
+              }
             />
-            <label htmlFor="autoAssignment">Enable automatic ticket assignment</label>
+            <label htmlFor="autoAssignment">
+              Enable automatic ticket assignment
+            </label>
           </div>
         </FormField>
       </div>
@@ -119,9 +125,13 @@ const SettingsPage: React.FC = () => {
               type="checkbox"
               id="emailNotifications"
               checked={formData.emailNotifications}
-              onChange={(e) => handleInputChange("emailNotifications", e.target.checked)}
+              onChange={(e) =>
+                handleInputChange("emailNotifications", e.target.checked)
+              }
             />
-            <label htmlFor="emailNotifications">Send email notifications for ticket updates</label>
+            <label htmlFor="emailNotifications">
+              Send email notifications for ticket updates
+            </label>
           </div>
         </FormField>
         <FormField label="Slack Integration">
@@ -130,7 +140,9 @@ const SettingsPage: React.FC = () => {
               type="checkbox"
               id="slackIntegration"
               checked={formData.slackIntegration}
-              onChange={(e) => handleInputChange("slackIntegration", e.target.checked)}
+              onChange={(e) =>
+                handleInputChange("slackIntegration", e.target.checked)
+              }
             />
             <label htmlFor="slackIntegration">Enable Slack notifications</label>
           </div>
@@ -154,7 +166,9 @@ const SettingsPage: React.FC = () => {
               type="checkbox"
               id="twoFactorAuth"
               checked={formData.twoFactorAuth}
-              onChange={(e) => handleInputChange("twoFactorAuth", e.target.checked)}
+              onChange={(e) =>
+                handleInputChange("twoFactorAuth", e.target.checked)
+              }
             />
             <label htmlFor="twoFactorAuth">Require 2FA for all users</label>
           </div>
@@ -162,7 +176,9 @@ const SettingsPage: React.FC = () => {
         <FormField label="Password Policy">
           <Select
             value={formData.passwordPolicy}
-            onChange={(e) => handleInputChange("passwordPolicy", e.target.value)}
+            onChange={(e) =>
+              handleInputChange("passwordPolicy", e.target.value)
+            }
             options={[
               { value: "weak", label: "Weak" },
               { value: "medium", label: "Medium" },
@@ -170,11 +186,16 @@ const SettingsPage: React.FC = () => {
             ]}
           />
         </FormField>
-        <FormField label="Session Timeout" helpText="Session timeout in minutes">
+        <FormField
+          label="Session Timeout"
+          helpText="Session timeout in minutes"
+        >
           <Input
             type="number"
             value={formData.sessionTimeout}
-            onChange={(e) => handleInputChange("sessionTimeout", e.target.value)}
+            onChange={(e) =>
+              handleInputChange("sessionTimeout", e.target.value)
+            }
             placeholder="30"
             min="5"
             max="480"
@@ -199,15 +220,21 @@ const SettingsPage: React.FC = () => {
               type="checkbox"
               id="backupEnabled"
               checked={formData.backupEnabled}
-              onChange={(e) => handleInputChange("backupEnabled", e.target.checked)}
+              onChange={(e) =>
+                handleInputChange("backupEnabled", e.target.checked)
+              }
             />
-            <label htmlFor="backupEnabled">Enable automatic system backups</label>
+            <label htmlFor="backupEnabled">
+              Enable automatic system backups
+            </label>
           </div>
         </FormField>
         <FormField label="Backup Frequency">
           <Select
             value={formData.backupFrequency}
-            onChange={(e) => handleInputChange("backupFrequency", e.target.value)}
+            onChange={(e) =>
+              handleInputChange("backupFrequency", e.target.value)
+            }
             options={[
               { value: "hourly", label: "Hourly" },
               { value: "daily", label: "Daily" },
@@ -216,11 +243,16 @@ const SettingsPage: React.FC = () => {
             ]}
           />
         </FormField>
-        <FormField label="Retention Period" helpText="Number of days to keep backups">
+        <FormField
+          label="Retention Period"
+          helpText="Number of days to keep backups"
+        >
           <Input
             type="number"
             value={formData.retentionPeriod}
-            onChange={(e) => handleInputChange("retentionPeriod", e.target.value)}
+            onChange={(e) =>
+              handleInputChange("retentionPeriod", e.target.value)
+            }
             placeholder="90"
             min="1"
             max="365"
@@ -239,27 +271,40 @@ const SettingsPage: React.FC = () => {
         </p>
       </div>
       <div className="settings-form">
-        <FormField label="Response Time" helpText="Target response time in hours">
+        <FormField
+          label="Response Time"
+          helpText="Target response time in hours"
+        >
           <Input
             type="number"
             value={formData.slaResponseTime}
-            onChange={(e) => handleInputChange("slaResponseTime", e.target.value)}
+            onChange={(e) =>
+              handleInputChange("slaResponseTime", e.target.value)
+            }
             placeholder="4"
             min="1"
             max="72"
           />
         </FormField>
-        <FormField label="Resolution Time" helpText="Target resolution time in hours">
+        <FormField
+          label="Resolution Time"
+          helpText="Target resolution time in hours"
+        >
           <Input
             type="number"
             value={formData.slaResolutionTime}
-            onChange={(e) => handleInputChange("slaResolutionTime", e.target.value)}
+            onChange={(e) =>
+              handleInputChange("slaResolutionTime", e.target.value)
+            }
             placeholder="24"
             min="1"
             max="168"
           />
         </FormField>
-        <FormField label="Business Hours" helpText="e.g., 9-17 for 9 AM to 5 PM">
+        <FormField
+          label="Business Hours"
+          helpText="e.g., 9-17 for 9 AM to 5 PM"
+        >
           <Input
             type="text"
             value={formData.businessHours}
@@ -286,13 +331,22 @@ const SettingsPage: React.FC = () => {
             <p>Send notifications to Slack channels</p>
           </div>
           <div className="settings-integration-actions">
-            <span className={`settings-status-badge ${formData.slackIntegration ? 'connected' : 'disconnected'}`}>
+            <span
+              className={`settings-status-badge ${
+                formData.slackIntegration ? "connected" : "disconnected"
+              }`}
+            >
               {formData.slackIntegration ? "Connected" : "Not Connected"}
             </span>
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => handleInputChange("slackIntegration", !formData.slackIntegration)}
+              onClick={() =>
+                handleInputChange(
+                  "slackIntegration",
+                  !formData.slackIntegration
+                )
+              }
             >
               {formData.slackIntegration ? "Disconnect" : "Connect"}
             </Button>

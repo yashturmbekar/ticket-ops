@@ -7,16 +7,19 @@ import {
   FaEdit,
   FaTrash,
 } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import type { Ticket, TicketStatus, Priority } from "../types";
 import "../styles/tickets.css";
 
 export const TicketsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<TicketStatus | "all">("all");
   const [priorityFilter, setPriorityFilter] = useState<Priority | "all">("all");
   const [loading, setLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Mock data
   useEffect(() => {
@@ -160,6 +163,42 @@ export const TicketsPage: React.FC = () => {
     }
   };
 
+  // Button action handlers
+  const handleCreateTicket = () => {
+    // Navigate to create ticket page or open modal
+    navigate("/tickets/create");
+  };
+
+  const handleViewTicket = (ticketId: string) => {
+    // Navigate to ticket detail page or open modal
+    navigate(`/tickets/${ticketId}`);
+  };
+
+  const handleEditTicket = (ticketId: string) => {
+    // Navigate to edit ticket page or open modal
+    navigate(`/tickets/${ticketId}/edit`);
+  };
+
+  const handleDeleteTicket = (ticketId: string) => {
+    // Show confirmation dialog and delete ticket
+    if (window.confirm("Are you sure you want to delete this ticket?")) {
+      setTickets((prev) => prev.filter((ticket) => ticket.id !== ticketId));
+      setFilteredTickets((prev) =>
+        prev.filter((ticket) => ticket.id !== ticketId)
+      );
+    }
+  };
+
+  const handleToggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setPriorityFilter("all");
+  };
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -171,134 +210,168 @@ export const TicketsPage: React.FC = () => {
 
   return (
     <div className="tickets-page">
-      <div className="compact-header">
-        <h1>Tickets ({filteredTickets.length})</h1>
-        <div className="compact-actions">
-          <button className="compact-btn compact-btn-primary">
-            <FaPlus /> New Ticket
-          </button>
-          <button className="compact-btn">
-            <FaFilter /> Filter
-          </button>
-        </div>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="compact-card">
-        <div className="search-filters">
-          <div className="search-group">
-            <FaSearch className="search-icon" />
-            <input
-              type="text"
-              placeholder="Search tickets..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="compact-search"
-            />
+      <div className="content-container">
+        <div className="content-header">
+          <div>
+            <h1 className="content-title">
+              Tickets ({filteredTickets.length})
+            </h1>
+            <p className="content-subtitle">
+              Manage IT support tickets and requests
+            </p>
           </div>
-          <select
-            value={statusFilter}
-            onChange={(e) =>
-              setStatusFilter(e.target.value as TicketStatus | "all")
-            }
-            className="compact-search"
-          >
-            <option value="all">All Statuses</option>
-            <option value="open">Open</option>
-            <option value="in_progress">In Progress</option>
-            <option value="resolved">Resolved</option>
-            <option value="closed">Closed</option>
-          </select>
-          <select
-            value={priorityFilter}
-            onChange={(e) =>
-              setPriorityFilter(e.target.value as Priority | "all")
-            }
-            className="compact-search"
-          >
-            <option value="all">All Priorities</option>
-            <option value="critical">Critical</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </select>
+          <div className="content-actions">
+            <button
+              className="compact-btn compact-btn-primary"
+              onClick={handleCreateTicket}
+            >
+              <FaPlus /> New Ticket
+            </button>
+            <button className="compact-btn" onClick={handleToggleFilters}>
+              <FaFilter /> {showFilters ? "Hide" : "Show"} Filters
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Tickets Table */}
-      <div className="compact-card">
-        <table className="compact-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Title</th>
-              <th>Status</th>
-              <th>Priority</th>
-              <th>Category</th>
-              <th>Assigned To</th>
-              <th>Created</th>
-              <th>SLA Deadline</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredTickets.map((ticket) => (
-              <tr key={ticket.id}>
-                <td>#{ticket.id}</td>
-                <td>
-                  <div>
-                    <div className="ticket-title">{ticket.title}</div>
-                    <div className="ticket-description">
-                      {ticket.description.slice(0, 50)}...
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <span
-                    className={`compact-badge compact-badge-${getStatusColor(
-                      ticket.status
-                    )}`}
-                  >
-                    {ticket.status}
-                  </span>
-                </td>
-                <td>
-                  <span
-                    className={`compact-badge compact-badge-${getPriorityColor(
-                      ticket.priority
-                    )}`}
-                  >
-                    {ticket.priority}
-                  </span>
-                </td>
-                <td>{ticket.category}</td>
-                <td>{ticket.assignedTo || "Unassigned"}</td>
-                <td>{formatDate(ticket.createdAt)}</td>
-                <td>{formatDate(ticket.slaDeadline)}</td>
-                <td>
-                  <div className="ticket-actions">
-                    <button className="compact-btn" title="View">
-                      <FaEye />
-                    </button>
-                    <button className="compact-btn" title="Edit">
-                      <FaEdit />
-                    </button>
-                    <button className="compact-btn" title="Delete">
-                      <FaTrash />
-                    </button>
-                  </div>
-                </td>
+        {/* Search and Filters */}
+        {showFilters && (
+          <div className="filters-section">
+            <div className="search-filters">
+              <div className="search-group">
+                <FaSearch className="search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search tickets..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="compact-search"
+                />
+              </div>
+              <select
+                value={statusFilter}
+                onChange={(e) =>
+                  setStatusFilter(e.target.value as TicketStatus | "all")
+                }
+                className="compact-search"
+              >
+                <option value="all">All Statuses</option>
+                <option value="open">Open</option>
+                <option value="in_progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+                <option value="closed">Closed</option>
+              </select>
+              <select
+                value={priorityFilter}
+                onChange={(e) =>
+                  setPriorityFilter(e.target.value as Priority | "all")
+                }
+                className="compact-search"
+              >
+                <option value="all">All Priorities</option>
+                <option value="critical">Critical</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+              <button
+                className="compact-btn compact-btn-secondary"
+                onClick={handleClearFilters}
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Tickets Table */}
+        <div className="table-container">
+          <table className="compact-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Category</th>
+                <th>Assigned To</th>
+                <th>Created</th>
+                <th>SLA Deadline</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {filteredTickets.length === 0 && (
-        <div className="compact-card">
-          <p className="no-tickets">No tickets found matching your criteria.</p>
+            </thead>
+            <tbody>
+              {filteredTickets.map((ticket) => (
+                <tr key={ticket.id}>
+                  <td>#{ticket.id}</td>
+                  <td>
+                    <div>
+                      <div className="ticket-title">{ticket.title}</div>
+                      <div className="ticket-description">
+                        {ticket.description.slice(0, 50)}...
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span
+                      className={`compact-badge compact-badge-${getStatusColor(
+                        ticket.status
+                      )}`}
+                    >
+                      {ticket.status}
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      className={`compact-badge compact-badge-${getPriorityColor(
+                        ticket.priority
+                      )}`}
+                    >
+                      {ticket.priority}
+                    </span>
+                  </td>
+                  <td>{ticket.category}</td>
+                  <td>{ticket.assignedTo || "Unassigned"}</td>
+                  <td>{formatDate(ticket.createdAt)}</td>
+                  <td>{formatDate(ticket.slaDeadline)}</td>
+                  <td>
+                    <div className="ticket-actions">
+                      <button
+                        className="compact-btn compact-btn-sm"
+                        title="View"
+                        onClick={() => handleViewTicket(ticket.id)}
+                      >
+                        <FaEye />
+                      </button>
+                      <button
+                        className="compact-btn compact-btn-sm"
+                        title="Edit"
+                        onClick={() => handleEditTicket(ticket.id)}
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        className="compact-btn compact-btn-sm compact-btn-danger"
+                        title="Delete"
+                        onClick={() => handleDeleteTicket(ticket.id)}
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      )}
+
+        {filteredTickets.length === 0 && (
+          <div className="empty-state">
+            <p className="no-tickets">
+              No tickets found matching your criteria.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

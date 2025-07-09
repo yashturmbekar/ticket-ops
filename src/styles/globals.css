@@ -2964,3 +2964,42 @@ html {
     gap: 8px;
   }
 }
+
+/* Side Navigation Layout Adjustments */
+.side-nav.collapsed + .app-content {
+  margin-left: 70px;
+}
+
+/* Responsive sidebar adjustments */
+@media (max-width: 768px) {
+  .app-content {
+    margin-left: 0 !important;
+  }
+
+  .side-nav {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .side-nav.mobile-open {
+    transform: translateX(0);
+  }
+}
+
+/* Mobile overlay for sidebar */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 199;
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar-overlay {
+    display: block;
+  }
+}

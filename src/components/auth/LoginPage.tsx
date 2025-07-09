@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { useTheme } from "../../hooks/useTheme";
 import { UserRole } from "../../types";
 import "./LoginPage.css";
 
@@ -34,13 +35,21 @@ const demoUsers = [
 
 export const LoginPage: React.FC = () => {
   const { login, isLoading, error, isAuthenticated, clearError } = useAuth();
+  const { toggleTheme, themeName } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isToggling, setIsToggling] = useState(false);
 
   // Redirect to dashboard if already authenticated
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
   }
+
+  const handleThemeToggle = () => {
+    setIsToggling(true);
+    toggleTheme();
+    setTimeout(() => setIsToggling(false), 500);
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,9 +74,20 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="login-page">
+    <div className="login-page" data-theme={themeName}>
       <div className="login-container">
         <div className="login-header">
+          <div className="theme-toggle-container">
+            <button
+              className={`theme-toggle-button ${isToggling ? "animating" : ""}`}
+              onClick={handleThemeToggle}
+              aria-label={`Switch to ${
+                themeName === "light" ? "dark" : "light"
+              } theme`}
+            >
+              {themeName === "light" ? "🌙" : "☀️"}
+            </button>
+          </div>
           <div className="logo">
             <img
               src="/redfish-logo.svg"

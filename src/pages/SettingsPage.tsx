@@ -1,4 +1,18 @@
 import React, { useState } from "react";
+import { Card } from "../components/common/Card";
+import { Button } from "../components/common/Button";
+import { FormField, Input, Select } from "../components/common/Form";
+import { 
+  FaCog, 
+  FaBell, 
+  FaLock, 
+  FaDatabase, 
+  FaClock, 
+  FaPlug,
+  FaSave,
+  FaUndo
+} from "react-icons/fa";
+import "../styles/settings.css";
 
 const SettingsPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState("general");
@@ -21,12 +35,12 @@ const SettingsPage: React.FC = () => {
   });
 
   const sections = [
-    { id: "general", title: "General", icon: "⚙️" },
-    { id: "notifications", title: "Notifications", icon: "🔔" },
-    { id: "security", title: "Security", icon: "🔒" },
-    { id: "backup", title: "Backup", icon: "💾" },
-    { id: "sla", title: "SLA", icon: "⏱️" },
-    { id: "integrations", title: "Integrations", icon: "🔗" },
+    { id: "general", title: "General", icon: <FaCog /> },
+    { id: "notifications", title: "Notifications", icon: <FaBell /> },
+    { id: "security", title: "Security", icon: <FaLock /> },
+    { id: "backup", title: "Backup", icon: <FaDatabase /> },
+    { id: "sla", title: "SLA", icon: <FaClock /> },
+    { id: "integrations", title: "Integrations", icon: <FaPlug /> },
   ];
 
   const handleInputChange = (key: string, value: string | boolean | number) => {
@@ -39,270 +53,277 @@ const SettingsPage: React.FC = () => {
   };
 
   const renderGeneralSettings = () => (
-    <div className="compact-settings-section">
-      <h3>General Settings</h3>
-      <div className="compact-form-grid">
-        <div className="compact-form-group">
-          <label>Company Name</label>
-          <input
+    <div className="settings-section">
+      <div className="settings-section-header">
+        <h3 className="settings-section-title">General Settings</h3>
+        <p className="settings-section-description">
+          Configure basic system settings and preferences
+        </p>
+      </div>
+      <div className="settings-form">
+        <FormField label="Company Name" required>
+          <Input
             type="text"
             value={formData.companyName}
             onChange={(e) => handleInputChange("companyName", e.target.value)}
-            className="compact-input"
+            placeholder="Enter company name"
           />
-        </div>
-        <div className="compact-form-group">
-          <label>Support Email</label>
-          <input
+        </FormField>
+        <FormField label="Support Email" required>
+          <Input
             type="email"
             value={formData.supportEmail}
             onChange={(e) => handleInputChange("supportEmail", e.target.value)}
-            className="compact-input"
+            placeholder="support@company.com"
           />
-        </div>
-        <div className="compact-form-group">
-          <label>Default Priority</label>
-          <select
+        </FormField>
+        <FormField label="Default Priority">
+          <Select
             value={formData.defaultPriority}
-            onChange={(e) =>
-              handleInputChange("defaultPriority", e.target.value)
-            }
-            className="compact-select"
-          >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-            <option value="critical">Critical</option>
-          </select>
-        </div>
-        <div className="compact-form-group">
-          <label className="compact-checkbox-label">
+            onChange={(e) => handleInputChange("defaultPriority", e.target.value)}
+            options={[
+              { value: "low", label: "Low" },
+              { value: "medium", label: "Medium" },
+              { value: "high", label: "High" },
+              { value: "critical", label: "Critical" },
+            ]}
+          />
+        </FormField>
+        <FormField label="Auto-Assignment">
+          <div className="settings-toggle">
             <input
               type="checkbox"
+              id="autoAssignment"
               checked={formData.autoAssignment}
-              onChange={(e) =>
-                handleInputChange("autoAssignment", e.target.checked)
-              }
+              onChange={(e) => handleInputChange("autoAssignment", e.target.checked)}
             />
-            Enable Auto-Assignment
-          </label>
-        </div>
+            <label htmlFor="autoAssignment">Enable automatic ticket assignment</label>
+          </div>
+        </FormField>
       </div>
     </div>
   );
 
   const renderNotificationSettings = () => (
-    <div className="compact-settings-section">
-      <h3>Notification Settings</h3>
-      <div className="compact-form-grid">
-        <div className="compact-form-group">
-          <label className="compact-checkbox-label">
+    <div className="settings-section">
+      <div className="settings-section-header">
+        <h3 className="settings-section-title">Notification Settings</h3>
+        <p className="settings-section-description">
+          Configure how and when notifications are sent
+        </p>
+      </div>
+      <div className="settings-form">
+        <FormField label="Email Notifications">
+          <div className="settings-toggle">
             <input
               type="checkbox"
+              id="emailNotifications"
               checked={formData.emailNotifications}
-              onChange={(e) =>
-                handleInputChange("emailNotifications", e.target.checked)
-              }
+              onChange={(e) => handleInputChange("emailNotifications", e.target.checked)}
             />
-            Email Notifications
-          </label>
-        </div>
-        <div className="compact-form-group">
-          <label className="compact-checkbox-label">
+            <label htmlFor="emailNotifications">Send email notifications for ticket updates</label>
+          </div>
+        </FormField>
+        <FormField label="Slack Integration">
+          <div className="settings-toggle">
             <input
               type="checkbox"
+              id="slackIntegration"
               checked={formData.slackIntegration}
-              onChange={(e) =>
-                handleInputChange("slackIntegration", e.target.checked)
-              }
+              onChange={(e) => handleInputChange("slackIntegration", e.target.checked)}
             />
-            Slack Integration
-          </label>
-        </div>
+            <label htmlFor="slackIntegration">Enable Slack notifications</label>
+          </div>
+        </FormField>
       </div>
     </div>
   );
 
   const renderSecuritySettings = () => (
-    <div className="compact-settings-section">
-      <h3>Security Settings</h3>
-      <div className="compact-form-grid">
-        <div className="compact-form-group">
-          <label className="compact-checkbox-label">
+    <div className="settings-section">
+      <div className="settings-section-header">
+        <h3 className="settings-section-title">Security Settings</h3>
+        <p className="settings-section-description">
+          Manage security policies and authentication settings
+        </p>
+      </div>
+      <div className="settings-form">
+        <FormField label="Two-Factor Authentication">
+          <div className="settings-toggle">
             <input
               type="checkbox"
+              id="twoFactorAuth"
               checked={formData.twoFactorAuth}
-              onChange={(e) =>
-                handleInputChange("twoFactorAuth", e.target.checked)
-              }
+              onChange={(e) => handleInputChange("twoFactorAuth", e.target.checked)}
             />
-            Two-Factor Authentication
-          </label>
-        </div>
-        <div className="compact-form-group">
-          <label>Password Policy</label>
-          <select
+            <label htmlFor="twoFactorAuth">Require 2FA for all users</label>
+          </div>
+        </FormField>
+        <FormField label="Password Policy">
+          <Select
             value={formData.passwordPolicy}
-            onChange={(e) =>
-              handleInputChange("passwordPolicy", e.target.value)
-            }
-            className="compact-select"
-          >
-            <option value="weak">Weak</option>
-            <option value="medium">Medium</option>
-            <option value="strong">Strong</option>
-          </select>
-        </div>
-        <div className="compact-form-group">
-          <label>Session Timeout (minutes)</label>
-          <input
+            onChange={(e) => handleInputChange("passwordPolicy", e.target.value)}
+            options={[
+              { value: "weak", label: "Weak" },
+              { value: "medium", label: "Medium" },
+              { value: "strong", label: "Strong" },
+            ]}
+          />
+        </FormField>
+        <FormField label="Session Timeout" helpText="Session timeout in minutes">
+          <Input
             type="number"
             value={formData.sessionTimeout}
-            onChange={(e) =>
-              handleInputChange("sessionTimeout", e.target.value)
-            }
-            className="compact-input"
+            onChange={(e) => handleInputChange("sessionTimeout", e.target.value)}
+            placeholder="30"
+            min="5"
+            max="480"
           />
-        </div>
+        </FormField>
       </div>
     </div>
   );
 
   const renderBackupSettings = () => (
-    <div className="compact-settings-section">
-      <h3>Backup Settings</h3>
-      <div className="compact-form-grid">
-        <div className="compact-form-group">
-          <label className="compact-checkbox-label">
+    <div className="settings-section">
+      <div className="settings-section-header">
+        <h3 className="settings-section-title">Backup Settings</h3>
+        <p className="settings-section-description">
+          Configure automated backups and data retention
+        </p>
+      </div>
+      <div className="settings-form">
+        <FormField label="Enable Backups">
+          <div className="settings-toggle">
             <input
               type="checkbox"
+              id="backupEnabled"
               checked={formData.backupEnabled}
-              onChange={(e) =>
-                handleInputChange("backupEnabled", e.target.checked)
-              }
+              onChange={(e) => handleInputChange("backupEnabled", e.target.checked)}
             />
-            Enable Backups
-          </label>
-        </div>
-        <div className="compact-form-group">
-          <label>Backup Frequency</label>
-          <select
+            <label htmlFor="backupEnabled">Enable automatic system backups</label>
+          </div>
+        </FormField>
+        <FormField label="Backup Frequency">
+          <Select
             value={formData.backupFrequency}
-            onChange={(e) =>
-              handleInputChange("backupFrequency", e.target.value)
-            }
-            className="compact-select"
-          >
-            <option value="hourly">Hourly</option>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-          </select>
-        </div>
-        <div className="compact-form-group">
-          <label>Retention Period (days)</label>
-          <input
+            onChange={(e) => handleInputChange("backupFrequency", e.target.value)}
+            options={[
+              { value: "hourly", label: "Hourly" },
+              { value: "daily", label: "Daily" },
+              { value: "weekly", label: "Weekly" },
+              { value: "monthly", label: "Monthly" },
+            ]}
+          />
+        </FormField>
+        <FormField label="Retention Period" helpText="Number of days to keep backups">
+          <Input
             type="number"
             value={formData.retentionPeriod}
-            onChange={(e) =>
-              handleInputChange("retentionPeriod", e.target.value)
-            }
-            className="compact-input"
+            onChange={(e) => handleInputChange("retentionPeriod", e.target.value)}
+            placeholder="90"
+            min="1"
+            max="365"
           />
-        </div>
+        </FormField>
       </div>
     </div>
   );
 
   const renderSLASettings = () => (
-    <div className="compact-settings-section">
-      <h3>SLA Settings</h3>
-      <div className="compact-form-grid">
-        <div className="compact-form-group">
-          <label>Response Time (hours)</label>
-          <input
+    <div className="settings-section">
+      <div className="settings-section-header">
+        <h3 className="settings-section-title">SLA Settings</h3>
+        <p className="settings-section-description">
+          Configure service level agreements and response times
+        </p>
+      </div>
+      <div className="settings-form">
+        <FormField label="Response Time" helpText="Target response time in hours">
+          <Input
             type="number"
             value={formData.slaResponseTime}
-            onChange={(e) =>
-              handleInputChange("slaResponseTime", e.target.value)
-            }
-            className="compact-input"
+            onChange={(e) => handleInputChange("slaResponseTime", e.target.value)}
+            placeholder="4"
+            min="1"
+            max="72"
           />
-        </div>
-        <div className="compact-form-group">
-          <label>Resolution Time (hours)</label>
-          <input
+        </FormField>
+        <FormField label="Resolution Time" helpText="Target resolution time in hours">
+          <Input
             type="number"
             value={formData.slaResolutionTime}
-            onChange={(e) =>
-              handleInputChange("slaResolutionTime", e.target.value)
-            }
-            className="compact-input"
+            onChange={(e) => handleInputChange("slaResolutionTime", e.target.value)}
+            placeholder="24"
+            min="1"
+            max="168"
           />
-        </div>
-        <div className="compact-form-group">
-          <label>Business Hours</label>
-          <input
+        </FormField>
+        <FormField label="Business Hours" helpText="e.g., 9-17 for 9 AM to 5 PM">
+          <Input
             type="text"
             value={formData.businessHours}
             onChange={(e) => handleInputChange("businessHours", e.target.value)}
-            className="compact-input"
-            placeholder="e.g., 9-17"
+            placeholder="9-17"
           />
-        </div>
+        </FormField>
       </div>
     </div>
   );
 
   const renderIntegrationSettings = () => (
-    <div className="compact-settings-section">
-      <h3>Integration Settings</h3>
-      <div className="compact-integrations">
-        <div className="compact-integration-item">
-          <div className="compact-integration-info">
+    <div className="settings-section">
+      <div className="settings-section-header">
+        <h3 className="settings-section-title">Integration Settings</h3>
+        <p className="settings-section-description">
+          Connect with external services and tools
+        </p>
+      </div>
+      <div className="settings-integrations">
+        <div className="settings-integration-item">
+          <div className="settings-integration-info">
             <h4>Slack</h4>
             <p>Send notifications to Slack channels</p>
           </div>
-          <div className="compact-integration-status">
-            <span
-              className="compact-status-badge"
-              style={{
-                color: formData.slackIntegration ? "#10b981" : "#6b7280",
-              }}
-            >
+          <div className="settings-integration-actions">
+            <span className={`settings-status-badge ${formData.slackIntegration ? 'connected' : 'disconnected'}`}>
               {formData.slackIntegration ? "Connected" : "Not Connected"}
             </span>
-            <button className="compact-btn compact-btn-sm compact-btn-secondary">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => handleInputChange("slackIntegration", !formData.slackIntegration)}
+            >
               {formData.slackIntegration ? "Disconnect" : "Connect"}
-            </button>
+            </Button>
           </div>
         </div>
-        <div className="compact-integration-item">
-          <div className="compact-integration-info">
+        <div className="settings-integration-item">
+          <div className="settings-integration-info">
             <h4>Microsoft Teams</h4>
             <p>Send notifications to Teams channels</p>
           </div>
-          <div className="compact-integration-status">
-            <span className="compact-status-badge" style={{ color: "#6b7280" }}>
+          <div className="settings-integration-actions">
+            <span className="settings-status-badge disconnected">
               Not Connected
             </span>
-            <button className="compact-btn compact-btn-sm compact-btn-secondary">
+            <Button variant="secondary" size="sm">
               Connect
-            </button>
+            </Button>
           </div>
         </div>
-        <div className="compact-integration-item">
-          <div className="compact-integration-info">
+        <div className="settings-integration-item">
+          <div className="settings-integration-info">
             <h4>LDAP/Active Directory</h4>
             <p>Sync users from Active Directory</p>
           </div>
-          <div className="compact-integration-status">
-            <span className="compact-status-badge" style={{ color: "#6b7280" }}>
+          <div className="settings-integration-actions">
+            <span className="settings-status-badge disconnected">
               Not Connected
             </span>
-            <button className="compact-btn compact-btn-sm compact-btn-secondary">
+            <Button variant="secondary" size="sm">
               Connect
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -329,48 +350,45 @@ const SettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="compact-page">
+    <div className="settings-page">
       {/* Header */}
-      <div className="compact-header">
-        <h1>System Settings</h1>
-        <div className="compact-actions">
-          <button className="compact-btn compact-btn-secondary">Reset</button>
-          <button
-            className="compact-btn compact-btn-primary"
-            onClick={handleSave}
-          >
+      <div className="settings-header">
+        <h1 className="settings-title">System Settings</h1>
+        <div className="settings-actions">
+          <Button variant="secondary" icon={<FaUndo />}>
+            Reset
+          </Button>
+          <Button variant="primary" icon={<FaSave />} onClick={handleSave}>
             Save Changes
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Settings Content */}
-      <div className="compact-settings-layout">
+      <div className="settings-container">
         {/* Sidebar */}
-        <div className="compact-settings-sidebar">
-          <div className="compact-settings-nav">
+        <div className="settings-sidebar">
+          <nav className="settings-nav">
             {sections.map((section) => (
               <button
                 key={section.id}
-                className={`compact-settings-nav-item ${
+                className={`settings-nav-button ${
                   activeSection === section.id ? "active" : ""
                 }`}
                 onClick={() => setActiveSection(section.id)}
               >
-                <span className="compact-settings-nav-icon">
-                  {section.icon}
-                </span>
-                <span className="compact-settings-nav-text">
-                  {section.title}
-                </span>
+                <span className="settings-nav-icon">{section.icon}</span>
+                <span className="settings-nav-text">{section.title}</span>
               </button>
             ))}
-          </div>
+          </nav>
         </div>
 
         {/* Main Content */}
-        <div className="compact-settings-content">
-          <div className="compact-card">{renderActiveSection()}</div>
+        <div className="settings-content">
+          <Card variant="elevated" padding="lg">
+            {renderActiveSection()}
+          </Card>
         </div>
       </div>
     </div>

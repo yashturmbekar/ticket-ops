@@ -52,7 +52,7 @@ export const EmployeeDashboard: React.FC = () => {
         createdBy: user?.id,
       });
 
-      if (response.success) {
+      if (response.success && response.data?.data) {
         const userTickets = response.data.data;
         setTickets(userTickets);
 
@@ -72,6 +72,8 @@ export const EmployeeDashboard: React.FC = () => {
       }
     } catch (error) {
       console.error("Error loading tickets:", error);
+      // Ensure tickets is always an array even on error
+      setTickets([]);
     } finally {
       setLoading(false);
     }
@@ -234,7 +236,7 @@ export const EmployeeDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {tickets.map((ticket) => (
+              {(tickets || []).map((ticket) => (
                 <tr key={ticket.id} onClick={() => handleTicketClick(ticket)}>
                   <td>#{ticket.id.slice(0, 8)}</td>
                   <td>{ticket.title}</td>

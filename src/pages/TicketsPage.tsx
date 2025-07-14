@@ -300,7 +300,7 @@ export const TicketsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredTickets.map((ticket) => (
+              {(filteredTickets || []).map((ticket) => (
                 <tr key={ticket.id}>
                   <td>#{ticket.id}</td>
                   <td>

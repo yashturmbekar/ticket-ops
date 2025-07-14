@@ -43,7 +43,7 @@ export const OperationsDashboard: React.FC = () => {
         limit: 100,
       });
 
-      if (ticketsResponse.success) {
+      if (ticketsResponse.success && ticketsResponse.data?.data) {
         const allTickets = ticketsResponse.data.data;
         const userTickets = allTickets.filter(
           (t: Ticket) => t.assignedTo === user?.id
@@ -82,6 +82,8 @@ export const OperationsDashboard: React.FC = () => {
       }
     } catch (error) {
       console.error("Error loading operations dashboard:", error);
+      // Ensure tickets is always an array even on error
+      setTickets([]);
     } finally {
       setLoading(false);
     }
@@ -242,7 +244,7 @@ export const OperationsDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {tickets.map((ticket) => (
+              {(tickets || []).map((ticket) => (
                 <tr key={ticket.id} onClick={() => handleTicketClick(ticket)}>
                   <td>#{ticket.id.slice(0, 8)}</td>
                   <td>{ticket.title}</td>

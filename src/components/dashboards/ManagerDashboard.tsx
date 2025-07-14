@@ -49,7 +49,7 @@ export const ManagerDashboard: React.FC = () => {
         limit: 50,
       });
 
-      if (ticketsResponse.success) {
+      if (ticketsResponse.success && ticketsResponse.data?.data) {
         const teamTickets = ticketsResponse.data.data;
         setTickets(teamTickets);
 

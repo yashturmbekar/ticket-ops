@@ -44,7 +44,7 @@ const ReportsPage: React.FC = () => {
       {/* Header */}
       <div className="compact-header">
         <h1>Reports & Analytics</h1>
-        <div className="compact-actions">
+        <div className="actions-container">
           <select
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value)}

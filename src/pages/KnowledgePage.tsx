@@ -142,7 +142,7 @@ const KnowledgePage: React.FC = () => {
       {/* Header */}
       <div className="compact-header">
         <h1>Knowledge Base</h1>
-        <div className="compact-actions">
+        <div className="actions-container">
           <div className="compact-search">
             <input
               type="text"
@@ -327,7 +327,7 @@ const KnowledgePage: React.FC = () => {
                   <td>{article.views}</td>
                   <td>{article.lastUpdated}</td>
                   <td>
-                    <div className="compact-actions">
+                    <div className="actions-container">
                       <button className="compact-btn compact-btn-sm compact-btn-primary">
                         View
                       </button>

@@ -138,7 +138,7 @@ const NetworkPage: React.FC = () => {
       {/* Header */}
       <div className="compact-header">
         <h1>Network Monitoring</h1>
-        <div className="compact-actions">
+        <div className="actions-container">
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}

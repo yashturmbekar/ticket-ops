@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import type { Asset, AssetType, AssetStatus } from "../types";
 import { AssetType as AT, AssetStatus as AS } from "../types";
 import "../styles/assets.css";
@@ -245,7 +245,7 @@ export const AssetsPage: React.FC = () => {
     <>
       <div className="compact-header">
         <h1>Asset Management</h1>
-        <div className="compact-actions">
+        <div className="actions-container">
           <button className="compact-btn primary" onClick={handleCreateAsset}>
             Add Asset
           </button>
@@ -291,7 +291,7 @@ export const AssetsPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="compact-actions">
+      <div className="actions-container">
         <input
           type="search"
           placeholder="Search assets..."
@@ -372,7 +372,7 @@ export const AssetsPage: React.FC = () => {
                 </td>
                 <td>{formatCurrency(asset.value)}</td>
                 <td>
-                  <div className="compact-actions">
+                  <div className="actions-container">
                     <button
                       className="compact-btn"
                       onClick={() => handleViewAsset(asset.id)}

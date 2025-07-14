@@ -156,7 +156,7 @@ const UsersPage: React.FC = () => {
       {/* Header */}
       <div className="compact-header">
         <h1>User Management</h1>
-        <div className="compact-actions">
+        <div className="actions-container">
           <div className="compact-search">
             <input
               type="text"
@@ -348,7 +348,7 @@ const UsersPage: React.FC = () => {
                     </div>
                   </td>
                   <td>
-                    <div className="compact-actions">
+                    <div className="actions-container">
                       <button className="compact-btn compact-btn-sm compact-btn-primary">
                         View
                       </button>

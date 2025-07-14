@@ -1,10 +1,10 @@
-.admin-dashboard {
+.dashboard-page {
   padding: 1rem;
   background: var(--color-surface);
   min-height: 100vh;
 }
 
-.admin-dashboard.loading {
+.dashboard-page.loading {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -424,7 +424,7 @@
 }
 
 @media (max-width: 768px) {
-  .admin-dashboard {
+  .dashboard-page {
     padding: 0.5rem;
   }
 

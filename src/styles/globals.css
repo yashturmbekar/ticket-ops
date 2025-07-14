@@ -106,6 +106,24 @@
   --gradient-surface: linear-gradient(135deg, #fafbfc 0%, #f5f7fa 100%);
   --gradient-subtle: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   --gradient-background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+  --gradient-background-dark: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  --gradient-surface: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(248, 250, 252, 0.9) 100%
+  );
+  --gradient-surface-dark: linear-gradient(
+    135deg,
+    rgba(30, 41, 59, 0.95) 0%,
+    rgba(15, 23, 42, 0.9) 100%
+  );
+
+  /* Compact Spacing System */
+  --spacing-compact-xs: 0.125rem;
+  --spacing-compact-sm: 0.25rem;
+  --spacing-compact-md: 0.5rem;
+  --spacing-compact-lg: 0.75rem;
+  --spacing-compact-xl: 1rem;
 
   /* Professional Typography */
   --font-family-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -298,11 +316,15 @@ body {
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-normal);
   color: var(--color-text);
-  background-color: var(--color-background);
+  background: var(--gradient-background);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   min-height: 100vh;
+}
+
+[data-theme="dark"] body {
+  background: var(--gradient-background-dark);
 }
 
 #root {
@@ -529,13 +551,6 @@ body {
   letter-spacing: 0.05em;
 }
 
-.compact-actions {
-  display: flex;
-  gap: var(--spacing-3);
-  align-items: center;
-  flex-wrap: wrap;
-}
-
 .compact-btn {
   padding: var(--spacing-2) var(--spacing-3);
   font-size: var(--font-size-sm);
@@ -683,11 +698,6 @@ body {
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* Dashboard specific styles */
-.admin-dashboard {
-  padding: 0;
 }
 
 /* Responsive table */
@@ -2943,11 +2953,6 @@ html {
     gap: 16px;
   }
 
-  .compact-actions {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
   .compact-grid-2,
   .compact-grid-3,
   .compact-grid-4 {
@@ -3001,5 +3006,87 @@ html {
 @media (max-width: 768px) {
   .sidebar-overlay {
     display: block;
+  }
+}
+
+/* Enhanced Background System for Modern Layout */
+:root {
+  /* ...existing code... */
+
+  /* Modern Background Gradients */
+  --gradient-background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  --gradient-background-dark: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  --gradient-surface: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(248, 250, 252, 0.9) 100%
+  );
+  --gradient-surface-dark: linear-gradient(
+    135deg,
+    rgba(30, 41, 59, 0.95) 0%,
+    rgba(15, 23, 42, 0.9) 100%
+  );
+
+  /* Compact Spacing System */
+  --spacing-compact-xs: 0.125rem;
+  --spacing-compact-sm: 0.25rem;
+  --spacing-compact-md: 0.5rem;
+  --spacing-compact-lg: 0.75rem;
+  --spacing-compact-xl: 1rem;
+}
+
+/* Modern Body Styling */
+body {
+  background: var(--gradient-background);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+[data-theme="dark"] body {
+  background: var(--gradient-background-dark);
+}
+
+/* Compact Content Spacing Utilities */
+.compact-spacing {
+  padding: var(--spacing-compact-md);
+  margin-bottom: var(--spacing-compact-lg);
+}
+
+.compact-spacing-sm {
+  padding: var(--spacing-compact-sm);
+  margin-bottom: var(--spacing-compact-md);
+}
+
+.compact-spacing-lg {
+  padding: var(--spacing-compact-lg);
+  margin-bottom: var(--spacing-compact-xl);
+}
+
+/* Modern Glass Effect */
+.glass-effect {
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .glass-effect {
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(71, 85, 105, 0.2);
+}
+
+/* Actions Container for buttons and controls */
+.actions-container {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .actions-container {
+    gap: 0.375rem;
+    flex-direction: column;
+    align-items: stretch;
   }
 }

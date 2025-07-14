@@ -198,10 +198,10 @@ export const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="admin-dashboard">
+    <div className="dashboard-page">
       <div className="compact-header">
         <h1>Admin Dashboard</h1>
-        <div className="compact-actions">
+        <div className="actions-container">
           <button className="compact-btn compact-btn-primary">
             <FaBell /> Alerts ({stats.slaBreaches})
           </button>

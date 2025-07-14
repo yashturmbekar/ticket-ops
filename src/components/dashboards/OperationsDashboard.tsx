@@ -152,7 +152,7 @@ export const OperationsDashboard: React.FC = () => {
     <>
       <div className="compact-header">
         <h1>Operations Dashboard</h1>
-        <div className="compact-actions">
+        <div className="actions-container">
           <input
             type="search"
             placeholder="Search tickets..."
@@ -198,7 +198,7 @@ export const OperationsDashboard: React.FC = () => {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="compact-actions">
+      <div className="actions-container">
         <button
           className={`compact-btn ${activeTab === "assigned" ? "primary" : ""}`}
           onClick={() => setActiveTab("assigned")}
@@ -265,7 +265,7 @@ export const OperationsDashboard: React.FC = () => {
                     )}
                   </td>
                   <td>
-                    <div className="compact-actions">
+                    <div className="actions-container">
                       {ticket.status === "open" && (
                         <button
                           className="compact-btn primary"
@@ -301,7 +301,7 @@ export const OperationsDashboard: React.FC = () => {
       {activeTab === "team" && (
         <div className="compact-card">
           <h3>Team Ticket Queue</h3>
-          <div className="compact-actions">
+          <div className="actions-container">
             <button className="compact-btn">Filter by Priority</button>
             <button className="compact-btn">Filter by Status</button>
             <button className="compact-btn">Auto-assign</button>
@@ -439,7 +439,7 @@ export const OperationsDashboard: React.FC = () => {
 
           <div className="compact-card">
             <h3>Quick Actions</h3>
-            <div className="compact-actions">
+            <div className="actions-container">
               <button className="compact-btn primary">Export Report</button>
               <button className="compact-btn">Generate Summary</button>
               <button className="compact-btn">View Analytics</button>

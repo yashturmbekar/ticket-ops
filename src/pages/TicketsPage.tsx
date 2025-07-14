@@ -220,7 +220,7 @@ export const TicketsPage: React.FC = () => {
               Manage IT support tickets and requests
             </p>
           </div>
-          <div className="content-actions">
+          <div className="actions-container">
             <button
               className="compact-btn compact-btn-primary"
               onClick={handleCreateTicket}

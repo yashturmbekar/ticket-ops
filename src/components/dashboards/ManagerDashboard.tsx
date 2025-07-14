@@ -159,7 +159,7 @@ export const ManagerDashboard: React.FC = () => {
     <>
       <div className="compact-header">
         <h1>Manager Dashboard</h1>
-        <div className="compact-actions">
+        <div className="actions-container">
           <button className="compact-btn primary">Generate Report</button>
           <button className="compact-btn">Export Data</button>
         </div>
@@ -196,7 +196,7 @@ export const ManagerDashboard: React.FC = () => {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="compact-actions">
+      <div className="actions-container">
         <button
           className={`compact-btn ${activeTab === "overview" ? "primary" : ""}`}
           onClick={() => setActiveTab("overview")}
@@ -301,7 +301,7 @@ export const ManagerDashboard: React.FC = () => {
       {activeTab === "team" && (
         <div className="compact-card">
           <h3>Team Management</h3>
-          <div className="compact-actions">
+          <div className="actions-container">
             <button className="compact-btn primary">Add Member</button>
             <button className="compact-btn">Import Members</button>
           </div>

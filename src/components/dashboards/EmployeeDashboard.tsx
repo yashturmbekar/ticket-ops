@@ -153,7 +153,7 @@ export const EmployeeDashboard: React.FC = () => {
     <>
       <div className="compact-header">
         <h1>Employee Dashboard</h1>
-        <div className="compact-actions">
+        <div className="actions-container">
           <button
             className="compact-btn primary"
             onClick={() => setShowCreateModal(true)}
@@ -191,7 +191,7 @@ export const EmployeeDashboard: React.FC = () => {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="compact-actions">
+      <div className="actions-container">
         <button
           className={`compact-btn ${
             activeTab === "my-tickets" ? "primary" : ""
@@ -317,7 +317,7 @@ export const EmployeeDashboard: React.FC = () => {
                 className="compact-input"
               />
             </div>
-            <div className="compact-actions">
+            <div className="actions-container">
               <button type="submit" className="compact-btn primary">
                 Create Ticket
               </button>
@@ -344,7 +344,7 @@ export const EmployeeDashboard: React.FC = () => {
       {activeTab === "knowledge" && (
         <div className="compact-card">
           <h3>Knowledge Base</h3>
-          <div className="compact-actions">
+          <div className="actions-container">
             <input
               type="search"
               placeholder="Search knowledge base..."
@@ -477,7 +477,7 @@ export const EmployeeDashboard: React.FC = () => {
                   className="compact-input"
                 />
               </div>
-              <div className="compact-actions">
+              <div className="actions-container">
                 <button type="submit" className="compact-btn primary">
                   Create Ticket
                 </button>

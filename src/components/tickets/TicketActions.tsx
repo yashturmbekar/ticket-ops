@@ -19,7 +19,22 @@ import { Card } from "../common/Card";
 import { Form, FormField, Input, Select, Textarea } from "../common/Form";
 import { useAuth } from "../../hooks/useAuth";
 import { useNotifications } from "../../hooks/useNotifications";
-import { ticketActionsService } from "../../services/ticketActionsService";
+import {
+  getNotes,
+  getTimeEntries,
+  getTicketHistory,
+  getAttachments,
+  getAvailableAgents,
+  assignTicket,
+  updateStatus,
+  closeTicket,
+  addNote,
+  addTimeEntry,
+  watchTicket,
+  unwatchTicket,
+  printTicket,
+  exportTicket
+} from "../../services/ticketActionsService";
 import type {
   Ticket,
   TicketStatus,
@@ -100,10 +115,10 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
       try {
         const [notesRes, timeRes, historyRes, attachmentsRes] =
           await Promise.all([
-            ticketActionsService.getNotes(ticket.id),
-            ticketActionsService.getTimeEntries(ticket.id),
-            ticketActionsService.getTicketHistory(ticket.id),
-            ticketActionsService.getAttachments(ticket.id),
+            getNotes(ticket.id),
+            getTimeEntries(ticket.id),
+            getTicketHistory(ticket.id),
+            getAttachments(ticket.id),
           ]);
 
         setNotes(notesRes.data);
@@ -120,7 +135,7 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
 
   const loadAvailableAgents = async () => {
     try {
-      const response = await ticketActionsService.getAvailableAgents(ticket.id);
+      const response = await getAvailableAgents(ticket.id);
       setAgents(response.data);
     } catch (error: unknown) {
       console.error("Failed to load agents:", error);
@@ -130,10 +145,9 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
   const handleStatusUpdate = async (formData: Record<string, unknown>) => {
     try {
       setLoading(true);
-      const response = await ticketActionsService.updateStatus(
+      const response = await updateStatus(
         ticket.id,
-        formData.status as TicketStatus,
-        formData.note as string
+        { status: formData.status as TicketStatus, note: formData.note as string }
       );
 
       onTicketUpdate(response.data);
@@ -158,7 +172,7 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
   const handleAssignment = async (formData: Record<string, unknown>) => {
     try {
       setLoading(true);
-      const response = await ticketActionsService.assignTicket(ticket.id, {
+      const response = await assignTicket(ticket.id, {
         userId: formData.userId as string,
         note: formData.note as string,
         notifyUser: formData.notifyUser as boolean,
@@ -186,7 +200,7 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
   const handleAddNote = async (formData: Record<string, unknown>) => {
     try {
       setLoading(true);
-      const response = await ticketActionsService.addNote(ticket.id, {
+      const response = await addNote(ticket.id, {
         content: formData.content as string,
         isInternal: (formData.isInternal as boolean) || false,
         attachments: formData.attachments as File[],
@@ -206,11 +220,13 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
   const handleAddTimeEntry = async (formData: Record<string, unknown>) => {
     try {
       setLoading(true);
-      const response = await ticketActionsService.addTimeEntry(
+      const response = await addTimeEntry(
         ticket.id,
-        formData.hours as number,
-        formData.description as string,
-        new Date(formData.date as string)
+        {
+          hours: formData.hours as number,
+          description: formData.description as string,
+          date: formData.date ? new Date(formData.date as string) : new Date()
+        }
       );
 
       setTimeEntries((prev) => [...prev, response.data]);
@@ -227,10 +243,12 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
   const handleCloseTicket = async (formData: Record<string, unknown>) => {
     try {
       setLoading(true);
-      const response = await ticketActionsService.closeTicket(
+      const response = await closeTicket(
         ticket.id,
-        formData.resolution as string,
-        formData.satisfactionRating as number
+        {
+          resolution: formData.resolution as string,
+          satisfactionRating: formData.satisfactionRating as number
+        }
       );
 
       onTicketUpdate(response.data);
@@ -247,11 +265,11 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
   const handleWatchToggle = async () => {
     try {
       if (isWatching) {
-        await ticketActionsService.unwatchTicket(ticket.id);
+        await unwatchTicket(ticket.id);
         setIsWatching(false);
         showNotification("success", "Stopped watching ticket");
       } else {
-        await ticketActionsService.watchTicket(ticket.id);
+        await watchTicket(ticket.id);
         setIsWatching(true);
         showNotification("success", "Now watching ticket");
       }
@@ -263,7 +281,7 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
 
   const handlePrint = async () => {
     try {
-      const response = await ticketActionsService.printTicket(ticket.id);
+      const response = await printTicket(ticket.id);
       window.open(response.data.url, "_blank");
     } catch (error: unknown) {
       console.error("Failed to generate print version:", error);
@@ -271,9 +289,9 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
     }
   };
 
-  const handleExport = async (format: "pdf" | "excel" | "json") => {
+  const handleExport = async (format: "pdf" | "csv") => {
     try {
-      const response = await ticketActionsService.exportTicket(
+      const response = await exportTicket(
         ticket.id,
         format
       );

@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { websocketService } from "../services/websocketService";
+import {
+  on,
+  off,
+  send
+} from "../services/websocketService";
 import { useAuth } from "./useAuth";
 import { useNotifications } from "./useNotifications";
 import type { WebSocketEvent } from "../types";
@@ -18,18 +22,17 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
 
   // Handle WebSocket events
   useEffect(() => {
-    const handleTicketCreated = (data: Record<string, unknown>) => {
+    const handleTicketCreated = (...args: unknown[]) => {
+      const data = args[0] as Record<string, unknown>;
       const event: WebSocketEvent = {
         id: Date.now().toString(),
         type: "ticket_created",
         data,
         timestamp: new Date(),
       };
-
       setLastEvent(event);
       setEventHistory((prev) => [...prev.slice(-99), event]);
       onEvent?.(event);
-
       const ticket = data.ticket as { id: string };
       addNotification({
         type: "info",
@@ -38,19 +41,17 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
         duration: 5000,
       });
     };
-
-    const handleTicketAssigned = (data: Record<string, unknown>) => {
+    const handleTicketAssigned = (...args: unknown[]) => {
+      const data = args[0] as Record<string, unknown>;
       const event: WebSocketEvent = {
         id: Date.now().toString(),
         type: "ticket_assigned",
         data,
         timestamp: new Date(),
       };
-
       setLastEvent(event);
       setEventHistory((prev) => [...prev.slice(-99), event]);
       onEvent?.(event);
-
       const ticket = data.ticket as { id: string; assignedTo: string };
       if (ticket?.assignedTo === user?.id) {
         addNotification({
@@ -61,19 +62,17 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
         });
       }
     };
-
-    const handleTicketUpdated = (data: Record<string, unknown>) => {
+    const handleTicketUpdated = (...args: unknown[]) => {
+      const data = args[0] as Record<string, unknown>;
       const event: WebSocketEvent = {
         id: Date.now().toString(),
         type: "ticket_updated",
         data,
         timestamp: new Date(),
       };
-
       setLastEvent(event);
       setEventHistory((prev) => [...prev.slice(-99), event]);
       onEvent?.(event);
-
       const ticket = data.ticket as {
         id: string;
         assignedTo: string;
@@ -88,19 +87,17 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
         });
       }
     };
-
-    const handleTicketResolved = (data: Record<string, unknown>) => {
+    const handleTicketResolved = (...args: unknown[]) => {
+      const data = args[0] as Record<string, unknown>;
       const event: WebSocketEvent = {
         id: Date.now().toString(),
         type: "ticket_resolved",
         data,
         timestamp: new Date(),
       };
-
       setLastEvent(event);
       setEventHistory((prev) => [...prev.slice(-99), event]);
       onEvent?.(event);
-
       const ticket = data.ticket as { id: string; createdBy: string };
       if (ticket?.createdBy === user?.id) {
         addNotification({
@@ -111,19 +108,17 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
         });
       }
     };
-
-    const handleSystemAlert = (data: Record<string, unknown>) => {
+    const handleSystemAlert = (...args: unknown[]) => {
+      const data = args[0] as Record<string, unknown>;
       const event: WebSocketEvent = {
         id: Date.now().toString(),
         type: "system_alert",
         data,
         timestamp: new Date(),
       };
-
       setLastEvent(event);
       setEventHistory((prev) => [...prev.slice(-99), event]);
       onEvent?.(event);
-
       const alert = data as { severity: string; message: string };
       addNotification({
         type: alert.severity === "critical" ? "error" : "warning",
@@ -132,26 +127,23 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
         duration: 10000,
       });
     };
-
-    // Subscribe to WebSocket events
-    websocketService.on("TICKET_CREATED", handleTicketCreated);
-    websocketService.on("TICKET_ASSIGNED", handleTicketAssigned);
-    websocketService.on("TICKET_UPDATED", handleTicketUpdated);
-    websocketService.on("TICKET_RESOLVED", handleTicketResolved);
-    websocketService.on("SYSTEM_ALERT", handleSystemAlert);
-
+    on("TICKET_CREATED", handleTicketCreated);
+    on("TICKET_ASSIGNED", handleTicketAssigned);
+    on("TICKET_UPDATED", handleTicketUpdated);
+    on("TICKET_RESOLVED", handleTicketResolved);
+    on("SYSTEM_ALERT", handleSystemAlert);
     return () => {
-      websocketService.off("TICKET_CREATED", handleTicketCreated);
-      websocketService.off("TICKET_ASSIGNED", handleTicketAssigned);
-      websocketService.off("TICKET_UPDATED", handleTicketUpdated);
-      websocketService.off("TICKET_RESOLVED", handleTicketResolved);
-      websocketService.off("SYSTEM_ALERT", handleSystemAlert);
+      off("TICKET_CREATED", handleTicketCreated);
+      off("TICKET_ASSIGNED", handleTicketAssigned);
+      off("TICKET_UPDATED", handleTicketUpdated);
+      off("TICKET_RESOLVED", handleTicketResolved);
+      off("SYSTEM_ALERT", handleSystemAlert);
     };
   }, [user?.id, onEvent, addNotification]);
 
   // Send event
   const sendEvent = (type: string, data: Record<string, unknown>) => {
-    websocketService.send(type, data);
+    send(type, data);
   };
 
   // Get events by type

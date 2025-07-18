@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { ticketService } from "../../services";
+import { getTickets, updateTicket } from "../../services";
 import type { Ticket, TicketStatus, Priority } from "../../types";
 import "./OperationsDashboard.css";
 
@@ -38,7 +38,7 @@ export const OperationsDashboard: React.FC = () => {
       setLoading(true);
 
       // Load tickets
-      const ticketsResponse = await ticketService.getTickets({
+      const ticketsResponse = await getTickets({
         page: 1,
         limit: 100,
       });
@@ -134,7 +134,7 @@ export const OperationsDashboard: React.FC = () => {
     newStatus: TicketStatus
   ) => {
     try {
-      await ticketService.updateTicket(ticketId, { status: newStatus });
+      await updateTicket(ticketId, { status: newStatus });
       loadDashboardData();
     } catch (error) {
       console.error("Error updating ticket status:", error);

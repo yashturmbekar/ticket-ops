@@ -1,7 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "./useAuth";
 import { useNotifications } from "./useNotifications";
-import { websocketService } from "../services/websocketService";
+import {
+  on,
+  off
+} from "../services/websocketService";
 import type { Ticket } from "../types";
 
 export interface RealtimeEvent {
@@ -186,7 +189,8 @@ export const useRealtime = (options: UseRealtimeOptions = {}) => {
       setIsConnected(true);
 
       // Subscribe to WebSocket events
-      const handleTicketCreated = (data: Record<string, unknown>) => {
+      const handleTicketCreated = (...args: unknown[]) => {
+        const data = args[0] as Record<string, unknown>;
         handleRealtimeEvent({
           type: "ticket_created",
           data: { ticket: data as unknown as Ticket },
@@ -194,7 +198,8 @@ export const useRealtime = (options: UseRealtimeOptions = {}) => {
         });
       };
 
-      const handleTicketUpdated = (data: Record<string, unknown>) => {
+      const handleTicketUpdated = (...args: unknown[]) => {
+        const data = args[0] as Record<string, unknown>;
         handleRealtimeEvent({
           type: "ticket_updated",
           data: { ticket: data as unknown as Ticket },
@@ -202,7 +207,8 @@ export const useRealtime = (options: UseRealtimeOptions = {}) => {
         });
       };
 
-      const handleTicketAssigned = (data: Record<string, unknown>) => {
+      const handleTicketAssigned = (...args: unknown[]) => {
+        const data = args[0] as Record<string, unknown>;
         handleRealtimeEvent({
           type: "ticket_assigned",
           data: { ticket: data as unknown as Ticket },
@@ -210,7 +216,8 @@ export const useRealtime = (options: UseRealtimeOptions = {}) => {
         });
       };
 
-      const handleTicketResolved = (data: Record<string, unknown>) => {
+      const handleTicketResolved = (...args: unknown[]) => {
+        const data = args[0] as Record<string, unknown>;
         handleRealtimeEvent({
           type: "ticket_resolved",
           data: { ticket: data as unknown as Ticket },
@@ -218,7 +225,8 @@ export const useRealtime = (options: UseRealtimeOptions = {}) => {
         });
       };
 
-      const handleSystemAlert = (data: Record<string, unknown>) => {
+      const handleSystemAlert = (...args: unknown[]) => {
+        const data = args[0] as Record<string, unknown>;
         handleRealtimeEvent({
           type: "system_alert",
           data: data,
@@ -226,7 +234,8 @@ export const useRealtime = (options: UseRealtimeOptions = {}) => {
         });
       };
 
-      const handleNetworkAlert = (data: Record<string, unknown>) => {
+      const handleNetworkAlert = (...args: unknown[]) => {
+        const data = args[0] as Record<string, unknown>;
         handleRealtimeEvent({
           type: "system_alert",
           data: {
@@ -241,20 +250,20 @@ export const useRealtime = (options: UseRealtimeOptions = {}) => {
         });
       };
 
-      websocketService.on("TICKET_CREATED", handleTicketCreated);
-      websocketService.on("TICKET_UPDATED", handleTicketUpdated);
-      websocketService.on("TICKET_ASSIGNED", handleTicketAssigned);
-      websocketService.on("TICKET_RESOLVED", handleTicketResolved);
-      websocketService.on("SYSTEM_ALERT", handleSystemAlert);
-      websocketService.on("NETWORK_ALERT", handleNetworkAlert);
+      on("TICKET_CREATED", handleTicketCreated);
+      on("TICKET_UPDATED", handleTicketUpdated);
+      on("TICKET_ASSIGNED", handleTicketAssigned);
+      on("TICKET_RESOLVED", handleTicketResolved);
+      on("SYSTEM_ALERT", handleSystemAlert);
+      on("NETWORK_ALERT", handleNetworkAlert);
 
       return () => {
-        websocketService.off("TICKET_CREATED", handleTicketCreated);
-        websocketService.off("TICKET_UPDATED", handleTicketUpdated);
-        websocketService.off("TICKET_ASSIGNED", handleTicketAssigned);
-        websocketService.off("TICKET_RESOLVED", handleTicketResolved);
-        websocketService.off("SYSTEM_ALERT", handleSystemAlert);
-        websocketService.off("NETWORK_ALERT", handleNetworkAlert);
+        off("TICKET_CREATED", handleTicketCreated);
+        off("TICKET_UPDATED", handleTicketUpdated);
+        off("TICKET_ASSIGNED", handleTicketAssigned);
+        off("TICKET_RESOLVED", handleTicketResolved);
+        off("SYSTEM_ALERT", handleSystemAlert);
+        off("NETWORK_ALERT", handleNetworkAlert);
       };
     }
   }, [user, handleRealtimeEvent]);

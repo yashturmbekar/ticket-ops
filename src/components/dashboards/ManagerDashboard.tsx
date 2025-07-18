@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { ticketService } from "../../services";
+import { getTickets } from "../../services";
 import type { Ticket, TicketStatus, Priority } from "../../types";
 import "./ManagerDashboard.css";
 
@@ -44,7 +44,7 @@ export const ManagerDashboard: React.FC = () => {
       setLoading(true);
 
       // Load tickets for the manager's team
-      const ticketsResponse = await ticketService.getTickets({
+      const ticketsResponse = await getTickets({
         page: 1,
         limit: 50,
       });

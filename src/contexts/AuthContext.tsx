@@ -2,9 +2,7 @@ import React, { createContext, useReducer, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { User, UserRole, Permission } from "../types";
 import { AUTH_TOKEN_KEY, USER_DATA_KEY } from "../constants";
-import { AuthService } from "../services/authService";
-
-const authService = new AuthService();
+import { login as loginApi } from "../services/authService";
 
 interface AuthState {
   user: User | null;
@@ -127,21 +125,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     dispatch({ type: "LOGIN_START" });
 
     try {
-      const response = await authService.login({ email, password });
+      const response = await loginApi({ email, password });
 
-      if (response.success && response.data) {
-        const { user, token } = response.data;
-
+      // Assume response contains { token, user } or similar
+      if (response && response.token && response.user) {
+        const { user, token } = response;
         // Store token and user data
         localStorage.setItem(AUTH_TOKEN_KEY, token);
         localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
-
+        dispatch({
+          type: "LOGIN_SUCCESS",
+          payload: { user, token },
+        });
+      } else if (response && response.data && response.data.token && response.data.user) {
+        // fallback for { data: { token, user } }
+        const { user, token } = response.data;
+        localStorage.setItem(AUTH_TOKEN_KEY, token);
+        localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
         dispatch({
           type: "LOGIN_SUCCESS",
           payload: { user, token },
         });
       } else {
-        throw new Error(response.error || "Login failed");
+        throw new Error("Login failed");
       }
     } catch (error) {
       dispatch({

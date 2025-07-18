@@ -1,40 +1,148 @@
-// Main services exports
-export { apiService } from "./api";
-export { authService } from "./authService";
-export { userService } from "./userService";
-export { ticketService } from "./ticketService";
-export { ticketActionsService } from "./ticketActionsService";
-export { assetService } from "./assetService";
-export { knowledgeService } from "./knowledgeService";
-export { networkService } from "./networkService";
-export { reportsService } from "./reportsService";
-export { websocketService } from "./websocketService";
-
-// Re-export types
-export type { ApiResponse, PaginatedResponse, ApiError } from "./api";
-export type {
-  LoginRequest,
-  LoginResponse,
-  RegisterRequest,
-  ResetPasswordRequest,
-  ChangePasswordRequest,
+// Main services exports (explicit, no conflicts)
+export {
+  // Auth
+  login,
+  register,
+  forgotPassword,
+  resetPassword,
+  logout,
+  getProfile,
+  updateProfile,
 } from "./authService";
+
+export {
+  // User
+  getUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  deleteUser,
+  changeUserStatus,
+  resetUserPassword,
+} from "./userService";
+
+export {
+  // Ticket
+  getTickets,
+  getTicketById,
+  createTicket,
+  updateTicket,
+  deleteTicket,
+  assignTicket,
+  closeTicket,
+  reopenTicket,
+  addComment as addTicketComment,
+  getTicketComments,
+  updateComment as updateTicketComment,
+  deleteComment as deleteTicketComment,
+  uploadAttachment as uploadTicketAttachment,
+  deleteAttachment as deleteTicketAttachment,
+  rateTicket,
+  getTicketHistory,
+  getMyTickets,
+  getAssignedTickets,
+  getOverdueTickets,
+  getTicketsByPriority,
+  getTicketsByCategory,
+  bulkUpdateTickets,
+  bulkAssignTickets,
+  bulkCloseTickets,
+  exportTickets,
+  getTicketStats,
+} from "./ticketService";
+
+export {
+  // Ticket Actions (aliased to avoid conflicts)
+  getNotes,
+  addNote,
+  updateNote,
+  deleteNote,
+  getTimeEntries,
+  addTimeEntry,
+  updateTimeEntry,
+  deleteTimeEntry,
+  getTicketHistory as getTicketActionHistory,
+  getAttachments as getTicketActionAttachments,
+  addAttachment as addTicketActionAttachment,
+  deleteAttachment as deleteTicketActionAttachment,
+  getAvailableAgents,
+  assignTicket as assignTicketAction,
+  updateStatus,
+  closeTicket as closeTicketAction,
+  watchTicket,
+  unwatchTicket,
+  printTicket,
+  exportTicket,
+} from "./ticketActionsService";
+
+export {
+  // Asset
+  getAssets,
+  getAssetById,
+  createAsset,
+  updateAsset,
+  deleteAsset,
+  assignAsset,
+  uploadAssetAttachment,
+  deleteAssetAttachment,
+  getAssetHistory,
+  bulkUpdateAssets,
+  exportAssets,
+} from "./assetService";
+
+export {
+  // Knowledge
+  getArticles,
+  getArticleById,
+  createArticle,
+  updateArticle,
+  deleteArticle,
+  addComment as addKnowledgeComment,
+  getComments as getKnowledgeComments,
+  updateComment as updateKnowledgeComment,
+  deleteComment as deleteKnowledgeComment,
+  uploadAttachment as uploadKnowledgeAttachment,
+  deleteAttachment as deleteKnowledgeAttachment,
+  getStats as getKnowledgeStats,
+} from "./knowledgeService";
+
+export {
+  // Network
+  getDevices,
+  getDeviceById,
+  createDevice,
+  updateDevice,
+  deleteDevice,
+  assignDevice,
+  uploadDeviceAttachment,
+  deleteDeviceAttachment,
+  getDeviceHistory,
+  bulkUpdateDevices,
+  exportDevices,
+} from "./networkService";
+
+export {
+  // Reports
+  getReports,
+  getReportById,
+  createReport,
+  updateReport,
+  deleteReport,
+  exportReports,
+} from "./reportsService";
+
+export {
+  // WebSocket
+  connect,
+  disconnect,
+  send,
+  on,
+  off,
+} from "./websocketService";
+
+// Re-export types that still exist
 export type { UserFilters } from "./userService";
 export type { TicketFilters } from "./ticketService";
 export type { AssetFilters } from "./assetService";
-export type { KnowledgeSearchParams, KnowledgeStats } from "./knowledgeService";
-export type {
-  NetworkAlert,
-  NetworkMetrics,
-  NetworkScanResult,
-} from "./networkService";
-export type {
-  ReportFilter,
-  ReportData,
-  DashboardWidget,
-} from "./reportsService";
-export type {
-  WebSocketEventType,
-  WebSocketMessage,
-  WebSocketEventHandler,
-} from "./websocketService";
+export type { KnowledgeSearchParams } from "./knowledgeService";
+export type { ReportFilters } from "./reportsService";

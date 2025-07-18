@@ -9,6 +9,12 @@ export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
 export const WEBSOCKET_URL =
   import.meta.env.VITE_WEBSOCKET_URL || "ws://localhost:3000";
+export const API_TIMEOUT = 10000; // 10 seconds default
+export const UNAUTH_ROUTES = [
+  '/auth/login',
+  '/auth/register',
+  '/auth/forgot-password',
+];
 
 // File Upload
 export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB

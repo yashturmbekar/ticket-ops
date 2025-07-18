@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { ticketService } from "../../services";
+import { getTickets, createTicket } from "../../services";
 import type { Ticket, Priority, TicketStatus, Category } from "../../types";
 import "./EmployeeDashboard.css";
 
@@ -46,7 +46,7 @@ export const EmployeeDashboard: React.FC = () => {
   const loadTickets = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await ticketService.getTickets({
+      const response = await getTickets({
         page: 1,
         limit: 50,
         createdBy: user?.id,
@@ -91,7 +91,7 @@ export const EmployeeDashboard: React.FC = () => {
   const handleCreateTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await ticketService.createTicket({
+      const response = await createTicket({
         title: createForm.title,
         description: createForm.description,
         category: createForm.category as Category,

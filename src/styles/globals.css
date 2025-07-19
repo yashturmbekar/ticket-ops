@@ -3106,3 +3106,72 @@ body {
   outline: none;
   background: #f8fafc;
 }
+
+/* --- Industry Standard Typography for Headers, Subheaders, Tabs, and Body Text --- */
+h1, .h1 {
+  font-size: 2.25rem; /* 36px */
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.15;
+  color: var(--color-text);
+}
+h2, .h2 {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+h3, .h3 {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 600;
+  margin-bottom: 1rem;
+  line-height: 1.25;
+  color: var(--color-text);
+}
+h4, .h4 {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+  color: var(--color-text);
+}
+p, .body-text {
+  font-size: 1rem; /* 16px */
+  font-weight: 400;
+  margin-bottom: 1rem;
+  line-height: 1.7;
+  color: var(--color-text);
+}
+.small, .text-small {
+  font-size: 0.875rem; /* 14px */
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+/* --- Tabs --- */
+.tab-list {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+.tab {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.5rem 1.5rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.tab:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-primary);
+}
+.tab.active, .tab[aria-selected="true"] {
+  color: var(--color-primary);
+  background: var(--color-surface-secondary);
+  font-weight: 700;
+}

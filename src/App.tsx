@@ -11,7 +11,6 @@ import { NotificationProvider } from "./contexts/NotificationContext";
 import { LoginPage } from "./components/auth";
 import { NotificationContainer } from "./components/common/NotificationContainer";
 import AppLayout from "./components/layout/AppLayout";
-import { DashboardPage } from "./pages/DashboardPage";
 import { TicketsPage } from "./pages/TicketsPage.tsx";
 import { AssetsPage } from "./pages/AssetsPage.tsx";
 import { UsersPage } from "./pages/UsersPage.tsx";
@@ -22,6 +21,7 @@ import { SettingsPage } from "./pages/SettingsPage.tsx";
 import { useAuth } from "./hooks/useAuth";
 import { UserRole } from "./types";
 import "./styles/globals.css";
+import { RoleDashboard } from "./components/dashboards/RoleDashboard";
 
 // Protected Route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
@@ -73,13 +73,13 @@ const AppContent: React.FC = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<LoginPage />} />
         <Route
-          path="/"
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <LayoutWrapper>
-                <DashboardPage />
+                <RoleDashboard />
               </LayoutWrapper>
             </ProtectedRoute>
           }

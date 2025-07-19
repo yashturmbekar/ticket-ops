@@ -1,7 +1,7 @@
 import apiClient from "./apiClient";
 
 export interface LoginRequest {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -20,10 +20,10 @@ export interface ResetPasswordRequest {
   newPassword: string;
 }
 
-const endpoint = "/auth";
+const endpoint = "";
 
 export async function login(data: LoginRequest) {
-  return apiClient.post(`${endpoint}/login`, data);
+  return apiClient.post(`${endpoint}/authenticate`, data);
 }
 
 export async function register(data: RegisterRequest) {

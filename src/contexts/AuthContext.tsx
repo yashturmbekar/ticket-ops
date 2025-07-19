@@ -85,7 +85,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 };
 
 interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   updateUser: (user: User) => void;
   hasPermission: (permission: string) => boolean;
@@ -125,7 +125,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     dispatch({ type: "LOGIN_START" });
 
     try {
-      const response = await loginApi({ email, password });
+      const response = await loginApi({ username: email, password });
 
       // Assume response contains { token, user } or similar
       if (response && response.token && response.user) {

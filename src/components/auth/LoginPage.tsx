@@ -8,25 +8,25 @@ import "./LoginPage.css";
 // Demo user credentials
 const demoUsers = [
   {
-    email: "admin@redfish.com",
+    username: "admin@redfish.com",
     password: "admin123",
     role: UserRole.ADMIN,
     name: "Admin User",
   },
   {
-    email: "manager@redfish.com",
+    username: "manager@redfish.com",
     password: "manager123",
     role: UserRole.MANAGER,
     name: "Manager User",
   },
   {
-    email: "tech@redfish.com",
+    username: "tech@redfish.com",
     password: "tech123",
     role: UserRole.IT_STAFF,
     name: "IT Staff User",
   },
   {
-    email: "employee@redfish.com",
+    username: "employee@redfish.com",
     password: "employee123",
     role: UserRole.USER,
     name: "Employee User",
@@ -36,13 +36,12 @@ const demoUsers = [
 export const LoginPage: React.FC = () => {
   const { login, isLoading, error, isAuthenticated, clearError } = useAuth();
   const { toggleTheme, themeName } = useTheme();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isToggling, setIsToggling] = useState(false);
 
-  // Redirect to dashboard if already authenticated
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   const handleThemeToggle = () => {
@@ -56,20 +55,20 @@ export const LoginPage: React.FC = () => {
     clearError();
 
     try {
-      await login(email, password);
+      await login(username, password);
     } catch (err) {
       console.error("Login failed:", err);
     }
   };
 
   const handleDemoLogin = (demoUser: (typeof demoUsers)[0]) => {
-    setEmail(demoUser.email);
+    setUsername(demoUser.username);
     setPassword(demoUser.password);
     clearError();
 
     // Auto-login after setting credentials
     setTimeout(() => {
-      login(demoUser.email, demoUser.password);
+      login(demoUser.username, demoUser.password);
     }, 100);
   };
 
@@ -101,16 +100,16 @@ export const LoginPage: React.FC = () => {
 
         <form onSubmit={handleLogin} className="login-form">
           <div className="form-group">
-            <label htmlFor="email" className="form-label">
-              Email Address
+            <label htmlFor="username" className="form-label">
+              Username
             </label>
             <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="form-input"
-              placeholder="Enter your email"
+              placeholder="Enter your username"
               required
             />
           </div>
@@ -153,7 +152,7 @@ export const LoginPage: React.FC = () => {
           <div className="demo-users">
             {demoUsers.map((user) => (
               <button
-                key={user.email}
+                key={user.username}
                 onClick={() => handleDemoLogin(user)}
                 className="demo-user-button"
                 disabled={isLoading}
@@ -161,7 +160,7 @@ export const LoginPage: React.FC = () => {
                 <div className="demo-user-info">
                   <div className="demo-user-name">{user.name}</div>
                   <div className="demo-user-role">{user.role}</div>
-                  <div className="demo-user-email">{user.email}</div>
+                  <div className="demo-user-username">{user.username}</div>
                 </div>
               </button>
             ))}

@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { createContext, useReducer, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { User, UserRole, Permission } from "../types";
 import { AUTH_TOKEN_KEY, USER_DATA_KEY } from "../constants";
 import { login as loginApi } from "../services/authService";
+import { jwtDecode } from "jwt-decode";
 
 interface AuthState {
   user: User | null;
@@ -121,25 +123,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const login = async (email: string, password: string): Promise<void> => {
+  const login = async (username: string, password: string): Promise<void> => {
     dispatch({ type: "LOGIN_START" });
 
     try {
-      const response = await loginApi({ username: email, password });
-
-      // Assume response contains { token, user } or similar
-      if (response && response.token && response.user) {
-        const { user, token } = response;
-        // Store token and user data
-        localStorage.setItem(AUTH_TOKEN_KEY, token);
-        localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
-        dispatch({
-          type: "LOGIN_SUCCESS",
-          payload: { user, token },
-        });
-      } else if (response && response.data && response.data.token && response.data.user) {
-        // fallback for { data: { token, user } }
-        const { user, token } = response.data;
+      const response = await loginApi({ username, password });
+      // Handle response with id_token
+      if (response && response.id_token) {
+        const token = response.id_token;
+        // Decode user info from JWT
+        const decoded: any = jwtDecode(token);
+        // You may need to map the decoded fields to your User type
+        const user = {
+          id: decoded.employeeId || decoded.sub || "",
+          username: decoded.sub || "",
+          email: decoded.sub || "",
+          firstName: decoded.firstName || "",
+          lastName: decoded.lastName || "",
+          role: decoded.auth || "user",
+          department: decoded.department || "",
+          manager: decoded.manager || "",
+          phone: decoded.phone || "",
+          location: decoded.location || "",
+          isActive: decoded.isActive !== undefined ? decoded.isActive : true,
+          lastLogin: undefined,
+          permissions: [],
+          avatar: "",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
         localStorage.setItem(AUTH_TOKEN_KEY, token);
         localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
         dispatch({

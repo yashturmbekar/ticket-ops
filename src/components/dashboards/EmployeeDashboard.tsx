@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { getTickets, createTicket } from "../../services";
-import type { Ticket, Priority, TicketStatus, Category } from "../../types";
+import { getMyTickets, createTicket } from "../../services";
+import type { Ticket, Priority, TicketStatus } from "../../types";
 import "./EmployeeDashboard.css";
 
 interface TicketCounts {
@@ -20,7 +20,11 @@ interface CreateTicketForm {
   attachments: File[];
 }
 
-export const EmployeeDashboard: React.FC = () => {
+interface EmployeeDashboardProps {
+  initialTab?: "my-tickets" | "create" | "knowledge";
+}
+
+export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab }) => {
   const { user } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [ticketCounts, setTicketCounts] = useState<TicketCounts>({
@@ -41,16 +45,12 @@ export const EmployeeDashboard: React.FC = () => {
   });
   const [activeTab, setActiveTab] = useState<
     "my-tickets" | "create" | "knowledge"
-  >("my-tickets");
+  >(initialTab || "my-tickets");
 
   const loadTickets = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getTickets({
-        page: 1,
-        limit: 50,
-        createdBy: user?.id,
-      });
+      const response = await getMyTickets();
 
       if (response.success && response.data?.data) {
         const userTickets = response.data.data;
@@ -72,12 +72,11 @@ export const EmployeeDashboard: React.FC = () => {
       }
     } catch (error) {
       console.error("Error loading tickets:", error);
-      // Ensure tickets is always an array even on error
       setTickets([]);
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, []);
 
   useEffect(() => {
     loadTickets();
@@ -94,8 +93,10 @@ export const EmployeeDashboard: React.FC = () => {
       const response = await createTicket({
         title: createForm.title,
         description: createForm.description,
-        category: createForm.category as Category,
-        priority: createForm.priority,
+        status: "OPEN",
+        assignedDepartmentId: user?.department || "",
+        assignedToEmployeeId: user?.id || "",
+        comment: createForm.description, // Using description as comment for now
       });
 
       if (response.success) {
@@ -195,10 +196,11 @@ export const EmployeeDashboard: React.FC = () => {
       {/* Navigation Tabs */}
       <div className="actions-container">
         <button
-          className={`compact-btn ${
-            activeTab === "my-tickets" ? "primary" : ""
-          }`}
-          onClick={() => setActiveTab("my-tickets")}
+          className={`compact-btn ${activeTab === "my-tickets" ? "primary" : ""}`}
+          onClick={() => {
+            setActiveTab("my-tickets");
+            loadTickets();
+          }}
         >
           My Tickets
         </button>
@@ -208,14 +210,14 @@ export const EmployeeDashboard: React.FC = () => {
         >
           Create Ticket
         </button>
-        <button
+        {/* <button
           className={`compact-btn ${
             activeTab === "knowledge" ? "primary" : ""
           }`}
           onClick={() => setActiveTab("knowledge")}
         >
           Knowledge Base
-        </button>
+        </button> */}
       </div>
 
       {/* Tab Content */}

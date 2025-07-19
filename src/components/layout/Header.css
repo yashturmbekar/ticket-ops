@@ -581,9 +581,9 @@
 
 /* Dark Theme Support */
 [data-theme="dark"] .header {
-  background: white;
-  border-bottom: 1px solid #e5e7eb;
-  color: #212529;
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+  color: #f1f5f9;
 }
 
 [data-theme="dark"] .menu-toggle,

@@ -28,7 +28,7 @@ export async function getTicketById(id: string) {
 }
 
 export async function createTicket(ticketData: Record<string, unknown>) {
-  return apiClient.post(endpoint, ticketData);
+  return apiClient.post('/helpdesk-tickets', ticketData);
 }
 
 export async function updateTicket(id: string, ticketData: Record<string, unknown>) {
@@ -43,8 +43,20 @@ export async function assignTicket(id: string, assignedTo: string) {
   return apiClient.patch(`${endpoint}/${id}/assign`, { assignedTo });
 }
 
-export async function closeTicket(id: string, resolution?: string) {
-  return apiClient.patch(`${endpoint}/${id}/close`, { resolution });
+export async function approveTicket(ticketData: Record<string, unknown>) {
+  return apiClient.post('/helpdesk-tickets/approve', ticketData);
+}
+
+export async function rejectTicket(ticketData: Record<string, unknown>) {
+  return apiClient.post(`${endpoint}/reject`, ticketData);
+}
+
+export async function closeTicket(ticketData: Record<string, unknown>) {
+  return apiClient.post(`${endpoint}/close`, ticketData);
+}
+
+export async function searchTickets(searchData: Record<string, unknown>, page = 0, size = 10, sort = "id,desc") {
+  return apiClient.post(`${endpoint}/search?page=${page}&size=${size}&sort=${sort}`, searchData);
 }
 
 export async function reopenTicket(id: string, reason?: string) {
@@ -87,7 +99,7 @@ export async function getTicketHistory(id: string) {
 }
 
 export async function getMyTickets() {
-  return apiClient.get(`${endpoint}/my-tickets`);
+  return apiClient.get(`${endpoint}`);
 }
 
 export async function getAssignedTickets() {

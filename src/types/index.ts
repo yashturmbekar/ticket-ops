@@ -268,7 +268,7 @@ export interface Notification {
 export const UserRole = {
   ADMIN: "admin",
   IT_STAFF: "it_staff",
-  USER: "user",
+  USER: "ROLE_USER",
   MANAGER: "manager",
 } as const;
 

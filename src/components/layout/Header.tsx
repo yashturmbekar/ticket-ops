@@ -16,6 +16,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
 import { USER_ROLE_LABELS } from "../../constants/userRoles";
 import "./Header.css";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -27,6 +28,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle, isMenuOpen }) => {
   const { themeName, toggleTheme } = useTheme();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -102,8 +104,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle, isMenuOpen }) => {
   };
 
   const handleNewTicket = () => {
-    // You can implement navigation to new ticket page here
-    console.log("Navigate to new ticket page");
+    navigate("/dashboard", { state: { activeTab: "create" } });
   };
 
   const handleProfileClick = () => {

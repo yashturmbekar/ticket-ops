@@ -3090,3 +3090,19 @@ body {
     align-items: stretch;
   }
 }
+
+.compact-input {
+  color: #222;
+  background: #fff;
+  border: 1px solid #b0b0b0;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.compact-input:focus {
+  border-color: #2563eb;
+  outline: none;
+  background: #f8fafc;
+}

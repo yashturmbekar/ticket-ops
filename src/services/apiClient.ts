@@ -14,7 +14,7 @@ export function removeToken(): void {
 const controllers: AbortController[] = [];
 
 const instance = axios.create({
-  baseURL: (import.meta.env.VITE_API_BASE_URL || 'https://5fcac7681f33.ngrok-free.app') + '/api',
+  baseURL: (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080') + '/api',
   timeout: API_TIMEOUT,
   headers: {
     'Content-Type': 'application/json',

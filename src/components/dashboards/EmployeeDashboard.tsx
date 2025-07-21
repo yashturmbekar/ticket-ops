@@ -93,7 +93,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
       const response = await createTicket({
         title: createForm.title,
         description: createForm.description,
-        status: "OPEN",
+        status: "PENDING_APPROVAL",
         assignedDepartmentId: user?.department || "",
         assignedToEmployeeId: user?.id || "",
         comment: createForm.description, // Using description as comment for now
@@ -266,8 +266,13 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
               <input
                 type="text"
                 value={createForm.title}
-                onChange={(e) =>
+                onChange={(e) => {
                   setCreateForm({ ...createForm, title: e.target.value })
+                  // setCreateForm((prev) => ({
+                  //   ...prev,
+                  //   title: e.target.value,
+                  // }))
+                }
                 }
                 required
                 className="compact-input"
@@ -322,7 +327,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
               />
             </div>
             <div className="actions-container">
-              <button type="submit" className="compact-btn primary">
+              <button type="submit" className="compact-btn primary" onSubmit={handleCreateTicket}>
                 Create Ticket
               </button>
               <button

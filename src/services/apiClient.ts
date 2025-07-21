@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
-import { API_TIMEOUT, UNAUTH_ROUTES } from "../constants";
+import { API_TIMEOUT, AUTH_TOKEN_KEY, UNAUTH_ROUTES } from "../constants";
 
 // Token helpers
 export function getToken(): string | null {
-  return localStorage.getItem("authToken");
+  return localStorage.getItem(AUTH_TOKEN_KEY);
 }
 
 export function removeToken(): void {
-  localStorage.removeItem("authToken");
+  localStorage.removeItem(AUTH_TOKEN_KEY);
 }
 
 const controllers: AbortController[] = [];
 
 const instance = axios.create({
-  baseURL: (import.meta.env.VITE_API_BASE_URL || 'https://d36e3cddc5bd.ngrok-free.app') + '/api',
+  baseURL: (import.meta.env.VITE_API_BASE_URL || 'https://5fcac7681f33.ngrok-free.app') + '/api',
   timeout: API_TIMEOUT,
   headers: {
     'Content-Type': 'application/json',

@@ -160,13 +160,13 @@ export const AdminDashboard: React.FC = () => {
 
   const getPriorityColor = (priority: Priority): string => {
     switch (priority) {
-      case "critical":
+      case "CRITICAL":
         return "error";
-      case "high":
+      case "HIGH":
         return "warning";
-      case "medium":
+      case "MEDIUM":
         return "info";
-      case "low":
+      case "LOW":
         return "success";
       default:
         return "secondary";

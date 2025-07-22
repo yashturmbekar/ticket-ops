@@ -362,13 +362,13 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
 
   const getPriorityColor = (priority: Priority): string => {
     switch (priority) {
-      case "critical":
+      case "CRITICAL":
         return "#dc3545";
-      case "high":
+      case "HIGH":
         return "#fd7e14";
-      case "medium":
+      case "MEDIUM":
         return "#ffc107";
-      case "low":
+      case "LOW":
         return "#28a745";
       default:
         return "#6c757d";

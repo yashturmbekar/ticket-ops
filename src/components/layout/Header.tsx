@@ -2,19 +2,11 @@ import React, { useState, useEffect } from "react";
 import {
   FaBars,
   FaBell,
-  FaSearch,
-  FaUser,
-  FaSignOutAlt,
-  FaCog,
-  FaMoon,
-  FaSun,
-  FaChevronDown,
   FaTicketAlt,
   FaAngleLeft,
   FaAngleRight,
 } from "react-icons/fa";
 import { useAuth } from "../../hooks/useAuth";
-import { useTheme } from "../../hooks/useTheme";
 import { USER_ROLE_LABELS } from "../../constants/userRoles";
 import "./HeaderModern.css";
 import { useNavigate } from "react-router-dom";
@@ -32,10 +24,8 @@ export const Header: React.FC<HeaderProps> = ({
   isCollapsed = false,
 }) => {
   const { user, logout } = useAuth();
-  const { themeName, toggleTheme } = useTheme();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
   // Close dropdowns when clicking outside
@@ -82,6 +72,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const getUserDisplayName = () => {
+    console.log("User data:", user); // Debug log
     if (user?.firstName && user?.lastName) {
       return `${user.firstName} ${user.lastName}`;
     }
@@ -102,6 +93,8 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const toggleUserMenu = () => {
+    console.log("Toggle user menu clicked, current state:", isUserMenuOpen);
+    console.log("User data in toggle:", user);
     setIsUserMenuOpen(!isUserMenuOpen);
     setIsNotificationOpen(false);
   };
@@ -109,13 +102,6 @@ export const Header: React.FC<HeaderProps> = ({
   const toggleNotifications = () => {
     setIsNotificationOpen(!isNotificationOpen);
     setIsUserMenuOpen(false);
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
   };
 
   const getRoleLabel = () => {
@@ -153,32 +139,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      <div className="modern-header-center">
-        {/* Search Bar */}
-        <form className="modern-search-form" onSubmit={handleSearch}>
-          <div className="modern-search-input-wrapper">
-            <FaSearch className="modern-search-icon" />
-            <input
-              type="text"
-              className="modern-search-input"
-              placeholder="Search tickets, users, or knowledge base..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </form>
-      </div>
-
       <div className="modern-header-right">
-        {/* Theme Toggle */}
-        <button
-          className="modern-icon-btn"
-          onClick={toggleTheme}
-          title="Toggle Theme"
-        >
-          {themeName === "dark" ? <FaSun /> : <FaMoon />}
-        </button>
-
         {/* Notifications */}
         <div className="modern-notification-dropdown">
           <button
@@ -241,25 +202,33 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </div>
 
-        {/* User Menu */}
+        {/* User Name */}
+        <span className="modern-user-name-display">
+          {user?.firstName && user?.lastName
+            ? `${user.firstName} ${user.lastName}`
+            : user?.username || "User"}
+        </span>
+
+        {/* User Profile Photo */}
         <div className="modern-user-dropdown">
           <button
-            className="modern-user-btn"
+            className="modern-user-profile-btn"
             onClick={toggleUserMenu}
             aria-expanded={isUserMenuOpen}
           >
             <div className="modern-user-avatar">{getUserInitials()}</div>
-            <div className="modern-user-info">
-              <span className="modern-user-name">{getUserDisplayName()}</span>
-              <span className="modern-user-role">{getRoleLabel()}</span>
-            </div>
-            <FaChevronDown
-              className={`modern-chevron ${isUserMenuOpen ? "rotated" : ""}`}
-            />
           </button>
 
           {isUserMenuOpen && (
-            <div className="modern-dropdown-menu modern-user-menu">
+            <div
+              className="modern-dropdown-menu modern-user-menu"
+              style={{
+                backgroundColor: "#ffffff",
+                border: "1px solid #ccc",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                zIndex: 9999,
+              }}
+            >
               <div className="modern-dropdown-header">
                 <div className="modern-user-profile">
                   <div className="modern-user-avatar-large">
@@ -267,7 +236,7 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
                   <div>
                     <p className="modern-user-name">{getUserDisplayName()}</p>
-                    <p className="modern-user-email">{user?.email}</p>
+                    <p className="modern-user-role">{getRoleLabel()}</p>
                   </div>
                 </div>
               </div>
@@ -281,8 +250,7 @@ export const Header: React.FC<HeaderProps> = ({
                   setIsUserMenuOpen(false);
                 }}
               >
-                <FaUser />
-                <span>Profile Settings</span>
+                <span>My Account</span>
               </button>
 
               <button
@@ -292,8 +260,7 @@ export const Header: React.FC<HeaderProps> = ({
                   setIsUserMenuOpen(false);
                 }}
               >
-                <FaCog />
-                <span>Preferences</span>
+                <span>Change Password</span>
               </button>
 
               <div className="modern-dropdown-divider" />
@@ -302,8 +269,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className="modern-dropdown-item modern-logout-item"
                 onClick={handleLogout}
               >
-                <FaSignOutAlt />
-                <span>Sign Out</span>
+                <span>Logout</span>
               </button>
             </div>
           )}

@@ -33,7 +33,7 @@ import {
   watchTicket,
   unwatchTicket,
   printTicket,
-  exportTicket
+  exportTicket,
 } from "../../services/ticketActionsService";
 import type {
   Ticket,
@@ -145,10 +145,10 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
   const handleStatusUpdate = async (formData: Record<string, unknown>) => {
     try {
       setLoading(true);
-      const response = await updateStatus(
-        ticket.id,
-        { status: formData.status as TicketStatus, note: formData.note as string }
-      );
+      const response = await updateStatus(ticket.id, {
+        status: formData.status as TicketStatus,
+        note: formData.note as string,
+      });
 
       onTicketUpdate(response.data);
       addNotification({
@@ -220,14 +220,11 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
   const handleAddTimeEntry = async (formData: Record<string, unknown>) => {
     try {
       setLoading(true);
-      const response = await addTimeEntry(
-        ticket.id,
-        {
-          hours: formData.hours as number,
-          description: formData.description as string,
-          date: formData.date ? new Date(formData.date as string) : new Date()
-        }
-      );
+      const response = await addTimeEntry(ticket.id, {
+        hours: formData.hours as number,
+        description: formData.description as string,
+        date: formData.date ? new Date(formData.date as string) : new Date(),
+      });
 
       setTimeEntries((prev) => [...prev, response.data]);
       showNotification("success", "Time entry added successfully");
@@ -243,13 +240,10 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
   const handleCloseTicket = async (formData: Record<string, unknown>) => {
     try {
       setLoading(true);
-      const response = await closeTicket(
-        ticket.id,
-        {
-          resolution: formData.resolution as string,
-          satisfactionRating: formData.satisfactionRating as number
-        }
-      );
+      const response = await closeTicket(ticket.id, {
+        resolution: formData.resolution as string,
+        satisfactionRating: formData.satisfactionRating as number,
+      });
 
       onTicketUpdate(response.data);
       showNotification("success", "Ticket closed successfully");
@@ -291,10 +285,7 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
 
   const handleExport = async (format: "pdf" | "csv") => {
     try {
-      const response = await exportTicket(
-        ticket.id,
-        format
-      );
+      const response = await exportTicket(ticket.id, format);
       window.open(response.data.url, "_blank");
     } catch (error: unknown) {
       console.error("Failed to export ticket:", error);

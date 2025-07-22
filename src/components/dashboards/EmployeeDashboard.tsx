@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { getMyTickets, createTicket } from "../../services";
+import {
+  getMyTickets,
+  createTicket,
+  searchHelpdeskDepartments,
+  type HelpdeskDepartment,
+} from "../../services";
 import type { Ticket, Priority, TicketStatus } from "../../types";
 import "./EmployeeDashboard.css";
 
@@ -24,9 +29,12 @@ interface EmployeeDashboardProps {
   initialTab?: "my-tickets" | "create" | "knowledge";
 }
 
-export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab }) => {
+export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
+  initialTab,
+}) => {
   const { user } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [departments, setDepartments] = useState<HelpdeskDepartment[]>([]);
   const [ticketCounts, setTicketCounts] = useState<TicketCounts>({
     total: 0,
     open: 0,
@@ -78,9 +86,22 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
     }
   }, []);
 
+  const loadDepartments = useCallback(async () => {
+    try {
+      const response = await searchHelpdeskDepartments();
+      if (response.success && response.data) {
+        setDepartments(response.data);
+      }
+    } catch (error) {
+      console.error("Error loading departments:", error);
+      setDepartments([]);
+    }
+  }, []);
+
   useEffect(() => {
     loadTickets();
-  }, [loadTickets]);
+    loadDepartments();
+  }, [loadTickets, loadDepartments]);
 
   const handleTicketClick = (ticket: Ticket) => {
     // TODO: Implement ticket detail view or navigation
@@ -196,7 +217,9 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
       {/* Navigation Tabs */}
       <div className="actions-container">
         <button
-          className={`compact-btn ${activeTab === "my-tickets" ? "primary" : ""}`}
+          className={`compact-btn ${
+            activeTab === "my-tickets" ? "primary" : ""
+          }`}
           onClick={() => {
             setActiveTab("my-tickets");
             loadTickets();
@@ -267,13 +290,12 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
                 type="text"
                 value={createForm.title}
                 onChange={(e) => {
-                  setCreateForm({ ...createForm, title: e.target.value })
+                  setCreateForm({ ...createForm, title: e.target.value });
                   // setCreateForm((prev) => ({
                   //   ...prev,
                   //   title: e.target.value,
                   // }))
-                }
-                }
+                }}
                 required
                 className="compact-input"
               />
@@ -289,12 +311,11 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
                 className="compact-input"
               >
                 <option value="">Select Category</option>
-                <option value="hardware">Hardware</option>
-                <option value="software">Software</option>
-                <option value="network">Network</option>
-                <option value="security">Security</option>
-                <option value="access">Access</option>
-                <option value="other">Other</option>
+                {departments.map((dept) => (
+                  <option key={dept.id} value={dept.name.toLowerCase()}>
+                    {dept.name}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="compact-form-group">
@@ -327,7 +348,11 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
               />
             </div>
             <div className="actions-container">
-              <button type="submit" className="compact-btn primary" onSubmit={handleCreateTicket}>
+              <button
+                type="submit"
+                className="compact-btn primary"
+                onSubmit={handleCreateTicket}
+              >
                 Create Ticket
               </button>
               <button
@@ -446,12 +471,11 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
                   className="compact-input"
                 >
                   <option value="">Select Category</option>
-                  <option value="hardware">Hardware</option>
-                  <option value="software">Software</option>
-                  <option value="network">Network</option>
-                  <option value="security">Security</option>
-                  <option value="access">Access</option>
-                  <option value="other">Other</option>
+                  {departments.map((dept) => (
+                    <option key={dept.id} value={dept.name.toLowerCase()}>
+                      {dept.name}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="compact-form-group">

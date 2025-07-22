@@ -34,7 +34,7 @@ export async function getTickets(filters?: TicketFilters) {
 }
 
 export async function getTicketById(id: string) {
-  return apiClient.get(`${endpoint}/${id}`);
+  return apiClient.get(`${endpoint}/details/${id}`);
 }
 
 export async function createTicket(ticketData: Record<string, unknown>) {

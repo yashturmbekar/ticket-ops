@@ -48,6 +48,25 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
         currentPath += `/${pathname}`;
         const isLast = index === pathnames.length - 1;
 
+        // Special handling for ticket details - check if it's a ticket ID route
+        if (
+          pathnames[0] === "tickets" &&
+          pathnames.length === 2 &&
+          !isNaN(Number(pathname))
+        ) {
+          // This is a ticket details page, use the ticket code from session storage or custom prop
+          const storedTicketCode = sessionStorage.getItem(
+            `ticketCode_${pathname}`
+          );
+          const label = storedTicketCode || `Ticket ${pathname}`;
+          breadcrumbs.push({
+            label,
+            path: isLast ? undefined : currentPath,
+            isActive: isLast,
+          });
+          return;
+        }
+
         // Skip adding breadcrumb if it's the same as the previous one
         const label =
           routeMap[currentPath] ||

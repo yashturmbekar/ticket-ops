@@ -13,7 +13,7 @@ import { NotificationContainer } from "./components/common/NotificationContainer
 import AppLayout from "./components/layout/AppLayout";
 import { TicketsPage } from "./pages/TicketsPageNew";
 import { CreateTicketPage } from "./pages/CreateTicketPage";
-import TicketDetailsPage from "./pages/TicketDetailsPage";
+import TicketDetailsPageProfessional from "./pages/TicketDetailsPageProfessional";
 import { AssetsPage } from "./pages/AssetsPage.tsx";
 import { UsersPage } from "./pages/UsersPage.tsx";
 import { KnowledgePage } from "./pages/KnowledgePage.tsx";
@@ -113,7 +113,7 @@ const AppContent: React.FC = () => {
           element={
             <ProtectedRoute>
               <LayoutWrapper>
-                <TicketDetailsPage />
+                <TicketDetailsPageProfessional />
               </LayoutWrapper>
             </ProtectedRoute>
           }

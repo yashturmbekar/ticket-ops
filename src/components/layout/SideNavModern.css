@@ -34,11 +34,6 @@
   animation: fadeIn var(--transition-fast) ease-out forwards;
 }
 
-/* Sidebar Header */
-.modern-sidebar-header {
-  padding: var(--spacing-6);
-  border-bottom: 1px solid var(--color-border);
-}
 
 .modern-sidebar-brand {
   display: flex;
@@ -269,10 +264,7 @@
   text-transform: capitalize;
 }
 
-/* Collapsed States */
-.modern-sidebar.collapsed .modern-sidebar-header {
-  padding: var(--spacing-4);
-}
+
 
 .modern-sidebar.collapsed .modern-brand-content {
   display: none;

@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useAuth } from "../../hooks/useAuth";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   getMyTickets,
   createTicket,
@@ -21,7 +20,6 @@ interface CreateTicketForm {
   title: string;
   category: string;
   description: string;
-  priority: Priority;
   attachments: File[];
 }
 
@@ -32,9 +30,10 @@ interface EmployeeDashboardProps {
 export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
   initialTab,
 }) => {
-  const { user } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [departments, setDepartments] = useState<HelpdeskDepartment[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const modalFileInputRef = useRef<HTMLInputElement>(null);
   const [ticketCounts, setTicketCounts] = useState<TicketCounts>({
     total: 0,
     open: 0,
@@ -48,7 +47,6 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
     title: "",
     category: "",
     description: "",
-    priority: "medium",
     attachments: [],
   });
   const [activeTab, setActiveTab] = useState<
@@ -134,10 +132,9 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
       const response = await createTicket({
         title: createForm.title,
         description: createForm.description,
-        status: "RAISED",
         assignedDepartmentId: createForm.category, // Now contains the department ID
-        assignedToEmployeeId: user?.id || "",
         comment: createForm.description, // Using description as comment for now
+        attachments: createForm.attachments,
       });
 
       if (response) {
@@ -146,9 +143,15 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
           title: "",
           category: "",
           description: "",
-          priority: "medium",
           attachments: [],
         });
+        // Clear file inputs
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        if (modalFileInputRef.current) {
+          modalFileInputRef.current.value = "";
+        }
         loadTickets();
       }
     } catch (error) {
@@ -173,11 +176,11 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
 
   const getPriorityBadge = (priority: Priority) => {
     switch (priority) {
-      case "high":
+      case "HIGH":
         return <span className="compact-badge high">High</span>;
-      case "medium":
+      case "MEDIUM":
         return <span className="compact-badge medium">Medium</span>;
-      case "low":
+      case "LOW":
         return <span className="compact-badge low">Low</span>;
       default:
         return <span className="compact-badge">{priority}</span>;
@@ -187,6 +190,55 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
   const getDepartmentName = (categoryId: string) => {
     const department = departments.find((dept) => dept.id === categoryId);
     return department ? department.name : categoryId;
+  };
+
+  const getFilePreview = (file: File) => {
+    const isImage = file.type.startsWith("image/");
+
+    if (isImage) {
+      const url = URL.createObjectURL(file);
+      return (
+        <img
+          src={url}
+          alt={file.name}
+          className="file-preview-image"
+          onLoad={() => URL.revokeObjectURL(url)}
+        />
+      );
+    }
+
+    // File type icons
+    const getFileIcon = (type: string) => {
+      if (type.includes("pdf")) return "📄";
+      if (type.includes("word") || type.includes("document")) return "📝";
+      if (type.includes("excel") || type.includes("spreadsheet")) return "📊";
+      if (type.includes("powerpoint") || type.includes("presentation"))
+        return "📽️";
+      if (type.includes("video")) return "🎥";
+      if (type.includes("audio")) return "🎵";
+      if (
+        type.includes("zip") ||
+        type.includes("rar") ||
+        type.includes("archive")
+      )
+        return "📦";
+      if (type.includes("text")) return "📃";
+      return "📎";
+    };
+
+    return (
+      <div className="file-preview-icon">
+        <span className="file-icon">{getFileIcon(file.type)}</span>
+      </div>
+    );
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   if (loading) {
@@ -344,23 +396,6 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
               </select>
             </div>
             <div className="compact-form-group">
-              <label>Priority</label>
-              <select
-                value={createForm.priority}
-                onChange={(e) =>
-                  setCreateForm({
-                    ...createForm,
-                    priority: e.target.value as Priority,
-                  })
-                }
-                className="compact-input"
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </div>
-            <div className="compact-form-group">
               <label>Description</label>
               <textarea
                 value={createForm.description}
@@ -371,6 +406,59 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
                 rows={4}
                 className="compact-input"
               />
+            </div>
+            <div className="compact-form-group">
+              <label>Attachments</label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                onChange={(e) => {
+                  const files = Array.from(e.target.files || []);
+                  setCreateForm({ ...createForm, attachments: files });
+                }}
+                className="compact-input"
+                accept="*/*"
+              />
+              {createForm.attachments.length > 0 && (
+                <div className="attachment-list">
+                  <small>Selected files:</small>
+                  <div className="attachment-grid">
+                    {createForm.attachments.map((file, index) => (
+                      <div key={index} className="attachment-preview-item">
+                        <div className="file-preview-container">
+                          {getFilePreview(file)}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newAttachments =
+                                createForm.attachments.filter(
+                                  (_, i) => i !== index
+                                );
+                              setCreateForm({
+                                ...createForm,
+                                attachments: newAttachments,
+                              });
+                            }}
+                            className="remove-attachment-overlay"
+                            title="Remove file"
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <div className="file-info">
+                          <span className="file-name" title={file.name}>
+                            {file.name}
+                          </span>
+                          <span className="file-size">
+                            {formatFileSize(file.size)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="actions-container">
               <button
@@ -383,15 +471,17 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
               <button
                 type="button"
                 className="compact-btn"
-                onClick={() =>
+                onClick={() => {
                   setCreateForm({
                     title: "",
                     category: "",
                     description: "",
-                    priority: "medium",
                     attachments: [],
-                  })
-                }
+                  });
+                  if (fileInputRef.current) {
+                    fileInputRef.current.value = "";
+                  }
+                }}
               >
                 Reset
               </button>
@@ -504,23 +594,6 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
                 </select>
               </div>
               <div className="compact-form-group">
-                <label>Priority</label>
-                <select
-                  value={createForm.priority}
-                  onChange={(e) =>
-                    setCreateForm({
-                      ...createForm,
-                      priority: e.target.value as Priority,
-                    })
-                  }
-                  className="compact-input"
-                >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
-              </div>
-              <div className="compact-form-group">
                 <label>Description</label>
                 <textarea
                   value={createForm.description}
@@ -534,6 +607,59 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
                   rows={4}
                   className="compact-input"
                 />
+              </div>
+              <div className="compact-form-group">
+                <label>Attachments</label>
+                <input
+                  ref={modalFileInputRef}
+                  type="file"
+                  multiple
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    setCreateForm({ ...createForm, attachments: files });
+                  }}
+                  className="compact-input"
+                  accept="*/*"
+                />
+                {createForm.attachments.length > 0 && (
+                  <div className="attachment-list">
+                    <small>Selected files:</small>
+                    <div className="attachment-grid">
+                      {createForm.attachments.map((file, index) => (
+                        <div key={index} className="attachment-preview-item">
+                          <div className="file-preview-container">
+                            {getFilePreview(file)}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newAttachments =
+                                  createForm.attachments.filter(
+                                    (_, i) => i !== index
+                                  );
+                                setCreateForm({
+                                  ...createForm,
+                                  attachments: newAttachments,
+                                });
+                              }}
+                              className="remove-attachment-overlay"
+                              title="Remove file"
+                            >
+                              ×
+                            </button>
+                          </div>
+                          <div className="file-info">
+                            <span className="file-name" title={file.name}>
+                              {file.name}
+                            </span>
+                            <span className="file-size">
+                              {formatFileSize(file.size)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="actions-container">
                 <button type="submit" className="compact-btn primary">

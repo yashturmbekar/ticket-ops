@@ -65,13 +65,13 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
         // Calculate counts
         const counts: TicketCounts = {
           total: userTickets.length,
-          open: userTickets.filter((t: Ticket) => t.status === "open").length,
+          open: userTickets.filter((t: Ticket) => t.status === "RAISED").length,
           inProgress: userTickets.filter(
-            (t: Ticket) => t.status === "in_progress"
+            (t: Ticket) => t.status === "IN_PROGRESS"
           ).length,
-          resolved: userTickets.filter((t: Ticket) => t.status === "resolved")
+          resolved: userTickets.filter((t: Ticket) => t.status === "RESOLVED")
             .length,
-          pending: userTickets.filter((t: Ticket) => t.status === "pending")
+          pending: userTickets.filter((t: Ticket) => t.status === "PENDING_APPROVAL")
             .length,
         };
         setTicketCounts(counts);
@@ -82,13 +82,13 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
         // Calculate counts
         const counts: TicketCounts = {
           total: userTickets.length,
-          open: userTickets.filter((t: Ticket) => t.status === "open").length,
+          open: userTickets.filter((t: Ticket) => t.status === "RAISED").length,
           inProgress: userTickets.filter(
-            (t: Ticket) => t.status === "in_progress"
+            (t: Ticket) => t.status === "IN_PROGRESS"
           ).length,
-          resolved: userTickets.filter((t: Ticket) => t.status === "resolved")
+          resolved: userTickets.filter((t: Ticket) => t.status === "RAISED")
             .length,
-          pending: userTickets.filter((t: Ticket) => t.status === "pending")
+          pending: userTickets.filter((t: Ticket) => t.status === "PENDING_APPROVAL")
             .length,
         };
         setTicketCounts(counts);
@@ -185,13 +185,13 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
 
   const getStatusBadge = (status: TicketStatus) => {
     switch (status) {
-      case "open":
+      case "RAISED":
         return <span className="compact-badge open">Open</span>;
-      case "in_progress":
+      case "IN_PROGRESS":
         return <span className="compact-badge in-progress">In Progress</span>;
-      case "resolved":
+      case "RESOLVED":
         return <span className="compact-badge closed">Resolved</span>;
-      case "pending":
+      case "PENDING_APPROVAL":
         return <span className="compact-badge warning">Pending</span>;
       default:
         return <span className="compact-badge">{status}</span>;

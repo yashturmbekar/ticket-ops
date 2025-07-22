@@ -10,13 +10,14 @@ import {
   FaSun,
   FaChevronDown,
   FaTicketAlt,
+  FaPlus,
   FaAngleLeft,
   FaAngleRight,
 } from "react-icons/fa";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
 import { USER_ROLE_LABELS } from "../../constants/userRoles";
-import "./HeaderModern.css";
+import "./Header.css";
 import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
@@ -111,6 +112,10 @@ export const Header: React.FC<HeaderProps> = ({
     setIsUserMenuOpen(false);
   };
 
+  const handleCreateTicket = () => {
+    navigate("/tickets/create");
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -170,6 +175,16 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="modern-header-right">
+        {/* Quick Create Ticket */}
+        <button
+          className="modern-quick-action-btn"
+          onClick={handleCreateTicket}
+          title="Create New Ticket"
+        >
+          <FaPlus />
+          <span className="modern-btn-text">New Ticket</span>
+        </button>
+
         {/* Theme Toggle */}
         <button
           className="modern-icon-btn"

@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  FaTicketAlt, 
-  FaCheckCircle, 
-  FaExclamationTriangle, 
+import {
+  FaTicketAlt,
+  FaCheckCircle,
+  FaExclamationTriangle,
   FaClock,
   FaArrowUp,
   FaArrowDown,
   FaFilter,
-  FaPlus,
   FaUsers,
   FaChartLine,
   FaBolt,
   FaEye,
+  FaSpinner,
+  FaBan,
 } from "react-icons/fa";
 import type { Ticket, TicketStatus, Priority } from "../../types";
 import "../../styles/dashboardModern.css";
+import "../../styles/ticketsModern.css";
 
 interface DashboardStats {
   totalTickets: number;
@@ -64,55 +66,59 @@ export const AdminDashboard: React.FC = () => {
           {
             id: "T-001",
             title: "Email server not responding",
-            description: "Users unable to access email services. Multiple departments affected.",
+            description:
+              "Users unable to access email services. Multiple departments affected.",
             priority: "high" as Priority,
-            status: "open" as TicketStatus,
+            status: "RAISED" as TicketStatus,
             assignedTo: "John Smith",
             createdAt: new Date("2024-01-15T08:30:00"),
             updatedAt: new Date("2024-01-15T08:30:00"),
             createdBy: "user@company.com",
             category: "hardware",
             slaDeadline: new Date("2024-01-15T12:30:00"),
-            tags: [],
+            tags: ["urgent", "email", "server"],
             attachments: [],
             comments: [],
           },
           {
             id: "T-002",
             title: "Software installation request",
-            description: "Need Adobe Creative Suite installed on workstation for new designer.",
+            description:
+              "Need Adobe Creative Suite installed on workstation for new designer.",
             priority: "medium" as Priority,
-            status: "in_progress" as TicketStatus,
+            status: "IN_PROGRESS" as TicketStatus,
             assignedTo: "Jane Doe",
             createdAt: new Date("2024-01-15T09:15:00"),
             updatedAt: new Date("2024-01-15T09:15:00"),
             createdBy: "designer@company.com",
             category: "software",
             slaDeadline: new Date("2024-01-15T17:15:00"),
-            tags: [],
+            tags: ["software", "installation", "adobe"],
             attachments: [],
             comments: [],
           },
           {
             id: "T-003",
             title: "Network connectivity issues",
-            description: "Intermittent connection drops affecting productivity in Marketing dept.",
+            description:
+              "Intermittent connection drops affecting productivity in Marketing dept.",
             priority: "high" as Priority,
-            status: "open" as TicketStatus,
+            status: "RAISED" as TicketStatus,
             assignedTo: "Mike Wilson",
             createdAt: new Date("2024-01-15T10:00:00"),
             updatedAt: new Date("2024-01-15T10:00:00"),
             createdBy: "manager@company.com",
             category: "network",
             slaDeadline: new Date("2024-01-15T14:00:00"),
-            tags: [],
+            tags: ["network", "connectivity", "urgent"],
             attachments: [],
             comments: [],
           },
           {
             id: "T-004",
             title: "Password reset request",
-            description: "User unable to access account after multiple failed login attempts.",
+            description:
+              "User unable to access account after multiple failed login attempts.",
             priority: "low" as Priority,
             status: "resolved" as TicketStatus,
             assignedTo: "Sarah Johnson",
@@ -128,9 +134,10 @@ export const AdminDashboard: React.FC = () => {
           {
             id: "T-005",
             title: "Printer not working",
-            description: "Office printer showing error messages and not responding to print jobs.",
+            description:
+              "Office printer showing error messages and not responding to print jobs.",
             priority: "medium" as Priority,
-            status: "in_progress" as TicketStatus,
+            status: "IN_PROGRESS" as TicketStatus,
             assignedTo: "Tom Brown",
             createdAt: new Date("2024-01-15T11:20:00"),
             updatedAt: new Date("2024-01-15T11:45:00"),
@@ -144,9 +151,10 @@ export const AdminDashboard: React.FC = () => {
           {
             id: "T-006",
             title: "Database performance slow",
-            description: "Application queries taking longer than usual, affecting user experience.",
+            description:
+              "Application queries taking longer than usual, affecting user experience.",
             priority: "high" as Priority,
-            status: "open" as TicketStatus,
+            status: "RAISED" as TicketStatus,
             assignedTo: "Alex Chen",
             createdAt: new Date("2024-01-15T12:10:00"),
             updatedAt: new Date("2024-01-15T12:10:00"),
@@ -171,18 +179,38 @@ export const AdminDashboard: React.FC = () => {
     fetchDashboardData();
   }, []);
 
-  const getTicketPriorityClass = (priority: Priority): string => {
-    return priority;
+  const getPriorityClass = (priority: Priority): string => {
+    return priority.toLowerCase();
   };
 
-  const getTicketStatusClass = (status: TicketStatus): string => {
+  const getStatusClass = (status: TicketStatus): string => {
     return status;
+  };
+
+  const getStatusIcon = (status: TicketStatus) => {
+    switch (status) {
+      case "RAISED":
+        return <FaExclamationTriangle />;
+      case "IN_PROGRESS":
+        return <FaSpinner />;
+      case "PENDING_APPROVAL":
+        return <FaClock />;
+      case "RESOLVED":
+        return <FaCheckCircle />;
+      case "APPROVED":
+        return <FaCheckCircle />;
+      case "REJECTED":
+        return <FaBan />;
+      default:
+        return <FaTicketAlt />;
+    }
   };
 
   const getSLAStatus = (deadline: Date): { status: string; text: string } => {
     const now = new Date();
-    const hoursUntilDeadline = (deadline.getTime() - now.getTime()) / (1000 * 60 * 60);
-    
+    const hoursUntilDeadline =
+      (deadline.getTime() - now.getTime()) / (1000 * 60 * 60);
+
     if (hoursUntilDeadline < 0) {
       return { status: "critical", text: "Overdue" };
     } else if (hoursUntilDeadline < 2) {
@@ -194,8 +222,10 @@ export const AdminDashboard: React.FC = () => {
 
   const formatTimeAgo = (date: Date): string => {
     const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
+    const diffInMinutes = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60)
+    );
+
     if (diffInMinutes < 60) {
       return `${diffInMinutes}m ago`;
     } else if (diffInMinutes < 1440) {
@@ -206,7 +236,11 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const getInitials = (name: string): string => {
-    return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase();
+    return name
+      .split(" ")
+      .map((word) => word.charAt(0))
+      .join("")
+      .toUpperCase();
   };
 
   const handleTicketClick = (ticketId: string) => {
@@ -233,19 +267,12 @@ export const AdminDashboard: React.FC = () => {
           </p>
         </div>
         <div className="modern-dashboard-actions">
-          <button 
+          <button
             className="btn btn-secondary"
             onClick={() => navigate("/reports")}
           >
             <FaChartLine />
             <span>View Reports</span>
-          </button>
-          <button 
-            className="btn btn-primary"
-            onClick={() => navigate("/tickets/create")}
-          >
-            <FaPlus />
-            <span>Create Ticket</span>
           </button>
         </div>
       </div>
@@ -258,7 +285,9 @@ export const AdminDashboard: React.FC = () => {
               <FaTicketAlt />
             </div>
           </div>
-          <div className="modern-stat-value">{stats.totalTickets.toLocaleString()}</div>
+          <div className="modern-stat-value">
+            {stats.totalTickets.toLocaleString()}
+          </div>
           <div className="modern-stat-label">Total Tickets</div>
           <div className="modern-stat-change positive">
             <FaArrowUp />
@@ -273,7 +302,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
           <div className="modern-stat-value">{stats.openTickets}</div>
-          <div className="modern-stat-label">Open Tickets</div>
+          <div className="modern-stat-label">Raised Tickets</div>
           <div className="modern-stat-change neutral">
             <span>Active workload</span>
           </div>
@@ -285,7 +314,9 @@ export const AdminDashboard: React.FC = () => {
               <FaCheckCircle />
             </div>
           </div>
-          <div className="modern-stat-value">{stats.resolvedTickets.toLocaleString()}</div>
+          <div className="modern-stat-value">
+            {stats.resolvedTickets.toLocaleString()}
+          </div>
           <div className="modern-stat-label">Resolved Tickets</div>
           <div className="modern-stat-change positive">
             <FaArrowUp />
@@ -326,7 +357,9 @@ export const AdminDashboard: React.FC = () => {
               <FaUsers />
             </div>
           </div>
-          <div className="modern-stat-value">{stats.userSatisfaction.toFixed(1)}</div>
+          <div className="modern-stat-value">
+            {stats.userSatisfaction.toFixed(1)}
+          </div>
           <div className="modern-stat-label">User Satisfaction</div>
           <div className="modern-stat-change positive">
             <FaArrowUp />
@@ -344,7 +377,7 @@ export const AdminDashboard: React.FC = () => {
               <FaFilter />
               <span>Filter</span>
             </button>
-            <button 
+            <button
               className="btn btn-secondary btn-sm"
               onClick={() => navigate("/tickets")}
             >
@@ -354,44 +387,74 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="modern-tickets-grid">
+        <div className="tickets-grid">
           {recentTickets.map((ticket) => {
             const slaStatus = getSLAStatus(ticket.slaDeadline);
-            
+
             return (
-              <div 
-                key={ticket.id} 
-                className="modern-ticket-tile"
+              <div
+                key={ticket.id}
+                className="ticket-tile"
                 onClick={() => handleTicketClick(ticket.id)}
               >
-                <div className="modern-ticket-header">
-                  <span className="modern-ticket-id">{ticket.id}</span>
-                  <span className={`modern-ticket-priority ${getTicketPriorityClass(ticket.priority)}`}>
+                <div className="ticket-tile-header">
+                  <span className="ticket-id">{ticket.id}</span>
+                  <span
+                    className={`ticket-priority ${getPriorityClass(
+                      ticket.priority
+                    )}`}
+                  >
                     {ticket.priority}
                   </span>
                 </div>
-                
-                <h3 className="modern-ticket-title">{ticket.title}</h3>
-                <p className="modern-ticket-description">{ticket.description}</p>
-                
-                <div className="modern-ticket-meta">
-                  <div className="modern-ticket-assignee">
-                    <div className="modern-ticket-avatar">
+
+                <h3 className="ticket-title">{ticket.title}</h3>
+                <p className="ticket-description">{ticket.description}</p>
+
+                <div className="ticket-meta">
+                  <div className="ticket-assignee">
+                    <div className="ticket-avatar">
                       {getInitials(ticket.assignedTo || "Unknown")}
                     </div>
                     <span>{ticket.assignedTo}</span>
                   </div>
-                  <span className="modern-ticket-date">
+                  <span className="ticket-date">
                     {formatTimeAgo(ticket.createdAt)}
                   </span>
                 </div>
-                
-                <div className="modern-ticket-footer">
-                  <span className={`modern-ticket-status ${getTicketStatusClass(ticket.status)}`}>
-                    {ticket.status.replace('_', ' ')}
-                  </span>
-                  <div className="modern-ticket-sla">
-                    <div className={`modern-sla-indicator ${slaStatus.status}`}></div>
+
+                <div className="ticket-tags">
+                  {ticket.tags.slice(0, 3).map((tag) => (
+                    <span key={tag} className="ticket-tag">
+                      {tag}
+                    </span>
+                  ))}
+                  {ticket.tags.length > 3 && (
+                    <span className="ticket-tag-more">
+                      +{ticket.tags.length - 3}
+                    </span>
+                  )}
+                </div>
+
+                <div className="ticket-footer">
+                  <div className="ticket-status-container">
+                    <div
+                      className={`ticket-status-icon ${getStatusClass(
+                        ticket.status
+                      )}`}
+                    >
+                      {getStatusIcon(ticket.status)}
+                    </div>
+                    <span
+                      className={`ticket-status ${getStatusClass(
+                        ticket.status
+                      )}`}
+                    >
+                      {ticket.status.replace("_", " ")}
+                    </span>
+                  </div>
+                  <div className="ticket-sla">
+                    <div className={`sla-indicator ${slaStatus.status}`}></div>
                     <span>{slaStatus.text}</span>
                   </div>
                 </div>

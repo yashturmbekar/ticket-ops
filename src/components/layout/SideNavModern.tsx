@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { 
+import {
   FaTachometerAlt,
   FaTicketAlt,
   FaLaptop,
@@ -11,8 +11,6 @@ import {
   FaCog,
   FaBuilding,
   FaShieldAlt,
-  FaAngleLeft,
-  FaAngleRight,
 } from "react-icons/fa";
 import { useAuth } from "../../hooks/useAuth";
 import { UserRole } from "../../types";
@@ -121,15 +119,14 @@ const SideNav: React.FC<SideNavProps> = ({
     <>
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
-        <div 
-          className="modern-sidebar-overlay"
-          onClick={onMobileMenuToggle}
-        />
+        <div className="modern-sidebar-overlay" onClick={onMobileMenuToggle} />
       )}
 
       {/* Sidebar */}
-      <nav 
-        className={`modern-sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobileMenuOpen ? 'mobile-open' : ''}`}
+      <nav
+        className={`modern-sidebar ${isCollapsed ? "collapsed" : ""} ${
+          isMobileMenuOpen ? "mobile-open" : ""
+        }`}
       >
         {/* Sidebar Header */}
         <div className="modern-sidebar-header">
@@ -153,7 +150,9 @@ const SideNav: React.FC<SideNavProps> = ({
               <li key={item.id} className="modern-nav-item">
                 <Link
                   to={item.path}
-                  className={`modern-nav-link ${isActive(item.path) ? 'active' : ''}`}
+                  className={`modern-nav-link ${
+                    isActive(item.path) ? "active" : ""
+                  }`}
                   onClick={() => {
                     if (isMobileMenuOpen && onMobileMenuToggle) {
                       onMobileMenuToggle();
@@ -161,10 +160,8 @@ const SideNav: React.FC<SideNavProps> = ({
                   }}
                   title={isCollapsed ? item.label : undefined}
                 >
-                  <div className="modern-nav-icon">
-                    {item.icon}
-                  </div>
-                  
+                  <div className="modern-nav-icon">{item.icon}</div>
+
                   {!isCollapsed && (
                     <>
                       <span className="modern-nav-label">{item.label}</span>
@@ -173,9 +170,11 @@ const SideNav: React.FC<SideNavProps> = ({
                       )}
                     </>
                   )}
-                  
+
                   {isCollapsed && item.badge && (
-                    <span className="modern-nav-badge-collapsed">{item.badge}</span>
+                    <span className="modern-nav-badge-collapsed">
+                      {item.badge}
+                    </span>
                   )}
                 </Link>
               </li>
@@ -188,11 +187,13 @@ const SideNav: React.FC<SideNavProps> = ({
           {!isCollapsed && user && (
             <div className="modern-user-card">
               <div className="modern-user-avatar">
-                {user.firstName?.charAt(0) || user.username?.charAt(0) || 'U'}
+                {user.firstName?.charAt(0) || user.username?.charAt(0) || "U"}
               </div>
               <div className="modern-user-info">
                 <p className="modern-user-name">
-                  {user.firstName ? `${user.firstName} ${user.lastName}` : user.username}
+                  {user.firstName
+                    ? `${user.firstName} ${user.lastName}`
+                    : user.username}
                 </p>
                 <p className="modern-user-role">{user.role}</p>
               </div>

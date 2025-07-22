@@ -275,12 +275,12 @@ export const UserRole = {
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
 export const TicketStatus = {
-  OPEN: "open",
-  IN_PROGRESS: "in_progress",
-  PENDING: "pending",
-  RESOLVED: "resolved",
-  CLOSED: "closed",
-  CANCELLED: "cancelled",
+  RAISED: "RAISED",
+  IN_PROGRESS: "IN_PROGRESS",
+  PENDING_APPROVAL: "PENDING_APPROVAL",
+  RESOLVED: "RESOLVED",
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
 } as const;
 
 export type TicketStatus = (typeof TicketStatus)[keyof typeof TicketStatus];

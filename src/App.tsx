@@ -11,7 +11,8 @@ import { NotificationProvider } from "./contexts/NotificationContext";
 import { LoginPage } from "./components/auth";
 import { NotificationContainer } from "./components/common/NotificationContainer";
 import AppLayout from "./components/layout/AppLayout";
-import { TicketsPage } from "./pages/TicketsPage.tsx";
+import { TicketsPage } from "./pages/TicketsPageNew";
+import { CreateTicketPage } from "./pages/CreateTicketPage";
 import { AssetsPage } from "./pages/AssetsPage.tsx";
 import { UsersPage } from "./pages/UsersPage.tsx";
 import { KnowledgePage } from "./pages/KnowledgePage.tsx";
@@ -91,6 +92,16 @@ const AppContent: React.FC = () => {
             <ProtectedRoute>
               <LayoutWrapper>
                 <TicketsPage />
+              </LayoutWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tickets/create"
+          element={
+            <ProtectedRoute>
+              <LayoutWrapper>
+                <CreateTicketPage />
               </LayoutWrapper>
             </ProtectedRoute>
           }

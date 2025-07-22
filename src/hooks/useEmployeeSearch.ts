@@ -41,7 +41,7 @@ function debounceString(fn: (query: string) => void, delay: number) {
 }
 
 export function useEmployeeSearch({
-  endpoint = "api/searchemployees?page=0&size=10&sort=lastModifiedDate,desc",
+  endpoint = "/api/searchemployees?page=0&size=10&sort=lastModifiedDate,desc",
   debounceMs = 300,
   params = { isactive: true } as Record<string, unknown>,
 }: {

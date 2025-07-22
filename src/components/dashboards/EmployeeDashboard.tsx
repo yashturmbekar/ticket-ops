@@ -135,7 +135,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
         title: createForm.title,
         description: createForm.description,
         status: "RAISED",
-        assignedDepartmentId: user?.department || "",
+        assignedDepartmentId: createForm.category, // Now contains the department ID
         assignedToEmployeeId: user?.id || "",
         comment: createForm.description, // Using description as comment for now
       });
@@ -182,6 +182,11 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
       default:
         return <span className="compact-badge">{priority}</span>;
     }
+  };
+
+  const getDepartmentName = (categoryId: string) => {
+    const department = departments.find((dept) => dept.id === categoryId);
+    return department ? department.name : categoryId;
   };
 
   if (loading) {
@@ -285,7 +290,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
                 <tr key={ticket.id} onClick={() => handleTicketClick(ticket)}>
                   <td>#{ticket.id.slice(0, 8)}</td>
                   <td>{ticket.title}</td>
-                  <td>{ticket.category}</td>
+                  <td>{getDepartmentName(ticket.category)}</td>
                   <td>{getPriorityBadge(ticket.priority)}</td>
                   <td>{getStatusBadge(ticket.status)}</td>
                   <td>{new Date(ticket.createdAt).toLocaleDateString()}</td>
@@ -332,7 +337,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
               >
                 <option value="">Select Category</option>
                 {departments.map((dept) => (
-                  <option key={dept.id} value={dept.name.toLowerCase()}>
+                  <option key={dept.id} value={dept.id}>
                     {dept.name}
                   </option>
                 ))}
@@ -492,7 +497,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
                 >
                   <option value="">Select Category</option>
                   {departments.map((dept) => (
-                    <option key={dept.id} value={dept.name.toLowerCase()}>
+                    <option key={dept.id} value={dept.id}>
                       {dept.name}
                     </option>
                   ))}

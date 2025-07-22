@@ -56,7 +56,7 @@ export const ManagerDashboard: React.FC = () => {
         // Calculate metrics
         const totalTickets = teamTickets.length;
         const openTickets = teamTickets.filter(
-          (t: Ticket) => t.status === "open"
+          (t: Ticket) => t.status === "RAISED"
         ).length;
         const slaBreaches = teamTickets.filter(
           (t: Ticket) => t.slaDeadline && new Date(t.slaDeadline) < new Date()
@@ -122,12 +122,18 @@ export const ManagerDashboard: React.FC = () => {
 
   const getStatusBadge = (status: TicketStatus) => {
     switch (status) {
-      case "open":
-        return <span className="compact-badge open">Open</span>;
-      case "in_progress":
+      case "RAISED":
+        return <span className="compact-badge open">Raised</span>;
+      case "IN_PROGRESS":
         return <span className="compact-badge in-progress">In Progress</span>;
-      case "resolved":
+      case "RESOLVED":
         return <span className="compact-badge closed">Resolved</span>;
+      case "APPROVED":
+        return <span className="compact-badge closed">Approved</span>;
+      case "REJECTED":
+        return <span className="compact-badge rejected">Rejected</span>;
+      case "PENDING_APPROVAL":
+        return <span className="compact-badge pending">Pending Approval</span>;
       default:
         return <span className="compact-badge">{status}</span>;
     }

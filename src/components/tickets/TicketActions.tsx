@@ -345,16 +345,18 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
 
   const getStatusColor = (status: TicketStatus): string => {
     switch (status) {
-      case "open":
+      case "RAISED":
         return "#dc3545";
-      case "in_progress":
+      case "IN_PROGRESS":
         return "#007bff";
-      case "pending":
+      case "PENDING_APPROVAL":
         return "#ffc107";
-      case "resolved":
+      case "RESOLVED":
         return "#28a745";
-      case "closed":
-        return "#6c757d";
+      case "APPROVED":
+        return "#28a745";
+      case "REJECTED":
+        return "#dc3545";
       default:
         return "#6c757d";
     }
@@ -505,7 +507,7 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
           >
             Log Time
           </Button>
-          {ticket.status !== "closed" && (
+          {ticket.status !== "RESOLVED" && ticket.status !== "APPROVED" && (
             <Button
               variant="success"
               size="sm"
@@ -696,10 +698,12 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
               name="status"
               required
               options={[
-                { value: "open", label: "Open" },
-                { value: "in_progress", label: "In Progress" },
-                { value: "pending", label: "Pending" },
-                { value: "resolved", label: "Resolved" },
+                { value: "RAISED", label: "Raised" },
+                { value: "IN_PROGRESS", label: "In Progress" },
+                { value: "PENDING_APPROVAL", label: "Pending Approval" },
+                { value: "RESOLVED", label: "Resolved" },
+                { value: "APPROVED", label: "Approved" },
+                { value: "REJECTED", label: "Rejected" },
               ]}
             />
           </FormField>

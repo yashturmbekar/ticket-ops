@@ -11,8 +11,6 @@ import {
   FaCog,
   FaBuilding,
   FaShieldAlt,
-  FaAngleLeft,
-  FaAngleRight,
 } from "react-icons/fa";
 import { useAuth } from "../../hooks/useAuth";
 import { UserRole } from "../../types";

@@ -13,6 +13,12 @@ import {
   FaBan,
 } from "react-icons/fa";
 import type { Ticket, TicketStatus, Priority } from "../types";
+
+// Extended ticket type for displaying API data
+type DisplayTicket = Ticket & { ticketCode?: string };
+import { searchTickets } from "../services/ticketService";
+import { useNotifications } from "../hooks/useNotifications";
+import { transformApiTicketsToTickets } from "../utils/apiTransforms";
 import "../styles/ticketsModern.css";
 
 interface TicketsFilter {
@@ -25,6 +31,7 @@ interface TicketsFilter {
 
 export const TicketsPage: React.FC = () => {
   const navigate = useNavigate();
+  const { addNotification } = useNotifications();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
@@ -43,128 +50,51 @@ export const TicketsPage: React.FC = () => {
       try {
         setLoading(true);
 
-        // Mock data - replace with actual API call
-        const mockTickets: Ticket[] = [
-          {
-            id: "T-001",
-            title: "Unable to access company email",
-            description:
-              "Email client showing authentication errors since this morning. Unable to send or receive emails.",
-            priority: "HIGH" as Priority,
-            status: "RAISED" as TicketStatus,
-            assignedTo: "Sarah Johnson",
-            createdAt: new Date("2024-01-15T09:30:00"),
-            updatedAt: new Date("2024-01-15T09:30:00"),
-            createdBy: "john.doe@company.com",
-            category: "email",
-            slaDeadline: new Date("2024-01-15T17:30:00"),
-            tags: ["email", "authentication", "urgent"],
-            attachments: [],
-            comments: [],
-            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
-          },
-          {
-            id: "T-002",
-            title: "Printer not responding in conference room",
-            description:
-              "Main conference room printer showing offline status. Unable to print documents for client meetings.",
-            priority: "MEDIUM" as Priority,
-            status: "IN_PROGRESS" as TicketStatus,
-            assignedTo: "Tom Brown",
-            createdAt: new Date("2024-01-15T08:45:00"),
-            updatedAt: new Date("2024-01-15T11:20:00"),
-            createdBy: "jane.smith@company.com",
-            category: "printer",
-            slaDeadline: new Date("2024-01-16T08:45:00"),
-            tags: ["printer", "conference-room"],
-            attachments: [],
-            comments: [],
-            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
-          },
-          {
-            id: "T-003",
-            title: "Software installation request - Adobe Creative Suite",
-            description:
-              "Need Adobe Creative Suite installed on marketing team workstations for upcoming campaign work.",
-            priority: "LOW" as Priority,
-            status: "PENDING_APPROVAL" as TicketStatus,
-            assignedTo: "Mike Wilson",
-            createdAt: new Date("2024-01-14T14:20:00"),
-            updatedAt: new Date("2024-01-15T09:10:00"),
-            createdBy: "marketing@company.com",
-            category: "software",
-            slaDeadline: new Date("2024-01-17T14:20:00"),
-            tags: ["software", "installation", "marketing"],
-            attachments: [],
-            comments: [],
-            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
-          },
-          {
-            id: "T-004",
-            title: "Critical: Database server performance issues",
-            description:
-              "Production database experiencing severe performance degradation. Query response times increased by 300%.",
-            priority: "CRITICAL" as Priority,
-            status: "IN_PROGRESS" as TicketStatus,
-            assignedTo: "Database Team",
-            createdAt: new Date("2024-01-15T06:15:00"),
-            updatedAt: new Date("2024-01-15T12:30:00"),
-            createdBy: "monitoring@company.com",
-            category: "software",
-            slaDeadline: new Date("2024-01-15T10:15:00"),
-            tags: ["database", "performance", "critical"],
-            attachments: [],
-            comments: [],
-            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
-          },
-          {
-            id: "T-005",
-            title: "New employee laptop setup",
-            description:
-              "Setup and configure laptop for new marketing team member starting next week.",
-            priority: "MEDIUM" as Priority,
-            status: "RESOLVED" as TicketStatus,
-            assignedTo: "Jane Doe",
-            createdAt: new Date("2024-01-13T11:00:00"),
-            updatedAt: new Date("2024-01-14T16:45:00"),
-            createdBy: "hr@company.com",
-            category: "hardware",
-            slaDeadline: new Date("2024-01-15T11:00:00"),
-            tags: ["hardware", "setup", "new-employee"],
-            attachments: [],
-            comments: [],
-            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
-          },
-          {
-            id: "T-006",
-            title: "Wi-Fi connectivity issues in Building B",
-            description:
-              "Multiple users reporting intermittent Wi-Fi disconnections on the 3rd floor of Building B.",
-            priority: "HIGH" as Priority,
-            status: "RAISED" as TicketStatus,
-            assignedTo: "Network Team",
-            createdAt: new Date("2024-01-15T10:30:00"),
-            updatedAt: new Date("2024-01-15T10:30:00"),
-            createdBy: "facilities@company.com",
-            category: "network",
-            slaDeadline: new Date("2024-01-15T18:30:00"),
-            tags: ["network", "wifi", "building-b"],
-            attachments: [],
-            comments: [],
-            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
-          },
-        ];
+        // Prepare search criteria for real API
+        const searchCriteria: Record<string, unknown> = {};
 
-        setTickets(mockTickets);
-      } catch (error) {
-        console.error("Error fetching tickets:", error);
+        // Add filters to search criteria
+        if (filters.status) {
+          searchCriteria.status = filters.status;
+        }
+        if (filters.priority) {
+          searchCriteria.priority = filters.priority;
+        }
+        if (filters.category) {
+          searchCriteria.category = filters.category;
+        }
+        if (filters.assignee) {
+          searchCriteria.assignedTo = filters.assignee;
+        }
+        if (filters.search) {
+          searchCriteria.search = filters.search;
+        }
+
+        // Call the actual API
+        const response = await searchTickets(searchCriteria, 0, 50, "id,desc");
+
+        // Extract tickets from response - API returns 'items' array
+        const apiTickets = response.data?.items || response.items || [];
+
+        // Transform API response to internal format
+        const transformedTickets = transformApiTicketsToTickets(apiTickets);
+        setTickets(transformedTickets);
+      } catch (error: unknown) {
+        console.error("Error loading tickets:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error occurred";
+        addNotification({
+          type: "error",
+          title: "Failed to Load Tickets",
+          message: `Failed to load tickets: ${errorMessage}`,
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchTickets();
-  }, [filters]);
+  }, [filters, addNotification]);
 
   const getStatusIcon = (status: TicketStatus) => {
     switch (status) {
@@ -250,36 +180,8 @@ export const TicketsPage: React.FC = () => {
     }
   };
 
-  const getFilteredTickets = () => {
-    return tickets.filter((ticket) => {
-      const matchesSearch =
-        ticket.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-        ticket.description
-          .toLowerCase()
-          .includes(filters.search.toLowerCase()) ||
-        ticket.id.toLowerCase().includes(filters.search.toLowerCase());
-      const matchesStatus = !filters.status || ticket.status === filters.status;
-      const matchesPriority =
-        !filters.priority || ticket.priority === filters.priority;
-      const matchesCategory =
-        !filters.category || ticket.assignedDepartmentId === filters.category;
-      const matchesAssignee =
-        !filters.assignee ||
-        ticket.assignedTo
-          ?.toLowerCase()
-          .includes(filters.assignee.toLowerCase());
-
-      return (
-        matchesSearch &&
-        matchesStatus &&
-        matchesPriority &&
-        matchesCategory &&
-        matchesAssignee
-      );
-    });
-  };
-
-  const filteredTickets = getFilteredTickets();
+  // Since we're filtering on the backend via API, no need for client-side filtering
+  const filteredTickets = tickets;
 
   if (loading) {
     return (
@@ -433,7 +335,10 @@ export const TicketsPage: React.FC = () => {
                       }}
                       className="ticket-checkbox"
                     />
-                    <span className="ticket-id">{ticket.id}</span>
+                    <span className="ticket-id">
+                      {(ticket as DisplayTicket).ticketCode ||
+                        ticket.id.slice(0, 8)}
+                    </span>
                     <span
                       className={`ticket-priority ${getPriorityClass(
                         ticket.priority
@@ -534,7 +439,10 @@ export const TicketsPage: React.FC = () => {
                           onChange={() => handleSelectTicket(ticket.id)}
                         />
                       </td>
-                      <td className="ticket-id-cell">{ticket.id}</td>
+                      <td className="ticket-id-cell">
+                        {(ticket as DisplayTicket).ticketCode ||
+                          ticket.id.slice(0, 8)}
+                      </td>
                       <td className="ticket-title-cell">
                         <div>
                           <h4>{ticket.title}</h4>

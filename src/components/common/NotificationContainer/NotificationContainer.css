@@ -195,10 +195,9 @@
     opacity: 1;
     transform: translateX(0) scale(1);
   }
-  to {
-    opacity: 0;
-    transform: translateX(100%) scale(0.95);
-  }
+to {
+  opacity: 0;
+  transform: translateX(100%) scale(0.95);
 }
 
 @keyframes pulse {

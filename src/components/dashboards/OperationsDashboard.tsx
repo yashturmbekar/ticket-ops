@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { getTickets, updateTicket } from "../../services";
+import { getTickets, updateTicket, getTicketStats } from "../../services";
+import { useNotifications } from "../../hooks";
+import { transformApiTicketsToTickets } from "../../utils/apiTransforms";
 import type { Ticket, TicketStatus, Priority } from "../../types";
 import "./OperationsDashboard.css";
 
@@ -17,6 +19,7 @@ interface OperationsMetrics {
 
 export const OperationsDashboard: React.FC = () => {
   const { user } = useAuth();
+  const { addNotification } = useNotifications();
   const [metrics, setMetrics] = useState<OperationsMetrics>({
     assignedTickets: 0,
     openTickets: 0,
@@ -37,20 +40,28 @@ export const OperationsDashboard: React.FC = () => {
     try {
       setLoading(true);
 
-      // Load tickets
-      const ticketsResponse = await getTickets({
-        page: 1,
-        limit: 100,
-      });
+      // Load tickets and stats in parallel
+      const [ticketsResponse, statsResponse] = await Promise.all([
+        getTickets({ page: 1, limit: 100 }),
+        getTicketStats(),
+      ]);
 
       if (ticketsResponse.success && ticketsResponse.data?.data) {
-        const allTickets = ticketsResponse.data.data;
+        const apiTickets = ticketsResponse.data.data;
+        // Transform API tickets to internal format if needed
+        const allTickets =
+          Array.isArray(apiTickets) &&
+          apiTickets.length > 0 &&
+          "ticketCode" in apiTickets[0]
+            ? transformApiTicketsToTickets(apiTickets)
+            : apiTickets;
+
         const userTickets = allTickets.filter(
           (t: Ticket) => t.assignedTo === user?.id
         );
         setTickets(userTickets);
 
-        // Calculate metrics
+        // Calculate real metrics from tickets
         const assignedTickets = userTickets.length;
         const openTickets = userTickets.filter(
           (t: Ticket) => t.status === "RAISED"
@@ -69,25 +80,35 @@ export const OperationsDashboard: React.FC = () => {
           (t: Ticket) => t.slaDeadline && new Date(t.slaDeadline) < new Date()
         ).length;
 
+        // Use stats API data where available
+        const apiStats = statsResponse.data || {};
+
         setMetrics({
           assignedTickets,
           openTickets,
           inProgressTickets,
           resolvedToday,
-          avgResolutionTime: 2.3, // Mock data
+          avgResolutionTime: apiStats.avgResolutionTime || 0,
           slaBreaches,
-          teamAvgResolutionTime: 2.8, // Mock data
-          performanceScore: 92, // Mock data
+          teamAvgResolutionTime: apiStats.teamAvgResolutionTime || 0,
+          performanceScore: apiStats.performanceScore || 0,
         });
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error loading operations dashboard:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      addNotification({
+        type: "error",
+        title: "Failed to Load Dashboard",
+        message: `Failed to load operations dashboard: ${errorMessage}`,
+      });
       // Ensure tickets is always an array even on error
       setTickets([]);
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, addNotification]);
 
   useEffect(() => {
     loadDashboardData();

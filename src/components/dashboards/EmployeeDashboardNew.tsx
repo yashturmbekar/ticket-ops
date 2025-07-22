@@ -13,6 +13,12 @@ import {
   FaBan,
 } from "react-icons/fa";
 import type { Ticket, TicketStatus, Priority } from "../../types";
+
+// Extended ticket type for displaying API data
+type DisplayTicket = Ticket & { ticketCode?: string };
+import { searchTickets } from "../../services";
+import { useNotifications } from "../../hooks";
+import { transformApiTicketsToTickets } from "../../utils/apiTransforms";
 import "../../styles/dashboardModern.css";
 import "../../styles/ticketsModern.css";
 
@@ -25,6 +31,7 @@ interface EmployeeStats {
 
 export const EmployeeDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { addNotification } = useNotifications();
   const [stats, setStats] = useState<EmployeeStats>({
     myTickets: 0,
     openTickets: 0,
@@ -39,75 +46,51 @@ export const EmployeeDashboard: React.FC = () => {
       try {
         setLoading(true);
 
-        // Mock data for demonstration
-        const mockStats = {
-          myTickets: 8,
-          openTickets: 3,
-          resolvedTickets: 5,
-          avgResponseTime: 4.2,
-        };
+        // Fetch real data from APIs
+        const [myTicketsResponse] = await Promise.all([
+          searchTickets({}, 0, 50, "createdDate,desc"), // Get user's tickets
+          //getTicketStats(),
+        ]);
 
-        const mockTickets: Ticket[] = [
-          {
-            id: "T-101",
-            title: "Password reset needed",
-            description:
-              "Unable to access my account after updating security settings.",
-            priority: "medium" as Priority,
-            status: "RAISED" as TicketStatus,
-            assignedTo: "Sarah Johnson",
-            createdAt: new Date("2024-01-15T09:30:00"),
-            updatedAt: new Date("2024-01-15T09:30:00"),
-            createdBy: "employee@company.com",
-            category: "access",
-            slaDeadline: new Date("2024-01-15T17:30:00"),
-            tags: [],
-            attachments: [],
-            comments: [],
-            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
-          },
-          {
-            id: "T-102",
-            title: "Laptop running slowly",
-            description:
-              "Computer has become very slow over the past week, affecting productivity.",
-            priority: "low" as Priority,
-            status: "IN_PROGRESS" as TicketStatus,
-            assignedTo: "Tom Brown",
-            createdAt: new Date("2024-01-14T14:20:00"),
-            updatedAt: new Date("2024-01-15T08:45:00"),
-            createdBy: "employee@company.com",
-            category: "hardware",
-            slaDeadline: new Date("2024-01-16T14:20:00"),
-            tags: [],
-            attachments: [],
-            comments: [],
-            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
-          },
-          {
-            id: "T-103",
-            title: "Software installation request",
-            description:
-              "Need Microsoft Project installed for upcoming planning tasks.",
-            priority: "medium" as Priority,
-            status: "RESOLVED" as TicketStatus,
-            assignedTo: "Jane Doe",
-            createdAt: new Date("2024-01-13T11:15:00"),
-            updatedAt: new Date("2024-01-14T16:30:00"),
-            createdBy: "employee@company.com",
-            category: "software",
-            slaDeadline: new Date("2024-01-15T11:15:00"),
-            tags: [],
-            attachments: [],
-            comments: [],
-                          assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+        // Process my tickets
 
-          },
-        ];
+        // Extract tickets from API response
+        const apiTickets = myTicketsResponse.items || [];
 
-        setStats(mockStats);
-        setMyTickets(mockTickets);
-      } catch (error) {
+        if (apiTickets.length > 0) {
+          // Transform API tickets to internal format
+          const transformedTickets = transformApiTicketsToTickets(apiTickets);
+          console.log("Transformed Tickets:", transformedTickets); // Debug log
+
+          setMyTickets(transformedTickets);
+
+          // Calculate stats from actual ticket data
+          const totalTickets = transformedTickets.length;
+          const openTickets = transformedTickets.filter(
+            (t: Ticket) => t.status === "RAISED" || t.status === "IN_PROGRESS"
+          ).length;
+          const resolvedTickets = transformedTickets.filter(
+            (t: Ticket) => t.status === "RESOLVED"
+          ).length;
+
+          setStats({
+            myTickets: totalTickets,
+            openTickets: openTickets,
+            resolvedTickets: resolvedTickets,
+            avgResponseTime: 0,
+          });
+        } else {
+          // No tickets found
+          console.log("No tickets found in API response");
+          setMyTickets([]);
+          setStats({
+            myTickets: 0,
+            openTickets: 0,
+            resolvedTickets: 0,
+            avgResponseTime: 0,
+          });
+        }
+      } catch (error: unknown) {
         console.error("Error fetching dashboard data:", error);
       } finally {
         setLoading(false);
@@ -115,7 +98,7 @@ export const EmployeeDashboard: React.FC = () => {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [addNotification]);
 
   const getPriorityClass = (priority: Priority): string => {
     return priority.toLowerCase();
@@ -290,7 +273,10 @@ export const EmployeeDashboard: React.FC = () => {
                 onClick={() => handleTicketClick(ticket.id)}
               >
                 <div className="ticket-tile-header">
-                  <span className="ticket-id">{ticket.id}</span>
+                  <span className="ticket-id">
+                    {(ticket as DisplayTicket).ticketCode ||
+                      ticket.id.slice(0, 8)}
+                  </span>
                   <span
                     className={`ticket-priority ${getPriorityClass(
                       ticket.priority

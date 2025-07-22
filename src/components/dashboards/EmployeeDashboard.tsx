@@ -20,7 +20,7 @@ interface CreateTicketForm {
   title: string;
   category: string;
   description: string;
-  attachments: any;
+  attachments: File[];
 }
 
 interface EmployeeDashboardProps {
@@ -147,7 +147,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
     try {
       // Convert files to byte arrays
       const byteArrays = await Promise.all(
-        createForm.attachments.map(async (file: any) => ({
+        createForm.attachments.map(async (file: File) => ({
           fileName: file.name,
           fileData: await fileToByteArray(file),
           fileSize: file.size,
@@ -450,7 +450,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
                 <div className="attachment-list">
                   <small>Selected files:</small>
                   <div className="attachment-grid">
-                    {createForm.attachments.map((file: any, index: number) => (
+                    {createForm.attachments.map((file: File, index: number) => (
                       <div key={index} className="attachment-preview-item">
                         <div className="file-preview-container">
                           {getFilePreview(file)}
@@ -652,7 +652,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
                     <small>Selected files:</small>
                     <div className="attachment-grid">
                       {createForm.attachments.map(
-                        (file: any, index: number) => (
+                        (file: File, index: number) => (
                           <div key={index} className="attachment-preview-item">
                             <div className="file-preview-container">
                               {getFilePreview(file)}

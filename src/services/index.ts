@@ -49,6 +49,7 @@ export {
   bulkCloseTickets,
   exportTickets,
   getTicketStats,
+  searchTickets,
 } from "./ticketService";
 
 export {

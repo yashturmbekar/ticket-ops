@@ -19,6 +19,32 @@ export interface User {
   updatedAt: Date;
 }
 
+// API Response interfaces to match backend structure
+export interface ApiTicketResponse {
+  id: string;
+  title: string;
+  description: string;
+  status: TicketStatus;
+  ticketCode: string;
+  priority: Priority;
+  raisedByEmployeeId: number;
+  raiserEmployeeDetails: {
+    employeeName: string;
+    id: number;
+    profilePic?: string;
+    profilePicContentType?: string;
+    designation: string;
+  };
+  assignedDepartmentId: string;
+  assignedToEmployeeId?: number;
+  isActive: boolean;
+  createdDate: string;
+  lastModifiedDate: string;
+  comment?: string;
+  ticketCommentDTO?: Record<string, unknown>;
+  attachments?: Record<string, unknown>[];
+}
+
 export interface Ticket {
   id: string;
   title: string;

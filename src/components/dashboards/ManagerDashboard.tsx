@@ -135,11 +135,11 @@ export const ManagerDashboard: React.FC = () => {
 
   const getPriorityBadge = (priority: Priority) => {
     switch (priority) {
-      case "high":
+      case "HIGH":
         return <span className="compact-badge high">High</span>;
-      case "medium":
+      case "MEDIUM":
         return <span className="compact-badge medium">Medium</span>;
-      case "low":
+      case "LOW":
         return <span className="compact-badge low">Low</span>;
       default:
         return <span className="compact-badge">{priority}</span>;

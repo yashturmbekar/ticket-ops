@@ -20,7 +20,7 @@ interface CreateTicketForm {
   title: string;
   category: string;
   description: string;
-  attachments: File[];
+  attachments: any;
 }
 
 interface EmployeeDashboardProps {
@@ -47,7 +47,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
     title: "",
     category: "",
     description: "",
-    attachments: [],
+    attachments: []
   });
   const [activeTab, setActiveTab] = useState<
     "my-tickets" | "create" | "knowledge"
@@ -126,15 +126,39 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
     console.log("Ticket clicked:", ticket);
   };
 
+  const fileToByteArray = async (file: File): Promise<number[]> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (reader.result instanceof ArrayBuffer) {
+          const bytes = Array.from(new Uint8Array(reader.result));
+          resolve(bytes);
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
   const handleCreateTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Convert files to byte arrays
+      const byteArrays = await Promise.all(
+        createForm.attachments.map(async (file:any) => ({
+          fileName: file.name,
+          fileData: await fileToByteArray(file),
+          fileSize: file.size,
+          fileType: file.type
+        }))
+      );
+
       const response = await createTicket({
         title: createForm.title,
         description: createForm.description,
         assignedDepartmentId: createForm.category, // Now contains the department ID
         comment: null, // Using description as comment for now
-        attachments: createForm.attachments,
+        attachments: byteArrays,
       });
 
       if (response) {
@@ -424,7 +448,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
                 <div className="attachment-list">
                   <small>Selected files:</small>
                   <div className="attachment-grid">
-                    {createForm.attachments.map((file, index) => (
+                    {createForm.attachments.map((file: any, index: number) => (
                       <div key={index} className="attachment-preview-item">
                         <div className="file-preview-container">
                           {getFilePreview(file)}
@@ -433,7 +457,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
                             onClick={() => {
                               const newAttachments =
                                 createForm.attachments.filter(
-                                  (_, i) => i !== index
+                                  (_: File, i: number) => i !== index
                                 );
                               setCreateForm({
                                 ...createForm,
@@ -625,7 +649,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
                   <div className="attachment-list">
                     <small>Selected files:</small>
                     <div className="attachment-grid">
-                      {createForm.attachments.map((file, index) => (
+                      {createForm.attachments.map((file: any, index: number) => (
                         <div key={index} className="attachment-preview-item">
                           <div className="file-preview-container">
                             {getFilePreview(file)}
@@ -634,7 +658,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
                               onClick={() => {
                                 const newAttachments =
                                   createForm.attachments.filter(
-                                    (_, i) => i !== index
+                                    (_: File, i: number) => i !== index
                                   );
                                 setCreateForm({
                                   ...createForm,

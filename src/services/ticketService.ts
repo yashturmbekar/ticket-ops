@@ -4,7 +4,7 @@ import apiClient from "./apiClient";
 export interface TicketFilters {
   status?: string;
   priority?: string;
-  assigned_department_id?: string;
+  assignedDepartmentId?: string;
   assignedTo?: string;
   createdBy?: string;
   search?: string;

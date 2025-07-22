@@ -64,6 +64,7 @@ export const EmployeeDashboard: React.FC = () => {
             tags: [],
             attachments: [],
             comments: [],
+            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
           },
           {
             id: "T-102",
@@ -81,6 +82,7 @@ export const EmployeeDashboard: React.FC = () => {
             tags: [],
             attachments: [],
             comments: [],
+            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
           },
           {
             id: "T-103",
@@ -98,6 +100,8 @@ export const EmployeeDashboard: React.FC = () => {
             tags: [],
             attachments: [],
             comments: [],
+                          assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
           },
         ];
 

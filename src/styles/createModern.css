@@ -4,12 +4,18 @@
 .create-page-header {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   margin-top: 0;
   margin-bottom: var(--spacing-4); /* Reduced from 8 */
   padding-top: 0;
   padding-bottom: var(--spacing-2); /* Reduced from 4 */
   border-bottom: 1px solid var(--color-border); /* Thinner border */
+}
+
+.create-page-actions {
+  display: flex;
+  gap: var(--spacing-3);
+  align-items: center;
 }
 
 .create-page-title-section {
@@ -585,6 +591,87 @@
   color: var(--color-text-primary);
 }
 
+/* Employee List Styles */
+.employee-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.employee-item {
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-4);
+}
+
+.employee-input-group {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: var(--spacing-3);
+  align-items: center;
+}
+
+.employee-id-field {
+  min-width: 0; /* Allow shrinking */
+}
+
+.employee-status-field {
+  width: 120px;
+}
+
+.employee-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-3);
+  padding: var(--spacing-2) var(--spacing-3);
+  background: rgba(var(--color-primary-rgb), 0.05);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.1);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.employee-info svg {
+  color: var(--color-primary);
+  font-size: 14px;
+}
+
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  background: var(--color-background);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-icon:hover:not(:disabled) {
+  background: var(--color-background-secondary);
+  border-color: var(--color-text-secondary);
+}
+
+.btn-icon.btn-danger {
+  color: var(--color-danger);
+  border-color: rgba(220, 53, 69, 0.3);
+}
+
+.btn-icon.btn-danger:hover:not(:disabled) {
+  background: rgba(220, 53, 69, 0.1);
+  border-color: var(--color-danger);
+}
+
+.btn-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Loading Spinner */
 .create-spinner {
   width: 16px;
@@ -626,5 +713,15 @@
   .btn {
     width: 100%;
     justify-content: center;
+  }
+
+  /* Employee list responsive */
+  .employee-input-group {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-2);
+  }
+
+  .employee-status-field {
+    width: 100%;
   }
 }

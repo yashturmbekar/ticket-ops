@@ -76,6 +76,8 @@ export const AdminDashboard: React.FC = () => {
             tags: [],
             attachments: [],
             comments: [],
+                        assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
           },
           {
             id: "T-002",
@@ -92,6 +94,8 @@ export const AdminDashboard: React.FC = () => {
             tags: [],
             attachments: [],
             comments: [],
+                        assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
           },
           {
             id: "T-003",
@@ -108,6 +112,8 @@ export const AdminDashboard: React.FC = () => {
             tags: [],
             attachments: [],
             comments: [],
+                        assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
           },
           {
             id: "T-004",
@@ -124,6 +130,8 @@ export const AdminDashboard: React.FC = () => {
             tags: [],
             attachments: [],
             comments: [],
+                        assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
           },
           {
             id: "T-005",
@@ -140,6 +148,8 @@ export const AdminDashboard: React.FC = () => {
             tags: [],
             attachments: [],
             comments: [],
+                        assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
           },
           {
             id: "T-006",
@@ -156,6 +166,8 @@ export const AdminDashboard: React.FC = () => {
             tags: [],
             attachments: [],
             comments: [],
+                        assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
           },
         ];
 

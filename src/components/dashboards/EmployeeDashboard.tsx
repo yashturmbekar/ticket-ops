@@ -368,7 +368,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
                 <tr key={ticket.id} onClick={() => handleTicketClick(ticket)}>
                   <td>#{ticket.id.slice(0, 8)}</td>
                   <td>{ticket.title}</td>
-                  <td>{getDepartmentName(ticket.assigned_department_id)}</td>
+                  <td>{getDepartmentName(ticket.assignedDepartmentId)}</td>
                   <td>{getPriorityBadge(ticket.priority)}</td>
                   <td>{getStatusBadge(ticket.status)}</td>
                   <td>{new Date(ticket.createdAt).toLocaleDateString()}</td>

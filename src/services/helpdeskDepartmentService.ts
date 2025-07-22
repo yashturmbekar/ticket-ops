@@ -1,5 +1,15 @@
-import type { HelpdeskDepartmentPayload } from "../features/departments/components/HelpdeskDepartmentCreateForm";
 import apiClient from "./apiClient";
+
+export interface HelpdeskDepartmentPayload {
+  department: {
+    name: string;
+    isActive: boolean;
+  };
+  employees: {
+    employeeId: number;
+    isActive: boolean;
+  }[];
+}
 
 export interface HelpdeskDepartment {
   id: string;

@@ -61,6 +61,8 @@ export const TicketsPage: React.FC = () => {
             tags: ["email", "authentication", "urgent"],
             attachments: [],
             comments: [],
+                        assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
           },
           {
             id: "T-002",
@@ -78,6 +80,8 @@ export const TicketsPage: React.FC = () => {
             tags: ["printer", "conference-room"],
             attachments: [],
             comments: [],
+                        assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
           },
           {
             id: "T-003",
@@ -95,6 +99,8 @@ export const TicketsPage: React.FC = () => {
             tags: ["software", "installation", "marketing"],
             attachments: [],
             comments: [],
+                        assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
           },
           {
             id: "T-004",
@@ -112,6 +118,7 @@ export const TicketsPage: React.FC = () => {
             tags: ["database", "performance", "critical"],
             attachments: [],
             comments: [],
+            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6"
           },
           {
             id: "T-005",
@@ -129,6 +136,7 @@ export const TicketsPage: React.FC = () => {
             tags: ["hardware", "setup", "new-employee"],
             attachments: [],
             comments: [],
+            assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
           },
           {
             id: "T-006",
@@ -146,6 +154,8 @@ export const TicketsPage: React.FC = () => {
             tags: ["network", "wifi", "building-b"],
             attachments: [],
             comments: [],
+            assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
           },
         ];
 
@@ -256,7 +266,7 @@ export const TicketsPage: React.FC = () => {
       const matchesPriority =
         !filters.priority || ticket.priority === filters.priority;
       const matchesCategory =
-        !filters.category || ticket.assigned_department_id === filters.category;
+        !filters.category || ticket.assignedDepartmentId === filters.category;
       const matchesAssignee =
         !filters.assignee ||
         ticket.assignedTo

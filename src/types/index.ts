@@ -25,7 +25,7 @@ export interface Ticket {
   description: string;
   status: TicketStatus;
   priority: Priority;
-  assigned_department_id: string;
+  assignedDepartmentId: string;
   createdBy: string;
   assignedTo?: string;
   createdAt: Date;
@@ -42,6 +42,7 @@ export interface Ticket {
   requesterEmail?: string;
   requesterPhone?: string;
   location?: string;
+  category?: Category;
   asset?: string; // Asset ID
 }
 

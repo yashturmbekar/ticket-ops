@@ -40,6 +40,8 @@ export const TicketsPage: React.FC = () => {
         tags: ["hardware", "urgent"],
         attachments: [],
         comments: [],
+                    assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
       },
       {
         id: "T-002",
@@ -56,6 +58,8 @@ export const TicketsPage: React.FC = () => {
         tags: ["account", "password"],
         attachments: [],
         comments: [],
+                    assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
       },
       {
         id: "T-003",
@@ -72,6 +76,8 @@ export const TicketsPage: React.FC = () => {
         tags: ["network", "connectivity"],
         attachments: [],
         comments: [],
+                    assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
       },
       {
         id: "T-004",
@@ -88,6 +94,8 @@ export const TicketsPage: React.FC = () => {
         tags: ["software", "installation"],
         attachments: [],
         comments: [],
+                    assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
       },
     ];
 
@@ -333,7 +341,7 @@ export const TicketsPage: React.FC = () => {
                       {ticket.priority}
                     </span>
                   </td>
-                  <td>{ticket.assigned_department_id}</td>
+                  <td>{ticket.assignedDepartmentId}</td>
                   <td>{ticket.assignedTo || "Unassigned"}</td>
                   <td>{formatDate(ticket.createdAt)}</td>
                   <td>{formatDate(ticket.slaDeadline)}</td>

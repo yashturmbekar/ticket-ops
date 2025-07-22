@@ -130,6 +130,8 @@ export const OperationsDashboard: React.FC = () => {
             tags: [],
             attachments: [],
             comments: [],
+            assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
           },
           {
             id: "T-302",
@@ -147,6 +149,7 @@ export const OperationsDashboard: React.FC = () => {
             tags: [],
             attachments: [],
             comments: [],
+            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6"
           },
         ];
 

@@ -79,6 +79,8 @@ export const AdminDashboard: React.FC = () => {
             tags: ["urgent", "email", "server"],
             attachments: [],
             comments: [],
+                        assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
           },
           {
             id: "T-002",
@@ -96,6 +98,8 @@ export const AdminDashboard: React.FC = () => {
             tags: ["software", "installation", "adobe"],
             attachments: [],
             comments: [],
+                        assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
           },
           {
             id: "T-003",
@@ -113,6 +117,8 @@ export const AdminDashboard: React.FC = () => {
             tags: ["network", "connectivity", "urgent"],
             attachments: [],
             comments: [],
+                        assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
           },
           {
             id: "T-004",
@@ -130,6 +136,8 @@ export const AdminDashboard: React.FC = () => {
             tags: [],
             attachments: [],
             comments: [],
+                        assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
           },
           {
             id: "T-005",
@@ -147,6 +155,8 @@ export const AdminDashboard: React.FC = () => {
             tags: [],
             attachments: [],
             comments: [],
+                        assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
           },
           {
             id: "T-006",
@@ -164,6 +174,8 @@ export const AdminDashboard: React.FC = () => {
             tags: [],
             attachments: [],
             comments: [],
+                        assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
+
           },
         ];
 

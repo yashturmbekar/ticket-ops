@@ -557,7 +557,7 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
                 </div>
                 <div className="detail-item">
                   <label>Category:</label>
-                  <p>{ticket.assigned_department_id}</p>
+                  <p>{ticket.assignedDepartmentId}</p>
                 </div>
                 <div className="detail-item">
                   <label>Created:</label>

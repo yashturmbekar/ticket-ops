@@ -256,7 +256,7 @@ export const TicketsPage: React.FC = () => {
       const matchesPriority =
         !filters.priority || ticket.priority === filters.priority;
       const matchesCategory =
-        !filters.category || ticket.category === filters.category;
+        !filters.category || ticket.assigned_department_id === filters.category;
       const matchesAssignee =
         !filters.assignee ||
         ticket.assignedTo

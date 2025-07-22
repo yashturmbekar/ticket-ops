@@ -25,7 +25,7 @@ export interface Ticket {
   description: string;
   status: TicketStatus;
   priority: Priority;
-  category: Category;
+  assigned_department_id: string;
   createdBy: string;
   assignedTo?: string;
   createdAt: Date;

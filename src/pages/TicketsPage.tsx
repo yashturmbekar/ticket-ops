@@ -333,7 +333,7 @@ export const TicketsPage: React.FC = () => {
                       {ticket.priority}
                     </span>
                   </td>
-                  <td>{ticket.category}</td>
+                  <td>{ticket.assigned_department_id}</td>
                   <td>{ticket.assignedTo || "Unassigned"}</td>
                   <td>{formatDate(ticket.createdAt)}</td>
                   <td>{formatDate(ticket.slaDeadline)}</td>

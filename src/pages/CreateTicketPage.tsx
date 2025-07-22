@@ -69,14 +69,10 @@ export const CreateTicketPage: React.FC = () => {
 
     if (!formData.title.trim()) {
       newErrors.title = "Title is required";
-    } else if (formData.title.length < 5) {
-      newErrors.title = "Title must be at least 5 characters";
     }
 
     if (!formData.description.trim()) {
       newErrors.description = "Description is required";
-    } else if (formData.description.length < 20) {
-      newErrors.description = "Description must be at least 20 characters";
     }
 
     if (!formData.category) {
@@ -101,10 +97,10 @@ export const CreateTicketPage: React.FC = () => {
       const ticketData = {
         title: formData.title,
         description: formData.description,
-        category: formData.category,
+        assignedDepartmentId: formData.category,
         requestedBy: user?.email || "",
         status: TicketStatus.RAISED,
-        priority: "MEDIUM", // Default priority
+        priority: "LOW", // Default priority
       };
 
       // Call the actual API to create ticket
@@ -251,7 +247,7 @@ export const CreateTicketPage: React.FC = () => {
                 }))
               }
               placeholder="Please describe the issue in detail. Include any error messages, steps you've tried, and when the problem started..."
-              rows={4}
+              rows={3}
               maxLength={1000}
             />
             {errors.description && (

@@ -47,7 +47,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
     title: "",
     category: "",
     description: "",
-    attachments: []
+    attachments: [],
   });
   const [activeTab, setActiveTab] = useState<
     "my-tickets" | "create" | "knowledge"
@@ -71,8 +71,9 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
           ).length,
           resolved: userTickets.filter((t: Ticket) => t.status === "RESOLVED")
             .length,
-          pending: userTickets.filter((t: Ticket) => t.status === "PENDING_APPROVAL")
-            .length,
+          pending: userTickets.filter(
+            (t: Ticket) => t.status === "PENDING_APPROVAL"
+          ).length,
         };
         setTicketCounts(counts);
       } else if (Array.isArray(response)) {
@@ -88,8 +89,9 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
           ).length,
           resolved: userTickets.filter((t: Ticket) => t.status === "RAISED")
             .length,
-          pending: userTickets.filter((t: Ticket) => t.status === "PENDING_APPROVAL")
-            .length,
+          pending: userTickets.filter(
+            (t: Ticket) => t.status === "PENDING_APPROVAL"
+          ).length,
         };
         setTicketCounts(counts);
       }
@@ -145,11 +147,11 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
     try {
       // Convert files to byte arrays
       const byteArrays = await Promise.all(
-        createForm.attachments.map(async (file:any) => ({
+        createForm.attachments.map(async (file: any) => ({
           fileName: file.name,
           fileData: await fileToByteArray(file),
           fileSize: file.size,
-          fileType: file.type
+          fileType: file.type,
         }))
       );
 
@@ -366,7 +368,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
                 <tr key={ticket.id} onClick={() => handleTicketClick(ticket)}>
                   <td>#{ticket.id.slice(0, 8)}</td>
                   <td>{ticket.title}</td>
-                  <td>{getDepartmentName(ticket.category)}</td>
+                  <td>{getDepartmentName(ticket.assigned_department_id)}</td>
                   <td>{getPriorityBadge(ticket.priority)}</td>
                   <td>{getStatusBadge(ticket.status)}</td>
                   <td>{new Date(ticket.createdAt).toLocaleDateString()}</td>
@@ -649,38 +651,40 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
                   <div className="attachment-list">
                     <small>Selected files:</small>
                     <div className="attachment-grid">
-                      {createForm.attachments.map((file: any, index: number) => (
-                        <div key={index} className="attachment-preview-item">
-                          <div className="file-preview-container">
-                            {getFilePreview(file)}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const newAttachments =
-                                  createForm.attachments.filter(
-                                    (_: File, i: number) => i !== index
-                                  );
-                                setCreateForm({
-                                  ...createForm,
-                                  attachments: newAttachments,
-                                });
-                              }}
-                              className="remove-attachment-overlay"
-                              title="Remove file"
-                            >
-                              ×
-                            </button>
+                      {createForm.attachments.map(
+                        (file: any, index: number) => (
+                          <div key={index} className="attachment-preview-item">
+                            <div className="file-preview-container">
+                              {getFilePreview(file)}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newAttachments =
+                                    createForm.attachments.filter(
+                                      (_: File, i: number) => i !== index
+                                    );
+                                  setCreateForm({
+                                    ...createForm,
+                                    attachments: newAttachments,
+                                  });
+                                }}
+                                className="remove-attachment-overlay"
+                                title="Remove file"
+                              >
+                                ×
+                              </button>
+                            </div>
+                            <div className="file-info">
+                              <span className="file-name" title={file.name}>
+                                {file.name}
+                              </span>
+                              <span className="file-size">
+                                {formatFileSize(file.size)}
+                              </span>
+                            </div>
                           </div>
-                          <div className="file-info">
-                            <span className="file-name" title={file.name}>
-                              {file.name}
-                            </span>
-                            <span className="file-size">
-                              {formatFileSize(file.size)}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
+                        )
+                      )}
                     </div>
                   </div>
                 )}

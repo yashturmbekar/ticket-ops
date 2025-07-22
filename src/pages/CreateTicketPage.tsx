@@ -87,6 +87,12 @@ export const CreateTicketPage: React.FC = () => {
     e.preventDefault();
 
     if (!validateForm()) {
+      addNotification({
+        type: "warning",
+        title: "⚠️ Form Validation Failed",
+        message:
+          "Please fill in all required fields before submitting your ticket.",
+      });
       return;
     }
 
@@ -123,8 +129,8 @@ export const CreateTicketPage: React.FC = () => {
             );
             addNotification({
               type: "warning",
-              title: "Attachment Upload Failed",
-              message: `Failed to upload ${file.name}. The ticket was created successfully.`,
+              title: "⚠️ Attachment Upload Warning",
+              message: `Failed to upload "${file.name}". Your ticket was created successfully, but you may need to attach this file later.`,
             });
           }
         }
@@ -133,8 +139,12 @@ export const CreateTicketPage: React.FC = () => {
       // Show success notification
       addNotification({
         type: "success",
-        title: "Ticket Created",
-        message: "Your support ticket has been created successfully.",
+        title: "🎫 Ticket Created Successfully!",
+        message: `Your support ticket "${
+          formData.title
+        }" has been created and assigned to the ${
+          categories.find((c) => c.id === formData.category)?.name || "selected"
+        } department.`,
       });
 
       // Navigate to tickets page on success
@@ -145,8 +155,9 @@ export const CreateTicketPage: React.FC = () => {
       // Show error notification
       addNotification({
         type: "error",
-        title: "Failed to Create Ticket",
-        message: "There was an error creating your ticket. Please try again.",
+        title: "❌ Failed to Create Ticket",
+        message:
+          "There was an error creating your support ticket. Please check your internet connection and try again.",
       });
     } finally {
       setLoading(false);
@@ -191,7 +202,7 @@ export const CreateTicketPage: React.FC = () => {
             <FaTicketAlt />
           </div>
           <div className="create-page-title-text">
-            <h1 className="create-page-title">Create New Ticket</h1>
+            <h1 className="create-page-title ">Create New Ticket</h1>
             <p className="create-page-subtitle">
               Report an issue or request assistance from the IT team
             </p>

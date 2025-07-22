@@ -64,6 +64,42 @@
   flex-shrink: 0;
 }
 
+.tickets-page-actions .btn {
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.tickets-page-actions .btn-secondary {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
+
+.tickets-page-actions .btn-secondary:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+.tickets-page-actions .btn-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.tickets-page-actions .btn-primary:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
 /* Toolbar */
 .tickets-toolbar {
   display: flex;

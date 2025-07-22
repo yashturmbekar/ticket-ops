@@ -86,6 +86,12 @@ export const DepartmentsCreatePage: React.FC = () => {
     e.preventDefault();
 
     if (!validateForm()) {
+      addNotification({
+        type: "warning",
+        title: "⚠️ Form Validation Failed",
+        message:
+          "Please provide a department name and ensure all employee selections are valid.",
+      });
       return;
     }
 
@@ -107,22 +113,46 @@ export const DepartmentsCreatePage: React.FC = () => {
 
       addNotification({
         type: "success",
-        title: "Department Created Successfully",
-        message: `Department "${formData.name}" has been created.`,
+        title: "🏢 Department Created Successfully!",
+        message: `Department "${formData.name}" has been created with ${
+          formData.employees.filter((emp) => emp.employeeId).length
+        } employee(s) assigned.`,
       });
 
       navigate("/departments");
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Failed to create department:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      addNotification({
-        type: "error",
-        title: "Failed to Create Department",
-        message:
-          errorMessage ||
-          "There was an error creating the department. Please try again.",
-      });
+
+      // Check for duplicate name error from backend
+      const errorResponse = error as {
+        response?: {
+          data?: { errorKey?: string; title?: string; message?: string };
+        };
+      };
+
+      if (
+        errorResponse?.response?.data?.errorKey === "duplicate_name" ||
+        errorResponse?.response?.data?.title?.includes(
+          "Department with the same name already exists"
+        )
+      ) {
+        addNotification({
+          type: "warning",
+          title: "⚠️ Department Name Already Exists",
+          message: `A department with the name "${formData.name}" already exists. Please choose a different name.`,
+        });
+      } else {
+        const errorMessage =
+          errorResponse?.response?.data?.message ||
+          (error instanceof Error ? error.message : "Unknown error occurred");
+        addNotification({
+          type: "error",
+          title: "❌ Failed to Create Department",
+          message:
+            errorMessage ||
+            "There was an error creating the department. Please check your input and try again.",
+        });
+      }
     } finally {
       setLoading(false);
     }

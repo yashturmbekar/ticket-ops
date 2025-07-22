@@ -175,7 +175,7 @@ const SideNav: React.FC<SideNavProps> = ({
               className="modern-footer-logo"
             />
             {!isCollapsed && (
-              <span className="modern-footer-text">Redfish ticket-ops</span>
+              <span className="modern-footer-text">Ticket-Ops</span>
             )}
           </div>
         </div>

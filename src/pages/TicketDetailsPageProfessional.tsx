@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { getTicketById, getTicketComments } from "../services/ticketService";
 import {
   FaUser,
@@ -21,8 +21,10 @@ import {
   FaFilePowerpoint,
   FaFile,
   FaSpinner,
+  FaTicketAlt,
 } from "react-icons/fa";
 import "../styles/ticketDetailsProfessional.css";
+import "../styles/createModern.css";
 
 // API Response interface matching the backend structure
 interface ApiTicketResponse {
@@ -414,6 +416,23 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
   return (
     <div className="ticket-details-page-professional">
+      {/* Page Header */}
+      <div className="create-page-header">
+        <div className="create-page-title-section">
+          <div className="create-page-icon">
+            <FaTicketAlt />
+          </div>
+          <div className="create-page-title-text">
+            <h1 className="create-page-title">Ticket Details</h1>
+            <p className="create-page-subtitle">
+              View and manage ticket information
+            </p>
+          </div>
+        </div>
+        <div className="create-page-actions">
+        </div>
+      </div>
+
       <div className="page-content">
         <div className="content-container">
           {/* Single Comprehensive Ticket Information Section */}
@@ -443,12 +462,12 @@ const TicketDetailsPageProfessional: React.FC = () => {
               {/* Simple Ticket Information Display */}
               <div className="simple-ticket-info">
                 <div className="ticket-code-simple">{ticket.ticketCode}</div>
-                
+
                 <div className="ticket-field title-field">
                   <span className="field-label">Title</span>
                   <span className="field-value">{ticket.title}</span>
                 </div>
-                
+
                 <div className="ticket-field">
                   <span className="field-label">Description</span>
                   <span className="field-value">{ticket.description}</span>
@@ -590,7 +609,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Attachments with Preview */}
               {ticket.attachments && ticket.attachments.length > 0 && (
                 <div className="attachments-section card-section">
@@ -626,7 +645,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
                   </div>
                 </div>
               )}
-              
+
               {/* Activity Timeline */}
               <div className="activity-section card-section">
                 <div className="activity-header">
@@ -680,7 +699,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
                   ))}
                 </div>
               </div>
-              
+
               {/* Add Comment Section */}
               <div className="comment-composer card-section">
                 <div className="composer-header">

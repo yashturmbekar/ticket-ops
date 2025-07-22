@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  FaBars,
-  FaBell,
-  FaTicketAlt,
-  FaAngleLeft,
-  FaAngleRight,
-} from "react-icons/fa";
+import { FaBars, FaBell, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import { useAuth } from "../../hooks/useAuth";
 import { USER_ROLE_LABELS } from "../../constants/userRoles";
 import "./HeaderModern.css";
@@ -134,8 +128,12 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Logo and brand */}
         <div className="modern-brand">
-          <FaTicketAlt className="modern-brand-icon" />
-          <span className="modern-brand-text">IT Helpdesk</span>
+          <img
+            src="/redfish-logo.svg"
+            alt="Redfish"
+            className="modern-brand-logo"
+          />
+          <span className="modern-brand-text">Ticket-Ops</span>
         </div>
       </div>
 

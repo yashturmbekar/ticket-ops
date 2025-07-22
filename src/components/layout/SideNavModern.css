@@ -59,6 +59,12 @@
   flex-shrink: 0;
 }
 
+.modern-brand-logo-header {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
 .modern-brand-content {
   min-width: 0;
   flex: 1;
@@ -193,6 +199,25 @@
   padding: var(--spacing-4) var(--spacing-6);
   border-top: 1px solid var(--color-border);
   background: var(--color-surface-secondary);
+}
+
+.modern-brand-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  justify-content: center;
+  padding: var(--spacing-3);
+}
+
+.modern-footer-logo {
+  height: 28px;
+  width: auto;
+}
+
+.modern-footer-text {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
 }
 
 .modern-user-card {

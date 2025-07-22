@@ -10,7 +10,6 @@ import {
   FaNetworkWired,
   FaCog,
   FaBuilding,
-  FaShieldAlt,
 } from "react-icons/fa";
 import { useAuth } from "../../hooks/useAuth";
 import { UserRole } from "../../types";
@@ -128,21 +127,6 @@ const SideNav: React.FC<SideNavProps> = ({
           isMobileMenuOpen ? "mobile-open" : ""
         }`}
       >
-        {/* Sidebar Header */}
-        <div className="modern-sidebar-header">
-          <div className="modern-sidebar-brand">
-            <div className="modern-brand-icon">
-              <FaShieldAlt />
-            </div>
-            {!isCollapsed && (
-              <div className="modern-brand-content">
-                <h3 className="modern-brand-title">IT Helpdesk</h3>
-                <p className="modern-brand-subtitle">Admin Panel</p>
-              </div>
-            )}
-          </div>
-        </div>
-
         {/* Navigation List */}
         <div className="modern-sidebar-content">
           <ul className="modern-nav-list">
@@ -184,21 +168,13 @@ const SideNav: React.FC<SideNavProps> = ({
 
         {/* Sidebar Footer */}
         <div className="modern-sidebar-footer">
-          {!isCollapsed && user && (
-            <div className="modern-user-card">
-              <div className="modern-user-avatar">
-                {user.firstName?.charAt(0) || user.username?.charAt(0) || "U"}
-              </div>
-              <div className="modern-user-info">
-                <p className="modern-user-name">
-                  {user.firstName
-                    ? `${user.firstName} ${user.lastName}`
-                    : user.username}
-                </p>
-                <p className="modern-user-role">{user.role}</p>
-              </div>
-            </div>
-          )}
+          <div className="modern-brand-footer">
+            <img
+              src="/redfish-logo.svg"
+              alt="Redfish"
+              className="modern-footer-logo"
+            />
+          </div>
         </div>
       </nav>
     </>

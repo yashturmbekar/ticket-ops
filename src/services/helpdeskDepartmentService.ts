@@ -4,10 +4,10 @@ import apiClient from "./apiClient";
 export interface HelpdeskDepartment {
   id: string;
   name: string;
-  description?: string;
   isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdDate: string;
+  lastModifiedDate: string;
+  organizationId: number;
 }
 
 export const createHelpdeskDepartment = async (
@@ -22,8 +22,8 @@ export const createHelpdeskDepartment = async (
 
 export const searchHelpdeskDepartments = async (query?: string) => {
   const params = query ? { search: query } : {};
-  const response = await apiClient.post("/helpdesk-departments/search", {
+  const response = await apiClient.get("/helpdesk-departments/all", {
     params,
   });
-  return response.data;
+  return response;
 };

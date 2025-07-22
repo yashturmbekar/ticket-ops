@@ -60,8 +60,25 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
       setLoading(true);
       const response = await getMyTickets();
 
-      if (response.success && response.data?.data) {
-        const userTickets = response.data.data;
+      if (response && response.data) {
+        const userTickets = response.data;
+        setTickets(userTickets);
+
+        // Calculate counts
+        const counts: TicketCounts = {
+          total: userTickets.length,
+          open: userTickets.filter((t: Ticket) => t.status === "open").length,
+          inProgress: userTickets.filter(
+            (t: Ticket) => t.status === "in_progress"
+          ).length,
+          resolved: userTickets.filter((t: Ticket) => t.status === "resolved")
+            .length,
+          pending: userTickets.filter((t: Ticket) => t.status === "pending")
+            .length,
+        };
+        setTicketCounts(counts);
+      } else if (Array.isArray(response)) {
+        const userTickets = response;
         setTickets(userTickets);
 
         // Calculate counts
@@ -89,7 +106,10 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
   const loadDepartments = useCallback(async () => {
     try {
       const response = await searchHelpdeskDepartments();
-      if (response.success && response.data) {
+      console.log("Departments response:", response);
+      if (response && Array.isArray(response)) {
+        setDepartments(response);
+      } else if (response && response.data && Array.isArray(response.data)) {
         setDepartments(response.data);
       }
     } catch (error) {
@@ -114,13 +134,13 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
       const response = await createTicket({
         title: createForm.title,
         description: createForm.description,
-        status: "PENDING_APPROVAL",
+        status: "RAISED",
         assignedDepartmentId: user?.department || "",
         assignedToEmployeeId: user?.id || "",
         comment: createForm.description, // Using description as comment for now
       });
 
-      if (response.success) {
+      if (response) {
         setShowCreateModal(false);
         setCreateForm({
           title: "",

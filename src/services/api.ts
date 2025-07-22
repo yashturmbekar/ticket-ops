@@ -1,7 +1,7 @@
 // Base API service configuration
 import { AUTH_TOKEN_KEY } from '../constants';
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://qa.redfishapp.com";
+const API_BASE_URL = 
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 export interface ApiResponse<T> {
   data: T;

@@ -133,7 +133,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
         title: createForm.title,
         description: createForm.description,
         assignedDepartmentId: createForm.category, // Now contains the department ID
-        comment: createForm.description, // Using description as comment for now
+        comment: null, // Using description as comment for now
         attachments: createForm.attachments,
       });
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { getTicketById, getTicketComments } from "../services/ticketService";
 import {
   FaUser,
@@ -429,8 +429,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
             </p>
           </div>
         </div>
-        <div className="create-page-actions">
-        </div>
+        <div className="create-page-actions"></div>
       </div>
 
       <div className="page-content">

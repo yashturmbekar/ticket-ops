@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
-import { API_TIMEOUT, UNAUTH_ROUTES } from "../constants";
+import { API_TIMEOUT, AUTH_TOKEN_KEY, UNAUTH_ROUTES } from "../constants";
 
 // Token helpers
 export function getToken(): string | null {
-  return localStorage.getItem("authToken");
+  return localStorage.getItem(AUTH_TOKEN_KEY);
 }
 
 export function removeToken(): void {
-  localStorage.removeItem("authToken");
+  localStorage.removeItem(AUTH_TOKEN_KEY);
 }
 
 const controllers: AbortController[] = [];

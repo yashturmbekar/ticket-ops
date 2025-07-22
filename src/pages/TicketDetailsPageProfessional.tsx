@@ -7,10 +7,7 @@ import {
   FaClock,
   FaExclamationTriangle,
   FaBuilding,
-  FaPhone,
-  FaEnvelope,
   FaUserTie,
-  FaEdit,
   FaPaperclip,
   FaDownload,
   FaTimes,
@@ -23,7 +20,6 @@ import {
   FaFileWord,
   FaFilePowerpoint,
   FaFile,
-  FaCheck,
   FaSpinner,
 } from "react-icons/fa";
 import "../styles/ticketDetailsProfessional.css";
@@ -36,18 +32,28 @@ interface ApiTicketResponse {
   status: string;
   ticketCode: string;
   priority: string;
-  raiserEmployeeDetails?: {
+  raisedByEmployeeDetails?: {
     employeeName: string;
+    id: number;
+    profilePic?: string;
+    profilePicContentType?: string;
     designation: string;
   };
   assignedDepartmentId?: string;
+  helpdeskDepartmentDetails?: {
+    id: string;
+    name: string;
+    isActive: boolean;
+  };
   assignedToEmployeeId?: string;
-  assignedToName?: string;
+  assignedToEmployeeDetails?: {
+    employeeName: string;
+    id: number;
+    designation: string;
+  };
   createdDate: string;
   lastModifiedDate: string;
   slaDeadline?: string;
-  location?: string;
-  requesterPhone?: string;
   requesterEmail?: string;
   category?: string;
   subcategory?: string;
@@ -83,6 +89,8 @@ interface TicketData {
   requestedBy: {
     employeeName: string;
     designation: string;
+    id?: number;
+    profilePic?: string;
   };
   assignedTo?: {
     employeeName: string;
@@ -94,11 +102,6 @@ interface TicketData {
   dateCreated: string;
   dateModified: string;
   dueDate?: string;
-  contact: {
-    phone: string;
-    email: string;
-  };
-  location: string;
   assetTag?: string;
   attachments: Array<{
     filename: string;
@@ -123,12 +126,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
   const [ticket, setTicket] = useState<TicketData | null>(null);
   const [comments, setComments] = useState<CommentData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editableFields, setEditableFields] = useState<Record<string, boolean>>(
-    {}
-  );
-  const [tempValues, setTempValues] = useState<Record<string, string>>({});
   const [newComment, setNewComment] = useState("");
-  const [isInternal, setIsInternal] = useState(false);
   const [isAddingComment, setIsAddingComment] = useState(false);
   const [commentAttachments, setCommentAttachments] = useState<File[]>([]);
 
@@ -159,28 +157,29 @@ const TicketDetailsPageProfessional: React.FC = () => {
             priority: foundTicket.priority,
             requestedBy: {
               employeeName:
-                foundTicket.raiserEmployeeDetails?.employeeName ||
+                foundTicket.raisedByEmployeeDetails?.employeeName ||
                 "Unknown User",
               designation:
-                foundTicket.raiserEmployeeDetails?.designation || "Unknown",
+                foundTicket.raisedByEmployeeDetails?.designation || "Unknown",
+              id: foundTicket.raisedByEmployeeDetails?.id,
+              profilePic: foundTicket.raisedByEmployeeDetails?.profilePic,
             },
-            assignedTo: foundTicket.assignedToName
+            assignedTo: foundTicket.assignedToEmployeeDetails
               ? {
-                  employeeName: foundTicket.assignedToName,
-                  designation: "IT Staff", // Default since API doesn't provide this
+                  employeeName:
+                    foundTicket.assignedToEmployeeDetails.employeeName,
+                  designation:
+                    foundTicket.assignedToEmployeeDetails.designation,
                 }
               : undefined,
-            department: foundTicket.assignedDepartmentId || "Unknown",
+            department:
+              foundTicket.helpdeskDepartmentDetails?.name ||
+              "Unknown Department",
             category: foundTicket.category || "General",
             subcategory: foundTicket.subcategory || "Other",
             dateCreated: foundTicket.createdDate,
             dateModified: foundTicket.lastModifiedDate,
             dueDate: foundTicket.slaDeadline,
-            contact: {
-              phone: foundTicket.requesterPhone || "Not provided",
-              email: foundTicket.requesterEmail || "Not provided",
-            },
-            location: foundTicket.location || "Not specified",
             assetTag: foundTicket.assetTag,
             attachments: foundTicket.attachments || [],
           };
@@ -239,62 +238,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
     loadTicketData();
   }, [id]);
 
-  const handleFieldEdit = (field: string) => {
-    setEditableFields((prev) => ({ ...prev, [field]: true }));
-    setTempValues((prev) => ({
-      ...prev,
-      [field]: ticket ? String(getFieldValue(ticket, field)) : "",
-    }));
-  };
-
-  const getFieldValue = (
-    ticket: TicketData,
-    field: string
-  ): string | object => {
-    switch (field) {
-      case "title":
-        return ticket.title;
-      case "description":
-        return ticket.description;
-      case "priority":
-        return ticket.priority;
-      case "status":
-        return ticket.status;
-      case "assignedTo":
-        return ticket.assignedTo || { employeeName: "", designation: "" };
-      case "dueDate":
-        return ticket.dueDate || "";
-      case "location":
-        return ticket.location;
-      case "assetTag":
-        return ticket.assetTag || "";
-      default:
-        return "";
-    }
-  };
-
-  const handleFieldSave = (field: string) => {
-    const value = tempValues[field];
-    if (ticket && value !== undefined) {
-      // In a real app, this would make an API call
-      console.log(`Updating ${field} to:`, value);
-      setEditableFields((prev) => ({ ...prev, [field]: false }));
-    }
-  };
-
-  const handleFieldCancel = (field: string) => {
-    setEditableFields((prev) => ({ ...prev, [field]: false }));
-    setTempValues((prev) => {
-      const newValues = { ...prev };
-      delete newValues[field];
-      return newValues;
-    });
-  };
-
-  const handleFieldUpdate = (field: string, value: string) => {
-    setTempValues((prev) => ({ ...prev, [field]: value }));
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
@@ -307,41 +250,44 @@ const TicketDetailsPageProfessional: React.FC = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
-  const getFileIcon = (filename: string) => {
+  const getFileIcon = (filename: string, size?: number) => {
     const ext = filename.split(".").pop()?.toLowerCase();
+    const iconSize = size || 16;
     switch (ext) {
       case "pdf":
-        return <FaFilePdf className="file-icon pdf" />;
+        return <FaFilePdf className="file-icon pdf" size={iconSize} />;
       case "doc":
       case "docx":
-        return <FaFileWord className="file-icon word" />;
+        return <FaFileWord className="file-icon word" size={iconSize} />;
       case "xls":
       case "xlsx":
-        return <FaFileExcel className="file-icon excel" />;
+        return <FaFileExcel className="file-icon excel" size={iconSize} />;
       case "ppt":
       case "pptx":
-        return <FaFilePowerpoint className="file-icon powerpoint" />;
+        return (
+          <FaFilePowerpoint className="file-icon powerpoint" size={iconSize} />
+        );
       case "jpg":
       case "jpeg":
       case "png":
       case "gif":
       case "bmp":
-        return <FaFileImage className="file-icon image" />;
+        return <FaFileImage className="file-icon image" size={iconSize} />;
       case "zip":
       case "rar":
       case "7z":
-        return <FaFileArchive className="file-icon archive" />;
+        return <FaFileArchive className="file-icon archive" size={iconSize} />;
       case "js":
       case "ts":
       case "html":
       case "css":
       case "json":
-        return <FaFileCode className="file-icon code" />;
+        return <FaFileCode className="file-icon code" size={iconSize} />;
       case "txt":
       case "log":
-        return <FaFileAlt className="file-icon text" />;
+        return <FaFileAlt className="file-icon text" size={iconSize} />;
       default:
-        return <FaFile className="file-icon default" />;
+        return <FaFile className="file-icon default" size={iconSize} />;
     }
   };
 
@@ -358,7 +304,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
         author: "Current User",
         content: newComment,
         timestamp: new Date().toISOString(),
-        isInternal,
+        isInternal: false,
         attachments: commentAttachments.map((file) => ({
           filename: file.name,
           size: file.size,
@@ -368,7 +314,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
       setComments((prev) => [...prev, comment]);
       setNewComment("");
       setCommentAttachments([]);
-      setIsInternal(false);
     } catch (error) {
       console.error("Error adding comment:", error);
     } finally {
@@ -390,6 +335,31 @@ const TicketDetailsPageProfessional: React.FC = () => {
   const downloadAttachment = (filename: string) => {
     // Simulate file download
     console.log("Downloading:", filename);
+  };
+
+  const getAttachmentPreview = (filename: string) => {
+    const extension = filename.split(".").pop()?.toLowerCase();
+    const isImage = ["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(
+      extension || ""
+    );
+
+    if (isImage) {
+      return (
+        <div className="image-preview">
+          <FaFileImage size={48} />
+          <span className="preview-label">Image</span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="file-preview">
+        {getFileIcon(filename, 48)}
+        <span className="preview-label">
+          {extension?.toUpperCase() || "File"}
+        </span>
+      </div>
+    );
   };
 
   const getPriorityColor = (priority: string) => {
@@ -446,12 +416,12 @@ const TicketDetailsPageProfessional: React.FC = () => {
     <div className="ticket-details-page-professional">
       <div className="page-content">
         <div className="content-container">
-          {/* Ticket Header */}
-          <div className="ticket-header-card">
-            <div className="ticket-title-section">
-              <div className="ticket-code-and-status">
-                <h1 className="ticket-title">{ticket.title}</h1>
-                <div className="status-badges">
+          {/* Single Comprehensive Ticket Information Section */}
+          <div className="card ticket-comprehensive-card">
+            <div className="card-header">
+              <div className="header-content">
+                <h2>Ticket Information</h2>
+                <div className="header-badges">
                   <span
                     className="status-badge"
                     style={{ backgroundColor: getStatusColor(ticket.status) }}
@@ -468,74 +438,22 @@ const TicketDetailsPageProfessional: React.FC = () => {
                   </span>
                 </div>
               </div>
-              <div className="ticket-meta">
-                <span className="meta-item">
-                  <FaCalendarAlt />
-                  Created {formatDate(ticket.dateCreated)}
-                </span>
-                <span className="meta-item">
-                  <FaClock />
-                  Modified {formatDate(ticket.dateModified)}
-                </span>
-                {ticket.dueDate && (
-                  <span className="meta-item">
-                    <FaClock />
-                    Due {formatDate(ticket.dueDate)}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Single Comprehensive Ticket Information Section */}
-          <div className="card ticket-comprehensive-card">
-            <div className="card-header">
-              <h2>Ticket Information</h2>
             </div>
             <div className="card-content">
-              {/* Description */}
-              <div className="ticket-description">
-                <h3>Description</h3>
-                <div className="description-content">
-                  {editableFields.description ? (
-                    <div className="edit-field">
-                      <textarea
-                        value={tempValues.description || ""}
-                        onChange={(e) =>
-                          handleFieldUpdate("description", e.target.value)
-                        }
-                        rows={4}
-                        className="edit-textarea"
-                      />
-                      <div className="edit-actions">
-                        <button
-                          onClick={() => handleFieldSave("description")}
-                          className="save-btn"
-                        >
-                          <FaCheck /> Save
-                        </button>
-                        <button
-                          onClick={() => handleFieldCancel("description")}
-                          className="cancel-btn"
-                        >
-                          <FaTimes /> Cancel
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="field-with-edit">
-                      <p>{ticket.description}</p>
-                      <button
-                        onClick={() => handleFieldEdit("description")}
-                        className="edit-btn"
-                      >
-                        <FaEdit />
-                      </button>
-                    </div>
-                  )}
+              {/* Simple Ticket Information Display */}
+              <div className="simple-ticket-info">
+                <div className="ticket-code-simple">{ticket.ticketCode}</div>
+                
+                <div className="ticket-field title-field">
+                  <span className="field-label">Title</span>
+                  <span className="field-value">{ticket.title}</span>
+                </div>
+                
+                <div className="ticket-field">
+                  <span className="field-label">Description</span>
+                  <span className="field-value">{ticket.description}</span>
                 </div>
               </div>
-
               {/* All Ticket Information in One Grid */}
               <div className="comprehensive-info-grid">
                 {/* Requester Information */}
@@ -545,7 +463,17 @@ const TicketDetailsPageProfessional: React.FC = () => {
                     <div className="info-item">
                       <label>Requested By</label>
                       <div className="info-value">
-                        <FaUser />
+                        {ticket.requestedBy.profilePic ? (
+                          <div className="profile-pic-container">
+                            <img
+                              src={`data:${ticket.requestedBy.profilePic}`}
+                              alt={ticket.requestedBy.employeeName}
+                              className="profile-pic"
+                            />
+                          </div>
+                        ) : (
+                          <FaUser />
+                        )}
                         <div>
                           <div className="primary-text">
                             {ticket.requestedBy.employeeName}
@@ -556,44 +484,20 @@ const TicketDetailsPageProfessional: React.FC = () => {
                         </div>
                       </div>
                     </div>
+                  </div>
+                </div>
 
+                {/* Assignment & Status */}
+                <div className="info-section">
+                  <h3>Assignment & Status</h3>
+                  <div className="info-items">
                     <div className="info-item">
-                      <label>Contact Information</label>
-                      <div className="info-value">
-                        <div className="contact-info">
-                          <div className="contact-item">
-                            <FaPhone />
-                            <span>{ticket.contact.phone}</span>
-                          </div>
-                          <div className="contact-item">
-                            <FaEnvelope />
-                            <span>{ticket.contact.email}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="info-item">
-                      <label>Department</label>
+                      <label>Assigned Department</label>
                       <div className="info-value">
                         <FaBuilding />
                         <span>{ticket.department}</span>
                       </div>
                     </div>
-
-                    <div className="info-item">
-                      <label>Location</label>
-                      <div className="info-value">
-                        <span>{ticket.location}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Assignment & Tracking */}
-                <div className="info-section">
-                  <h3>Assignment & Tracking</h3>
-                  <div className="info-items">
                     <div className="info-item">
                       <label>Assigned To</label>
                       <div className="info-value">
@@ -616,19 +520,29 @@ const TicketDetailsPageProfessional: React.FC = () => {
                     </div>
 
                     <div className="info-item">
-                      <label>Category</label>
+                      <label>Status</label>
                       <div className="info-value">
-                        <span>
-                          {ticket.category} → {ticket.subcategory}
+                        <span
+                          className="status-badge"
+                          style={{
+                            backgroundColor: getStatusColor(ticket.status),
+                          }}
+                        >
+                          {ticket.status}
                         </span>
                       </div>
                     </div>
 
                     <div className="info-item">
-                      <label>Ticket Code</label>
+                      <label>Priority</label>
                       <div className="info-value">
-                        <span className="ticket-code-display">
-                          {ticket.ticketCode}
+                        <span
+                          className="priority-badge"
+                          style={{
+                            backgroundColor: getPriorityColor(ticket.priority),
+                          }}
+                        >
+                          {ticket.priority} Priority
                         </span>
                       </div>
                     </div>
@@ -649,7 +563,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
                   <h3>Timeline</h3>
                   <div className="info-items">
                     <div className="info-item">
-                      <label>Created Date</label>
+                      <label>Created</label>
                       <div className="info-value">
                         <FaCalendarAlt />
                         <span>{formatDate(ticket.dateCreated)}</span>
@@ -673,58 +587,48 @@ const TicketDetailsPageProfessional: React.FC = () => {
                         </div>
                       </div>
                     )}
-
-                    <div className="info-item">
-                      <label>Status</label>
-                      <div className="info-value">
-                        <span
-                          className="status-indicator"
-                          style={{
-                            backgroundColor: getStatusColor(ticket.status),
-                          }}
-                        >
-                          {ticket.status}
-                        </span>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
-
-              {/* Attachments */}
+              
+              {/* Attachments with Preview */}
               {ticket.attachments && ticket.attachments.length > 0 && (
-                <div className="attachments-section">
-                  <h3>Attachments</h3>
-                  <div className="attachments-list">
+                <div className="attachments-section card-section">
+                  <h3>Attachments ({ticket.attachments.length})</h3>
+                  <div className="attachments-grid">
                     {ticket.attachments.map((attachment, index) => (
-                      <div key={index} className="attachment-item">
-                        <div className="attachment-info">
-                          {getFileIcon(attachment.filename)}
-                          <div className="attachment-details">
-                            <div className="attachment-name">
-                              {attachment.filename}
-                            </div>
-                            <div className="attachment-size">
-                              {formatFileSize(attachment.size)}
-                            </div>
-                          </div>
+                      <div key={index} className="attachment-card">
+                        <div className="attachment-preview">
+                          {getAttachmentPreview(attachment.filename)}
                         </div>
-                        <button
-                          onClick={() =>
-                            downloadAttachment(attachment.filename)
-                          }
-                          className="download-btn"
-                        >
-                          <FaDownload />
-                        </button>
+                        <div className="attachment-info">
+                          <div
+                            className="attachment-name"
+                            title={attachment.filename}
+                          >
+                            {attachment.filename}
+                          </div>
+                          <div className="attachment-size">
+                            {formatFileSize(attachment.size)}
+                          </div>
+                          <button
+                            onClick={() =>
+                              downloadAttachment(attachment.filename)
+                            }
+                            className="download-btn"
+                          >
+                            <FaDownload />
+                            Download
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-
+              
               {/* Activity Timeline */}
-              <div className="activity-section">
+              <div className="activity-section card-section">
                 <div className="activity-header">
                   <h3>Activity Timeline</h3>
                   <div className="activity-stats">
@@ -734,12 +638,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
                 <div className="activity-timeline">
                   {comments.map((comment) => (
-                    <div
-                      key={comment.id}
-                      className={`timeline-item ${
-                        comment.isInternal ? "internal" : "public"
-                      }`}
-                    >
+                    <div key={comment.id} className="timeline-item">
                       <div className="timeline-avatar">
                         <FaUser />
                       </div>
@@ -749,9 +648,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
                             <span className="author-name">
                               {comment.author}
                             </span>
-                            {comment.isInternal && (
-                              <span className="internal-badge">Internal</span>
-                            )}
                           </div>
                           <span className="timestamp">
                             {formatDate(comment.timestamp)}
@@ -784,21 +680,11 @@ const TicketDetailsPageProfessional: React.FC = () => {
                   ))}
                 </div>
               </div>
-
+              
               {/* Add Comment Section */}
-              <div className="comment-composer">
+              <div className="comment-composer card-section">
                 <div className="composer-header">
                   <h3>Add Comment</h3>
-                  <div className="composer-options">
-                    <label className="internal-toggle">
-                      <input
-                        type="checkbox"
-                        checked={isInternal}
-                        onChange={(e) => setIsInternal(e.target.checked)}
-                      />
-                      <span>Internal Comment</span>
-                    </label>
-                  </div>
                 </div>
 
                 <div className="composer-content">
@@ -806,11 +692,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
                     <textarea
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
-                      placeholder={
-                        isInternal
-                          ? "Add an internal comment..."
-                          : "Add a comment..."
-                      }
+                      placeholder="Add a comment..."
                       rows={4}
                     />
                   </div>

@@ -150,14 +150,18 @@ export const TicketsPage: React.FC = () => {
 
   const getStatusColor = (status: TicketStatus): string => {
     switch (status) {
-      case "open":
+      case "RAISED":
         return "info";
-      case "in_progress":
+      case "IN_PROGRESS":
         return "warning";
-      case "resolved":
+      case "RESOLVED":
         return "success";
-      case "closed":
-        return "secondary";
+      case "APPROVED":
+        return "success";
+      case "REJECTED":
+        return "danger";
+      case "PENDING_APPROVAL":
+        return "warning";
       default:
         return "secondary";
     }
@@ -329,7 +333,7 @@ export const TicketsPage: React.FC = () => {
                       {ticket.priority}
                     </span>
                   </td>
-                  <td>{ticket.category}</td>
+                  <td>{ticket.assigned_department_id}</td>
                   <td>{ticket.assignedTo || "Unassigned"}</td>
                   <td>{formatDate(ticket.createdAt)}</td>
                   <td>{formatDate(ticket.slaDeadline)}</td>

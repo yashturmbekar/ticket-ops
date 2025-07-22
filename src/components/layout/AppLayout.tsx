@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Header } from "./Header";
-import SideNav from "./SideNav";
+import SideNav from "./SideNavModern";
 import { Breadcrumb } from "../common/Breadcrumb";
+import { FloatingActionButton } from "../common/FloatingActionButton";
 import "./AppLayout.css";
 
 interface AppLayoutProps {
@@ -10,15 +11,23 @@ interface AppLayoutProps {
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  // Close mobile menu when clicking outside
+  const toggleSidebar = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
+  // Close mobile menu when clicking outside or on navigation
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isMobileMenuOpen && !(event.target as Element).closest(".side-nav")) {
+      if (
+        isMobileMenuOpen &&
+        !(event.target as Element).closest(".modern-sidebar")
+      ) {
         setIsMobileMenuOpen(false);
       }
     };
@@ -32,19 +41,54 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     };
   }, [isMobileMenuOpen]);
 
+  // Handle responsive sidebar
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
-    <div className="app-layout">
-      <Header onMenuToggle={toggleMobileMenu} isMenuOpen={isMobileMenuOpen} />
-      <div className="app-layout-body">
+    <div className="modern-app-layout">
+      <Header
+        onMenuToggle={toggleMobileMenu}
+        onSidebarToggle={toggleSidebar}
+        isMenuOpen={isMobileMenuOpen}
+        isCollapsed={isCollapsed}
+      />
+
+      <div className="modern-app-body">
         <SideNav
           isMobileMenuOpen={isMobileMenuOpen}
+          isCollapsed={isCollapsed}
           onMobileMenuToggle={toggleMobileMenu}
         />
-        <div className="app-content">
-          <Breadcrumb />
-          <main className="main-content">{children}</main>
-        </div>
+
+        <main
+          className={`modern-main-content ${
+            isCollapsed ? "sidebar-collapsed" : ""
+          }`}
+        >
+          <div className="modern-content-header">
+            <Breadcrumb />
+          </div>
+
+          <div className="modern-content-body">{children}</div>
+        </main>
       </div>
+
+      {/* Mobile overlay */}
+      {isMobileMenuOpen && (
+        <div className="mobile-overlay" onClick={toggleMobileMenu} />
+      )}
+
+      {/* Floating Action Button */}
+      <FloatingActionButton />
     </div>
   );
 };

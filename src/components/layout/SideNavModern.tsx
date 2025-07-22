@@ -127,23 +127,6 @@ const SideNav: React.FC<SideNavProps> = ({
           isMobileMenuOpen ? "mobile-open" : ""
         }`}
       >
-        {/* Sidebar Header */}
-        <div className="modern-sidebar-header">
-          <div className="modern-sidebar-brand">
-            <img
-              src="/redfish-logo.svg"
-              alt="Redfish"
-              className="modern-brand-logo-header"
-            />
-            {!isCollapsed && (
-              <div className="modern-brand-content">
-                <h3 className="modern-brand-title">Redfish ticket-ops</h3>
-                <p className="modern-brand-subtitle">Ticketing System</p>
-              </div>
-            )}
-          </div>
-        </div>
-
         {/* Navigation List */}
         <div className="modern-sidebar-content">
           <ul className="modern-nav-list">
@@ -191,9 +174,6 @@ const SideNav: React.FC<SideNavProps> = ({
               alt="Redfish"
               className="modern-footer-logo"
             />
-            {!isCollapsed && (
-              <span className="modern-footer-text">Redfish ticket-ops</span>
-            )}
           </div>
         </div>
       </nav>

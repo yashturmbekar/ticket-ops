@@ -53,10 +53,10 @@ export const OperationsDashboard: React.FC = () => {
         // Calculate metrics
         const assignedTickets = userTickets.length;
         const openTickets = userTickets.filter(
-          (t: Ticket) => t.status === "open"
+          (t: Ticket) => t.status === "RAISED"
         ).length;
         const inProgressTickets = userTickets.filter(
-          (t: Ticket) => t.status === "in_progress"
+          (t: Ticket) => t.status === "IN_PROGRESS"
         ).length;
         const resolvedToday = userTickets.filter((t: Ticket) => {
           const today = new Date();
@@ -105,12 +105,18 @@ export const OperationsDashboard: React.FC = () => {
 
   const getStatusBadge = (status: TicketStatus) => {
     switch (status) {
-      case "open":
-        return <span className="compact-badge open">Open</span>;
-      case "in_progress":
+      case "RAISED":
+        return <span className="compact-badge open">Raised</span>;
+      case "IN_PROGRESS":
         return <span className="compact-badge in-progress">In Progress</span>;
-      case "resolved":
+      case "RESOLVED":
         return <span className="compact-badge closed">Resolved</span>;
+      case "APPROVED":
+        return <span className="compact-badge closed">Approved</span>;
+      case "REJECTED":
+        return <span className="compact-badge rejected">Rejected</span>;
+      case "PENDING_APPROVAL":
+        return <span className="compact-badge pending">Pending Approval</span>;
       default:
         return <span className="compact-badge">{status}</span>;
     }
@@ -268,23 +274,23 @@ export const OperationsDashboard: React.FC = () => {
                   </td>
                   <td>
                     <div className="actions-container">
-                      {ticket.status === "open" && (
+                      {ticket.status === "RAISED" && (
                         <button
                           className="compact-btn primary"
                           onClick={(e) => {
                             e.stopPropagation();
-                            updateTicketStatus(ticket.id, "in_progress");
+                            updateTicketStatus(ticket.id, "IN_PROGRESS");
                           }}
                         >
                           Start
                         </button>
                       )}
-                      {ticket.status === "in_progress" && (
+                      {ticket.status === "IN_PROGRESS" && (
                         <button
                           className="compact-btn success"
                           onClick={(e) => {
                             e.stopPropagation();
-                            updateTicketStatus(ticket.id, "resolved");
+                            updateTicketStatus(ticket.id, "RESOLVED");
                           }}
                         >
                           Resolve

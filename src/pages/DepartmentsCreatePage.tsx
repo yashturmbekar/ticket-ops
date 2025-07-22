@@ -7,17 +7,16 @@ import {
   FaExclamationTriangle,
   FaPlus,
   FaTrash,
+  FaUser,
+  FaSearch,
 } from "react-icons/fa";
 import { useNotifications } from "../hooks/useNotifications";
+import {
+  useEmployeeSearch,
+  type EmployeeSearchResult,
+} from "../hooks/useEmployeeSearch";
 import { createHelpdeskDepartment } from "../services/helpdeskDepartmentService";
-import "../styles/createModern.css";
-
-interface Employee {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email?: string;
-}
+import "../styles/createSimple.css";
 
 interface DepartmentFormData {
   name: string;
@@ -25,19 +24,35 @@ interface DepartmentFormData {
   employees: {
     employeeId: string;
     isActive: boolean;
-    employeeObj?: Employee;
+    employeeObj?: EmployeeSearchResult;
+    searchQuery?: string;
   }[];
 }
 
 export const DepartmentsCreatePage: React.FC = () => {
   const navigate = useNavigate();
   const { addNotification } = useNotifications();
+  const {
+    results: employeeResults,
+    loading: employeeLoading,
+    search: searchEmployees,
+  } = useEmployeeSearch();
   const [loading, setLoading] = useState(false);
+  const [showDropdowns, setShowDropdowns] = useState<{
+    [key: number]: boolean;
+  }>({});
 
   const [formData, setFormData] = useState<DepartmentFormData>({
     name: "",
     isActive: true,
-    employees: [{ employeeId: "", isActive: true, employeeObj: undefined }],
+    employees: [
+      {
+        employeeId: "",
+        isActive: true,
+        employeeObj: undefined,
+        searchQuery: "",
+      },
+    ],
   });
 
   const [errors, setErrors] = useState<{
@@ -55,14 +70,12 @@ export const DepartmentsCreatePage: React.FC = () => {
 
     // Validate employees
     const hasInvalidEmployees = formData.employees.some(
-      (emp) =>
-        !emp.employeeId ||
-        isNaN(Number(emp.employeeId)) ||
-        Number(emp.employeeId) <= 0
+      (emp) => !emp.employeeObj || !emp.employeeId
     );
 
     if (hasInvalidEmployees) {
-      newErrors.employees = "All employees must have a valid Employee ID";
+      newErrors.employees =
+        "All employees must be selected from search results";
     }
 
     setErrors(newErrors);
@@ -124,7 +137,12 @@ export const DepartmentsCreatePage: React.FC = () => {
       ...prev,
       employees: [
         ...prev.employees,
-        { employeeId: "", isActive: true, employeeObj: undefined },
+        {
+          employeeId: "",
+          isActive: true,
+          employeeObj: undefined,
+          searchQuery: "",
+        },
       ],
     }));
   };
@@ -139,7 +157,7 @@ export const DepartmentsCreatePage: React.FC = () => {
   const updateEmployee = (
     index: number,
     field: keyof DepartmentFormData["employees"][0],
-    value: string | boolean | Employee | undefined
+    value: string | boolean | EmployeeSearchResult | undefined
   ) => {
     setFormData((prev) => ({
       ...prev,
@@ -230,16 +248,109 @@ export const DepartmentsCreatePage: React.FC = () => {
               {formData.employees.map((employee, index) => (
                 <div key={index} className="employee-item">
                   <div className="employee-input-group">
-                    <div className="employee-id-field">
-                      <input
-                        type="text"
-                        className="create-form-input"
-                        value={employee.employeeId}
-                        onChange={(e) => {
-                          updateEmployee(index, "employeeId", e.target.value);
-                        }}
-                        placeholder="Employee ID"
-                      />
+                    <div className="employee-search-field">
+                      <div className="employee-search-container">
+                        <FaSearch className="search-icon" />
+                        <input
+                          type="text"
+                          className="create-form-input"
+                          value={employee.searchQuery || ""}
+                          onChange={(e) => {
+                            const query = e.target.value;
+                            updateEmployee(index, "searchQuery", query);
+                            if (query) {
+                              searchEmployees(query);
+                              setShowDropdowns((prev) => ({
+                                ...prev,
+                                [index]: true,
+                              }));
+                            } else {
+                              setShowDropdowns((prev) => ({
+                                ...prev,
+                                [index]: false,
+                              }));
+                            }
+                          }}
+                          placeholder="Search employee by name..."
+                          autoComplete="off"
+                        />
+
+                        {/* Search Results Dropdown */}
+                        {showDropdowns[index] && employeeResults.length > 0 && (
+                          <div className="employee-search-dropdown">
+                            {employeeResults.map((result) => (
+                              <div
+                                key={result.id}
+                                className="employee-search-item"
+                                onClick={() => {
+                                  updateEmployee(index, "employeeObj", result);
+                                  updateEmployee(
+                                    index,
+                                    "employeeId",
+                                    result.id.toString()
+                                  );
+                                  updateEmployee(
+                                    index,
+                                    "searchQuery",
+                                    result.employeeName
+                                  );
+                                  setShowDropdowns((prev) => ({
+                                    ...prev,
+                                    [index]: false,
+                                  }));
+                                }}
+                              >
+                                <div className="employee-search-info">
+                                  <FaUser className="employee-icon" />
+                                  <div className="employee-details">
+                                    <div className="employee-name">
+                                      {result.employeeName}
+                                    </div>
+                                    <div className="employee-meta">
+                                      {result.departmentName} •{" "}
+                                      {result.designation}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+
+                            {employeeLoading && (
+                              <div className="employee-search-loading">
+                                <div className="create-spinner"></div>
+                                <span>Searching...</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Selected Employee Display */}
+                      {employee.employeeObj && (
+                        <div className="selected-employee">
+                          <FaUser className="employee-icon" />
+                          <div className="employee-details">
+                            <div className="employee-name">
+                              {employee.employeeObj.employeeName}
+                            </div>
+                            <div className="employee-meta">
+                              {employee.employeeObj.departmentName} •{" "}
+                              {employee.employeeObj.designation}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            className="clear-employee"
+                            onClick={() => {
+                              updateEmployee(index, "employeeObj", undefined);
+                              updateEmployee(index, "employeeId", "");
+                              updateEmployee(index, "searchQuery", "");
+                            }}
+                          >
+                            <FaTimes />
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     <div className="employee-status-field">

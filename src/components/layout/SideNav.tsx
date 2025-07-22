@@ -70,7 +70,6 @@ const SideNav: React.FC<SideNavProps> = ({
       label: "Departments",
       path: "/departments",
       icon: <FaBuilding />,
-      roles: [UserRole.ADMIN],
     },
     {
       id: "knowledge",

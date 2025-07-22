@@ -4,9 +4,7 @@ import {
   FaTicketAlt,
   FaCheckCircle,
   FaClock,
-  FaArrowUp,
   FaEye,
-  FaUser,
   FaTasks,
   FaExclamationTriangle,
   FaSpinner,
@@ -189,60 +187,53 @@ export const EmployeeDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="modern-stats-grid">
-        <div className="modern-stat-card">
-          <div className="modern-stat-header">
-            <div className="modern-stat-icon primary">
-              <FaUser />
-            </div>
+      {/* Compact Stats Bar */}
+      <div className="compact-stats-bar">
+        <div className="compact-stat-item">
+          <div className="compact-stat-icon primary">
+            <FaTicketAlt />
           </div>
-          <div className="modern-stat-value">{stats.myTickets}</div>
-          <div className="modern-stat-label">My Tickets</div>
-          <div className="modern-stat-change neutral">
-            <span>Total submitted</span>
+          <div className="compact-stat-content">
+            <div className="compact-stat-value">{stats.myTickets}</div>
+            <div className="compact-stat-label">Total Tickets</div>
           </div>
         </div>
 
-        <div className="modern-stat-card">
-          <div className="modern-stat-header">
-            <div className="modern-stat-icon info">
-              <FaTicketAlt />
-            </div>
+        <div className="compact-stat-divider"></div>
+
+        <div className="compact-stat-item">
+          <div className="compact-stat-icon warning">
+            <FaExclamationTriangle />
           </div>
-          <div className="modern-stat-value">{stats.openTickets}</div>
-          <div className="modern-stat-label">Raised Tickets</div>
-          <div className="modern-stat-change neutral">
-            <span>Awaiting resolution</span>
+          <div className="compact-stat-content">
+            <div className="compact-stat-value">{stats.openTickets}</div>
+            <div className="compact-stat-label">Open</div>
           </div>
         </div>
 
-        <div className="modern-stat-card">
-          <div className="modern-stat-header">
-            <div className="modern-stat-icon success">
-              <FaCheckCircle />
-            </div>
+        <div className="compact-stat-divider"></div>
+
+        <div className="compact-stat-item">
+          <div className="compact-stat-icon success">
+            <FaCheckCircle />
           </div>
-          <div className="modern-stat-value">{stats.resolvedTickets}</div>
-          <div className="modern-stat-label">Resolved</div>
-          <div className="modern-stat-change positive">
-            <FaArrowUp />
-            <span>Issues solved</span>
+          <div className="compact-stat-content">
+            <div className="compact-stat-value">{stats.resolvedTickets}</div>
+            <div className="compact-stat-label">Resolved</div>
           </div>
         </div>
 
-        <div className="modern-stat-card">
-          <div className="modern-stat-header">
-            <div className="modern-stat-icon warning">
-              <FaClock />
+        <div className="compact-stat-divider"></div>
+
+        <div className="compact-stat-item">
+          <div className="compact-stat-icon info">
+            <FaClock />
+          </div>
+          <div className="compact-stat-content">
+            <div className="compact-stat-value">
+              {stats.avgResponseTime.toFixed(1)}h
             </div>
-          </div>
-          <div className="modern-stat-value">
-            {stats.avgResponseTime.toFixed(1)}h
-          </div>
-          <div className="modern-stat-label">Avg Response</div>
-          <div className="modern-stat-change neutral">
-            <span>Support team</span>
+            <div className="compact-stat-label">Avg Response</div>
           </div>
         </div>
       </div>

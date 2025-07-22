@@ -58,9 +58,8 @@ const HelpdeskDepartmentCreateForm: React.FC<Props> = ({
     if (
       employees.some(
         (emp) =>
-          !emp.employeeId ||
-          isNaN(Number(emp.employeeId)) ||
-          Number(emp.employeeId) <= 0
+          (!emp.employeeObj?.id && !emp.employeeId) ||
+          (!emp.employeeObj?.id && (isNaN(Number(emp.employeeId)) || Number(emp.employeeId) <= 0))
       )
     ) {
       setFormError("All employees must have a valid Employee ID.");
@@ -79,7 +78,7 @@ const HelpdeskDepartmentCreateForm: React.FC<Props> = ({
         isActive: departmentActive,
       },
       employees: employees.map((emp) => ({
-        employeeId: Number(emp.employeeId),
+        employeeId: emp.employeeObj?.id || Number(emp.employeeId),
         isActive: emp.isActive,
       })),
     };

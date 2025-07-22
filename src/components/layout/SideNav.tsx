@@ -56,6 +56,17 @@ const SideNav: React.FC<SideNavProps> = ({
   }, [effectiveMobileMenuOpen, onMobileMenuToggle]);
 
   const navItems: NavItem[] = [
+        {
+      id: "departments-create",
+      label: "Helpdesk Department",
+      path: "/departments/create",
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-2.83.48-5.48-1.51-5.96-4.34-.07-.39.23-.75.63-.75.31 0 .58.22.63.52.36 2.13 2.37 3.57 4.5 3.21 1.97-.33 3.37-2.13 3.04-4.1-.28-1.66-1.7-2.89-3.38-2.89-.55 0-1-.45-1-1s.45-1 1-1c2.21 0 4 1.79 4 4 0 2.21-1.79 4-4 4-.55 0-1 .45-1 1s.45 1 1 1c2.76 0 5-2.24 5-5 0-2.76-2.24-5-5-5-.55 0-1-.45-1-1s.45-1 1-1c3.31 0 6 2.69 6 6 0 3.31-2.69 6-6 6z" />
+        </svg>
+      ),
+      roles: [UserRole.USER],
+    },
     {
       id: "dashboard",
       label: "Dashboard",

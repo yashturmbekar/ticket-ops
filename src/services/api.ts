@@ -1,6 +1,7 @@
 // Base API service configuration
+import { AUTH_TOKEN_KEY } from '../constants';
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://0a27d1845136.ngrok-free.app/api";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
 
 export interface ApiResponse<T> {
   data: T;
@@ -29,27 +30,27 @@ class ApiService {
 
   constructor(baseURL: string = API_BASE_URL) {
     this.baseURL = baseURL;
-    this.token = localStorage.getItem("authToken");
+    this.token = localStorage.getItem(AUTH_TOKEN_KEY);
   }
 
   setAuthToken(token: string | null) {
     this.token = token;
     if (token) {
-      localStorage.setItem("authToken", token);
+      localStorage.setItem(AUTH_TOKEN_KEY, token);
     } else {
-      localStorage.removeItem("authToken");
+      localStorage.removeItem(AUTH_TOKEN_KEY);
     }
   }
 
   private getHeaders(): HeadersInit {
+    // Always get the latest token from localStorage
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
     const headers: HeadersInit = {
       "Content-Type": "application/json",
     };
-
-    if (this.token) {
-      headers["Authorization"] = `Bearer ${this.token}`;
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
     }
-
     return headers;
   }
 

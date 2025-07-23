@@ -48,6 +48,13 @@ export interface ApiTicketResponse {
   };
   assignedDepartmentId: string;
   assignedToEmployeeId?: number;
+  assignedToEmployeeDetails?: {
+    employeeName: string;
+    id: number;
+    profilePic?: string;
+    profilePicContentType?: string;
+    designation: string;
+  };
   isActive: boolean;
   createdDate: string;
   lastModifiedDate: string;

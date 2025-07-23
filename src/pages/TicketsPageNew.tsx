@@ -18,7 +18,7 @@ import type { Ticket, TicketStatus, Priority } from "../types";
 // Extended ticket type for displaying API data
 type DisplayTicket = Ticket & { ticketCode?: string };
 import { searchTickets } from "../services/ticketService";
-import { getAllHelpdeskDepartments } from "../services/helpdeskDepartmentService";
+import { searchHelpdeskDepartments } from "../services/helpdeskDepartmentService";
 import type { HelpdeskDepartment } from "../services/helpdeskDepartmentService";
 import { useNotifications } from "../hooks/useNotifications";
 import { transformApiTicketsToTickets } from "../utils/apiTransforms";
@@ -30,6 +30,11 @@ interface TicketsFilter {
   department: string;
   assignee: string;
   search: string;
+}
+
+interface DepartmentSearchItem {
+  department: HelpdeskDepartment;
+  employees: unknown[];
 }
 
 export const TicketsPage: React.FC = () => {
@@ -53,8 +58,22 @@ export const TicketsPage: React.FC = () => {
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        const departmentData = await getAllHelpdeskDepartments();
-        setDepartments(Array.isArray(departmentData) ? departmentData : []);
+        // Use search endpoint with empty criteria to get all active departments
+        const response = await searchHelpdeskDepartments({}, 0, 50, "id,desc");
+
+        console.log("Department API Response:", response);
+        console.log("Response data:", response.data);
+
+        // Extract departments from the response structure
+        const departmentItems = response.data?.items || response.items || [];
+        console.log("Department items:", departmentItems);
+
+        const departmentList = departmentItems
+          .map((item: DepartmentSearchItem) => item.department)
+          .filter((dept: HelpdeskDepartment) => dept && dept.isActive);
+
+        console.log("Filtered department list:", departmentList);
+        setDepartments(departmentList);
       } catch (error) {
         console.error("Error loading departments:", error);
         addNotification({

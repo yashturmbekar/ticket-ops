@@ -86,12 +86,14 @@ export async function reopenTicket(id: string, reason?: string) {
 
 export async function addComment(
   ticketId: string,
-  content: string,
-  isInternal = false
+  comment: string
 ) {
-  return apiClient.post(`${endpoint}/${ticketId}/comments`, {
-    content,
-    isInternal,
+  return apiClient.post(`/helpdesk-ticket-comments`, {
+    id: null,
+    ticketId: ticketId,
+    comment: comment,
+    commenterEmployeeId: null,
+    isDeleted: false
   });
 }
 
@@ -102,10 +104,15 @@ export async function getTicketComments(ticketId: string) {
 export async function updateComment(
   ticketId: string,
   commentId: string,
-  content: string
+  content: string,
+  commenterEmployeeId?: number
 ) {
-  return apiClient.put(`${endpoint}/${ticketId}/comments/${commentId}`, {
-    content,
+  return apiClient.put(`/helpdesk-ticket-comments`, {
+    id: commentId,
+    ticketId: ticketId,
+    comment: content,
+    commenterEmployeeId: commenterEmployeeId,
+    isDeleted: false
   });
 }
 

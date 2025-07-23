@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
-import { getTicketById, getTicketComments } from "../services/ticketService";
+import { getTicketById, addComment, updateComment, uploadAttachment } from "../services/ticketService";
+import { NotificationContext } from "../contexts/NotificationContext";
+import { useAuth } from "../hooks/useAuth";
 import {
   FaUser,
   FaCalendarAlt,
@@ -64,21 +66,29 @@ interface ApiTicketResponse {
     filename: string;
     size: number;
   }>;
-}
-
-interface ApiCommentResponse {
-  id: string;
-  content: string;
-  author?: string;
-  authorName?: string;
-  createdAt?: string;
-  timestamp?: string;
-  isInternal?: boolean;
-  attachments?: Array<{
-    filename: string;
-    size: number;
+  comments?: Array<{
+    id: string;
+    ticketId: string;
+    comment: string;
+    commenterEmployeeId: number;
+    isDeleted: boolean;
+    createdDate: string;
+    lastModifiedDate: string;
+    commenterEmployeeDetails?: {
+      employeeName: string;
+      id: number;
+      profilePic?: string;
+      profilePicContentType?: string;
+      designation: string;
+    };
+    attachments?: Array<{
+      filename: string;
+      size: number;
+    }>;
   }>;
 }
+
+
 
 // Simplified interfaces for the professional implementation
 interface TicketData {
@@ -117,6 +127,7 @@ interface CommentData {
   content: string;
   timestamp: string;
   isInternal: boolean;
+  commenterEmployeeId?: number;
   attachments?: Array<{
     filename: string;
     size: number;
@@ -125,12 +136,92 @@ interface CommentData {
 
 const TicketDetailsPageProfessional: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const notificationContext = useContext(NotificationContext);
+  const { user } = useAuth();
   const [ticket, setTicket] = useState<TicketData | null>(null);
   const [comments, setComments] = useState<CommentData[]>([]);
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState("");
   const [isAddingComment, setIsAddingComment] = useState(false);
   const [commentAttachments, setCommentAttachments] = useState<File[]>([]);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingCommentText, setEditingCommentText] = useState("");
+  const [isUpdatingComment, setIsUpdatingComment] = useState(false);
+
+  // Function to transform API comments to CommentData format
+  const transformComments = (apiComments: ApiTicketResponse['comments']): CommentData[] => {
+    if (!apiComments || apiComments.length === 0) {
+      return [];
+    }
+
+    return apiComments
+      .map((comment) => ({
+        id: comment.id,
+        author: comment.commenterEmployeeDetails?.employeeName || "Unknown",
+        content: comment.comment,
+        timestamp: comment.createdDate,
+        isInternal: false,
+        commenterEmployeeId: comment.commenterEmployeeId,
+        attachments: comment.attachments || [],
+      }))
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()); // Sort by newest first
+  };
+
+  // Function to check if current user can edit a comment
+  const canEditComment = (comment: CommentData): boolean => {
+    if (comment.author === "System") return false;
+    if (!user?.id) return false;
+    return comment.commenterEmployeeId === parseInt(user.id);
+  };
+
+  // Function to start editing a comment
+  const startEditComment = (commentId: string, currentContent: string) => {
+    setEditingCommentId(commentId);
+    setEditingCommentText(currentContent);
+  };
+
+  // Function to cancel editing
+  const cancelEditComment = () => {
+    setEditingCommentId(null);
+    setEditingCommentText("");
+  };
+
+  // Function to update a comment
+  const handleUpdateComment = async () => {
+    if (!editingCommentId || !editingCommentText.trim() || !id) return;
+
+    setIsUpdatingComment(true);
+    try {
+      await updateComment(id, editingCommentId, editingCommentText.trim(), user?.id ? parseInt(user.id) : undefined);
+      
+      // Refresh ticket data to get updated comments
+      const updatedTicketResponse = await getTicketById(id);
+      const updatedTicket: ApiTicketResponse = updatedTicketResponse;
+      
+      if (updatedTicket) {
+        const updatedComments = transformComments(updatedTicket.comments);
+        setComments(updatedComments);
+      }
+
+      // Clear editing state
+      setEditingCommentId(null);
+      setEditingCommentText("");
+
+      // Show success notification
+      if (notificationContext) {
+        notificationContext.success("Comment Updated", "Your comment has been updated successfully.");
+      }
+    } catch (error) {
+      console.error("Error updating comment:", error);
+      
+      // Show error notification
+      if (notificationContext) {
+        notificationContext.error("Error Updating Comment", "Failed to update comment. Please try again.");
+      }
+    } finally {
+      setIsUpdatingComment(false);
+    }
+  };
 
   // Load ticket data from API
   useEffect(() => {
@@ -194,37 +285,23 @@ const TicketDetailsPageProfessional: React.FC = () => {
             transformedTicket.ticketCode
           );
 
-          // Load comments from API
-          try {
-            const commentsResponse = await getTicketComments(id);
-            const apiComments = commentsResponse?.data || [];
-
-            const transformedComments: CommentData[] = apiComments.map(
-              (comment: ApiCommentResponse) => ({
-                id: comment.id,
-                author: comment.authorName || comment.author || "Unknown",
-                content: comment.content,
-                timestamp: comment.createdAt || comment.timestamp,
-                isInternal: comment.isInternal || false,
-                attachments: comment.attachments || [],
-              })
-            );
-
-            setComments(transformedComments);
-          } catch (commentError) {
-            console.error("Error loading comments:", commentError);
-            // Fallback to system comment if comments API fails
-            const systemComment: CommentData[] = [
+          // Transform and set comments from ticket response
+          let transformedComments = transformComments(foundTicket.comments);
+          
+          // If no comments exist, add a system comment
+          if (transformedComments.length === 0) {
+            transformedComments = [
               {
-                id: "1",
+                id: "system-1",
                 author: "System",
                 content: `Ticket ${transformedTicket.ticketCode} has been created and assigned.`,
                 timestamp: transformedTicket.dateCreated,
                 isInternal: false,
               },
             ];
-            setComments(systemComment);
           }
+          
+          setComments(transformedComments);
         } else {
           console.error("Ticket not found");
           setTicket(null);
@@ -294,30 +371,69 @@ const TicketDetailsPageProfessional: React.FC = () => {
   };
 
   const handleAddComment = async () => {
-    if (!newComment.trim()) return;
+    if (!newComment.trim() || !id) return;
 
     setIsAddingComment(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Upload attachments first if any
+      const uploadedAttachments: Array<{ filename: string; size: number }> = [];
+      
+      if (commentAttachments.length > 0) {
+        for (const file of commentAttachments) {
+          try {
+            const uploadResponse = await uploadAttachment(id, file);
+            console.log("File uploaded successfully:", uploadResponse);
+            uploadedAttachments.push({
+              filename: file.name,
+              size: file.size,
+            });
+          } catch (uploadError) {
+            console.error("Error uploading file:", uploadError);
+            if (notificationContext) {
+              notificationContext.error(
+                "File Upload Error",
+                `Failed to upload ${file.name}. Please try again.`
+              );
+            }
+          }
+        }
+      }
 
-      const comment: CommentData = {
-        id: Date.now().toString(),
-        author: "Current User",
-        content: newComment,
-        timestamp: new Date().toISOString(),
-        isInternal: false,
-        attachments: commentAttachments.map((file) => ({
-          filename: file.name,
-          size: file.size,
-        })),
-      };
+      // Call the actual API to add comment
+      const response = await addComment(id, newComment.trim());
+      
+      console.log("Comment added successfully:", response);
 
-      setComments((prev) => [...prev, comment]);
+      // Refresh ticket data to get updated comments
+      const updatedTicketResponse = await getTicketById(id);
+      const updatedTicket: ApiTicketResponse = updatedTicketResponse;
+      
+      if (updatedTicket) {
+        const updatedComments = transformComments(updatedTicket.comments);
+        setComments(updatedComments);
+      }
+      
+      // Clear the form
       setNewComment("");
       setCommentAttachments([]);
+
+      // Show success notification
+      if (notificationContext) {
+        const message = uploadedAttachments.length > 0 
+          ? `Comment added with ${uploadedAttachments.length} attachment(s).`
+          : "Your comment has been added successfully.";
+        notificationContext.success("Comment Added", message);
+      }
     } catch (error) {
       console.error("Error adding comment:", error);
+      
+      // Show error notification
+      if (notificationContext) {
+        notificationContext.error(
+          "Error Adding Comment",
+          "Failed to add comment. Please try again."
+        );
+      }
     } finally {
       setIsAddingComment(false);
     }
@@ -664,12 +780,59 @@ const TicketDetailsPageProfessional: React.FC = () => {
                               {comment.author}
                             </span>
                           </div>
-                          <span className="timestamp">
-                            {formatDate(comment.timestamp)}
-                          </span>
+                          <div className="timeline-actions">
+                            <span className="timestamp">
+                              {formatDate(comment.timestamp)}
+                            </span>
+                            {canEditComment(comment) && (
+                              <div className="comment-actions">
+                                <button
+                                  className="edit-comment-btn"
+                                  onClick={() => startEditComment(comment.id, comment.content)}
+                                  title="Edit comment"
+                                >
+                                  Edit
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                         <div className="timeline-body">
-                          <p>{comment.content}</p>
+                          {editingCommentId === comment.id ? (
+                            <div className="edit-comment-form">
+                              <textarea
+                                value={editingCommentText}
+                                onChange={(e) => setEditingCommentText(e.target.value)}
+                                rows={3}
+                                className="edit-comment-input"
+                              />
+                              <div className="edit-comment-actions">
+                                <button
+                                  onClick={handleUpdateComment}
+                                  disabled={!editingCommentText.trim() || isUpdatingComment}
+                                  className="save-comment-btn"
+                                >
+                                  {isUpdatingComment ? (
+                                    <>
+                                      <ButtonLoader variant="white" />
+                                      <span>Saving...</span>
+                                    </>
+                                  ) : (
+                                    "Save"
+                                  )}
+                                </button>
+                                <button
+                                  onClick={cancelEditComment}
+                                  disabled={isUpdatingComment}
+                                  className="cancel-comment-btn"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p>{comment.content}</p>
+                          )}
                           {comment.attachments &&
                             comment.attachments.length > 0 && (
                               <div className="comment-attachments">
@@ -707,7 +870,13 @@ const TicketDetailsPageProfessional: React.FC = () => {
                     <textarea
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="Add a comment..."
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                          e.preventDefault();
+                          handleAddComment();
+                        }
+                      }}
+                      placeholder="Add a comment... (Ctrl+Enter to submit)"
                       rows={4}
                     />
                   </div>

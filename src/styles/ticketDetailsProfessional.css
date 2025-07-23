@@ -2195,11 +2195,13 @@ textarea:focus-visible {
   object-fit: cover;
   cursor: pointer;
   transition: all var(--transition-speed);
+  border: 2px solid transparent;
 }
 
 .attachment-preview img:hover {
   transform: scale(1.05);
   box-shadow: var(--shadow);
+  border-color: var(--color-primary);
 }
 
 .attachment-preview .file-icon {
@@ -2264,17 +2266,17 @@ textarea:focus-visible {
   .attachments-grid {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   }
-  
+
   .attachment-card {
     min-height: 140px;
     padding: var(--spacing-2);
   }
-  
+
   .attachment-preview img {
     max-width: 100px;
     max-height: 100px;
   }
-  
+
   .attachment-name {
     font-size: 0.65rem;
     white-space: normal;
@@ -2283,11 +2285,11 @@ textarea:focus-visible {
     max-height: 2.5em;
     line-height: 1.2;
   }
-  
+
   .attachment-size {
     font-size: 0.6rem;
   }
-  
+
   .attachment-card .download-btn {
     font-size: 0.7rem;
     padding: var(--spacing-1);

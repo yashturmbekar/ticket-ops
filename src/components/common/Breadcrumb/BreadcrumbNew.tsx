@@ -52,7 +52,8 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
         if (
           pathnames[0] === "tickets" &&
           pathnames.length === 2 &&
-          !isNaN(Number(pathname))
+          !routeMap[currentPath] && // Not a known route like "/tickets/create"
+          pathname !== "create" // Explicitly exclude create route
         ) {
           // This is a ticket details page, use the ticket code from session storage or custom prop
           const storedTicketCode = sessionStorage.getItem(

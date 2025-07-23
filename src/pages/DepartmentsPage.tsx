@@ -14,6 +14,7 @@ import {
 import { Loader } from "../components/common";
 import {
   searchHelpdeskDepartments,
+  getHelpdeskDepartmentWithEmployees,
   deleteHelpdeskDepartment,
   removeEmployeeFromDepartment,
   type HelpdeskDepartment,
@@ -44,7 +45,7 @@ export const DepartmentsPage: React.FC = () => {
         searchCriteria.search = searchQuery;
       }
 
-      // Call the new search API
+      // Call the search API to get departments list
       const response = await searchHelpdeskDepartments(
         searchCriteria,
         0,
@@ -54,7 +55,26 @@ export const DepartmentsPage: React.FC = () => {
 
       // Extract departments from response - API returns 'items' array
       const departmentsList = response.data?.items || response.items || [];
-      setDepartments(departmentsList);
+
+      // For each department, fetch detailed information with employees
+      const departmentsWithEmployees = await Promise.all(
+        departmentsList.map(async (dept: HelpdeskDepartment) => {
+          try {
+            const detailedResponse = await getHelpdeskDepartmentWithEmployees(dept.id);
+            // Merge the basic department info with the detailed response
+            return {
+              ...dept,
+              employees: detailedResponse.employees
+            };
+          } catch (error) {
+            console.error(`Error loading employees for department ${dept.id}:`, error);
+            // Return the basic department info if detailed fetch fails
+            return dept;
+          }
+        })
+      );
+
+      setDepartments(departmentsWithEmployees);
     } catch (error) {
       console.error("Error loading departments:", error);
       addNotification({
@@ -315,13 +335,10 @@ export const DepartmentsPage: React.FC = () => {
                                   >
                                     <div className="employee-info">
                                       <div className="employee-name">
-                                        {employee.employeeName}
-                                      </div>
-                                      <div className="employee-email">
-                                        {employee.email}
+                                        {employee.employeeProfilePicNameDTO.employeeName}
                                       </div>
                                       <div className="employee-designation">
-                                        {employee.designation}
+                                        {employee.employeeProfilePicNameDTO.designation}
                                       </div>
                                       <span
                                         className={`employee-status ${
@@ -341,8 +358,8 @@ export const DepartmentsPage: React.FC = () => {
                                         onClick={() =>
                                           handleRemoveEmployee(
                                             department.id,
-                                            employee.id,
-                                            employee.employeeName
+                                            employee.employeeId,
+                                            employee.employeeProfilePicNameDTO.employeeName
                                           )
                                         }
                                         title="Remove from Department"

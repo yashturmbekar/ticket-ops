@@ -679,7 +679,8 @@ const TicketDetailsPageProfessional: React.FC = () => {
                           {ticket.requestedBy.profilePic ? (
                             <img
                               src={
-                                ticket.requestedBy.profilePic && ticket.requestedBy.profilePic
+                                ticket.requestedBy.profilePic &&
+                                ticket.requestedBy.profilePic
                                   ? `data:${ticket.requestedBy.profilePic};base64,${ticket.requestedBy.profilePic}`
                                   : ""
                               }
@@ -690,20 +691,22 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                 borderRadius: "50%",
                                 objectFit: "cover",
                                 border: "2px solid #e3e7ef",
-                                background: "#f5f7fa"
+                                background: "#f5f7fa",
                               }}
                               className="profile-pic"
                             />
                           ) : (
                             <div className="avatar-initials">
                               {/* Show initials if available, fallback to icon */}
-                              {ticket.requestedBy.employeeName
-                                ? ticket.requestedBy.employeeName
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .join("")
-                                    .toUpperCase()
-                                : <FaUser />}
+                              {ticket.requestedBy.employeeName ? (
+                                ticket.requestedBy.employeeName
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")
+                                  .toUpperCase()
+                              ) : (
+                                <FaUser />
+                              )}
                             </div>
                           )}
                         </div>

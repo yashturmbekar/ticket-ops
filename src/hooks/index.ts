@@ -4,6 +4,8 @@ export { useNotifications } from "./useNotifications";
 export { useRealtime } from "./useRealtime";
 export { useDepartmentEdit } from "./useDepartmentEdit";
 export { useEmployeeProfile } from "./useEmployeeProfile";
+export { usePermissions } from "./usePermissions";
+export { useNavigation } from "./useNavigation";
 export {
   useApi,
   usePaginatedApi,

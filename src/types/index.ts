@@ -311,10 +311,11 @@ export interface Notification {
 
 // Enums and constants
 export const UserRole = {
-  ADMIN: "admin",
-  IT_STAFF: "it_staff",
-  USER: "ROLE_USER",
-  MANAGER: "manager",
+  CXO: "CXO",
+  HR: "HR",
+  EMPLOYEE: "EMPLOYEE",
+  MANAGER: "MANAGER",
+  ORG_ADMIN: "ORG-ADMIN",
 } as const;
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
@@ -473,6 +474,12 @@ export const Permission = {
   USER_VIEW: "user_view",
   USER_UPDATE: "user_update",
   USER_DELETE: "user_delete",
+
+  // Department permissions
+  DEPARTMENT_CREATE: "department_create",
+  DEPARTMENT_VIEW: "department_view",
+  DEPARTMENT_UPDATE: "department_update",
+  DEPARTMENT_DELETE: "department_delete",
 
   // Knowledge permissions
   KNOWLEDGE_CREATE: "knowledge_create",

@@ -11,7 +11,7 @@ import { ButtonLoader } from "../components/common";
 import { useAuth } from "../hooks/useAuth";
 import { useNotifications } from "../hooks/useNotifications";
 import { getAllHelpdeskDepartments } from "../services/helpdeskDepartmentService";
-import { createTicket, uploadAttachment } from "../services/ticketService";
+import { createTicket } from "../services/ticketService";
 import { TicketStatus } from "../types";
 import "../styles/createModern.css";
 

@@ -50,12 +50,12 @@ export const useDepartmentEdit = (options: DepartmentEditHookOptions = {}) => {
 
   // Update department
   const updateDepartment = useCallback(
-    async (id: string, payload: HelpdeskDepartmentPayload) => {
+    async (_id: string, payload: HelpdeskDepartmentPayload) => {
       try {
         setLoading(true);
         setError(null);
 
-        const updatedDepartment = await updateHelpdeskDepartment(id, payload);
+        const updatedDepartment = await updateHelpdeskDepartment(payload);
 
         addNotification({
           type: "success",

@@ -11,6 +11,19 @@ export {
 } from "./authService";
 
 export {
+  // Role and Permissions
+  getRoleAndPermissions,
+  createRoleWithPermissions,
+  updateRolePermissions,
+  deleteRole,
+} from "./rolePermissionService";
+
+export {
+  // Navigation
+  NavigationService,
+} from "./navigationService";
+
+export {
   // User
   getUsers,
   getUserById,

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -217,6 +217,21 @@ const AppContent: React.FC = () => {
 };
 
 const App: React.FC = () => {
+  useEffect(() => {
+    const token = localStorage.getItem('it-ticket-auth-token');
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryToken = urlParams.get("token");
+    const userEmail = urlParams.get("email");
+
+    if (!token && queryToken) {
+      const userData = {
+        "username": userEmail,
+        "email": userEmail,
+      }
+      localStorage.setItem("it-ticket-auth-token", queryToken);
+      localStorage.setItem("it-ticket-user-data", JSON.stringify(userData));
+    }
+  }, []);
   return (
     <ThemeProvider>
       <AuthProvider>

@@ -81,12 +81,7 @@ const apiClient = {
     return (await instance.delete(url, config)).data;
   },
 
-  // --- 🔐 Redfish Token Verification ---
-  verifyRedfishToken: async (redfishToken: string): Promise<string> => {
-    const res = await instance.post("/auth/verify-redfish-token", { token: redfishToken });
-    return res.data.token;
 
-  },
 };
 
 export default apiClient;

@@ -37,6 +37,7 @@ export interface ApiTicketResponse {
   description: string;
   status: TicketStatus;
   ticketCode: string;
+  assignedDepartmentName: string;
   priority: Priority;
   raisedByEmployeeId: number;
   raiserEmployeeDetails: {
@@ -86,6 +87,8 @@ export interface Ticket {
   requesterEmail?: string;
   requesterPhone?: string;
   location?: string;
+  assignedDepartmentName?: string;
+  totalCommentsCount?: number;
   category?: Category;
   asset?: string; // Asset ID
 }

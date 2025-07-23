@@ -38,6 +38,15 @@ export async function getTicketById(id: string) {
 }
 
 export async function createTicket(ticketData: Record<string, unknown>) {
+  // Use specialized retry method for tickets with attachments
+  if (
+    ticketData.attachments &&
+    Array.isArray(ticketData.attachments) &&
+    ticketData.attachments.length > 0
+  ) {
+    console.log("Creating ticket with attachments - using retry logic");
+    return apiClient.postWithRetry("/helpdesk-tickets", ticketData, 3);
+  }
   return apiClient.post("/helpdesk-tickets", ticketData);
 }
 
@@ -96,16 +105,13 @@ export async function reopenTicket(id: string, reason?: string) {
   return apiClient.patch(`${endpoint}/${id}/reopen`, { reason });
 }
 
-export async function addComment(
-  ticketId: string,
-  comment: string
-) {
+export async function addComment(ticketId: string, comment: string) {
   return apiClient.post(`/helpdesk-ticket-comments`, {
     id: null,
     ticketId: ticketId,
     comment: comment,
     commenterEmployeeId: null,
-    isDeleted: false
+    isDeleted: false,
   });
 }
 
@@ -124,7 +130,7 @@ export async function updateComment(
     ticketId: ticketId,
     comment: content,
     commenterEmployeeId: commenterEmployeeId,
-    isDeleted: false
+    isDeleted: false,
   });
 }
 

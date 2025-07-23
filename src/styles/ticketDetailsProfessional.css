@@ -1,3 +1,9 @@
+/* Professional layout for requester info value */
+.info-value.requester-info-value {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
 /* ========================================================================================
    PROFESSIONAL TICKET DETAILS PAGE - MATCHING CURRENT THEME
    Enterprise-grade styling consistent with IT ticket management system theme
@@ -2139,26 +2145,37 @@ textarea:focus-visible {
 }
 
 /* ==================== ENHANCED ATTACHMENTS GRID ==================== */
+.attachments-section {
+  margin-top: var(--spacing-4);
+}
+
+.attachments-section h3 {
+  margin-bottom: var(--spacing-3);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
 .attachments-grid {
   display: grid;
   grid-template-columns: repeat(
     auto-fill,
-    minmax(160px, 1fr)
-  ); /* Slightly smaller cards */
-  gap: var(--spacing-2); /* Reduced gap */
-  margin-top: var(--spacing-2); /* Reduced margin */
+    minmax(200px, 1fr)
+  ); /* Slightly larger cards for better content display */
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-3);
 }
 
 .attachment-card {
   background: var(--color-background-secondary);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
-  padding: var(--spacing-2); /* Reduced padding */
+  padding: var(--spacing-3);
   transition: all var(--transition-speed);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  min-height: 140px;
 }
 
 .attachment-card:hover {
@@ -2168,54 +2185,68 @@ textarea:focus-visible {
 }
 
 .attachment-preview {
-  margin-bottom: var(--spacing-2); /* Reduced margin */
+  margin-bottom: var(--spacing-3);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-1);
+  min-height: 40px;
+  justify-content: center;
 }
 
-.image-preview,
-.file-preview {
+.attachment-preview img {
+  max-width: 120px;
+  max-height: 120px;
+  border-radius: var(--border-radius);
+  object-fit: cover;
+  cursor: pointer;
+  transition: all var(--transition-speed);
+  border: 2px solid transparent;
+}
+
+.attachment-preview img:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow);
+  border-color: var(--color-primary);
+}
+
+.attachment-preview .file-icon {
+  font-size: 2.5rem;
+}
+
+.attachment-info {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
   gap: var(--spacing-2);
-}
-
-.preview-label {
-  font-size: 0.75rem;
-  color: var(--color-text-secondary);
-  font-weight: var(--font-weight-medium);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .attachment-name {
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-1);
-  word-break: break-all;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: center;
+  line-height: 1.3;
 }
 
 .attachment-size {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--color-text-secondary);
-  margin-bottom: var(--spacing-3);
+  margin-bottom: var(--spacing-1);
 }
 
 .attachment-card .download-btn {
   background: var(--color-primary);
   color: white;
   border: none;
-  padding: var(--spacing-2) var(--spacing-3);
+  padding: var(--spacing-1) var(--spacing-2);
   border-radius: var(--border-radius);
-  font-size: var(--font-size-sm);
+  font-size: 0.75rem;
   font-weight: var(--font-weight-medium);
   cursor: pointer;
   transition: all var(--transition-speed);
@@ -2224,11 +2255,52 @@ textarea:focus-visible {
   gap: var(--spacing-1);
   width: 100%;
   justify-content: center;
+  min-height: 28px;
 }
 
 .attachment-card .download-btn:hover {
   background: var(--color-primary-dark);
   transform: translateY(-1px);
+}
+
+.attachment-card .download-btn svg {
+  font-size: var(--font-size-sm);
+}
+
+/* Make sure file names wrap properly on small screens */
+@media (max-width: 768px) {
+  .attachments-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+
+  .attachment-card {
+    min-height: 140px;
+    padding: var(--spacing-2);
+  }
+
+  .attachment-preview img {
+    max-width: 100px;
+    max-height: 100px;
+  }
+
+  .attachment-name {
+    font-size: 0.65rem;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    max-height: 2.5em;
+    line-height: 1.2;
+  }
+
+  .attachment-size {
+    font-size: 0.6rem;
+  }
+
+  .attachment-card .download-btn {
+    font-size: 0.7rem;
+    padding: var(--spacing-1);
+    min-height: 24px;
+  }
 }
 
 /* ==================== COMMENT EDIT FUNCTIONALITY ==================== */
@@ -2380,4 +2452,70 @@ textarea:focus-visible {
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+
+/* ==================== IMAGE MODAL ==================== */
+.image-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: var(--spacing-4);
+}
+
+.image-modal-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.image-modal img {
+  max-width: 100%;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: var(--border-radius);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.image-modal-close {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  transition: all var(--transition-speed);
+}
+
+.image-modal-close:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+.image-modal-title {
+  margin-top: var(--spacing-3);
+  color: white;
+  font-size: var(--font-size-sm);
+  text-align: center;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

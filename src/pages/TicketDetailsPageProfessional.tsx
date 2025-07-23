@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
-import { getTicketById, addComment, updateComment, uploadAttachment } from "../services/ticketService";
+import {
+  getTicketById,
+  addComment,
+  updateComment,
+  uploadAttachment,
+} from "../services/ticketService";
 import { NotificationContext } from "../contexts/NotificationContext";
 import { useAuth } from "../hooks/useAuth";
 import {
@@ -87,8 +92,6 @@ interface ApiTicketResponse {
   }>;
 }
 
-
-
 // Simplified interfaces for the professional implementation
 interface TicketData {
   id: string;
@@ -150,9 +153,15 @@ const TicketDetailsPageProfessional: React.FC = () => {
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingCommentText, setEditingCommentText] = useState("");
   const [isUpdatingComment, setIsUpdatingComment] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<{
+    src: string;
+    alt: string;
+  } | null>(null);
 
   // Function to transform API comments to CommentData format
-  const transformComments = (apiComments: ApiTicketResponse['comments']): CommentData[] => {
+  const transformComments = (
+    apiComments: ApiTicketResponse["comments"]
+  ): CommentData[] => {
     if (!apiComments || apiComments.length === 0) {
       return [];
     }
@@ -167,7 +176,10 @@ const TicketDetailsPageProfessional: React.FC = () => {
         commenterEmployeeId: comment.commenterEmployeeId,
         attachments: comment.attachments || [],
       }))
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()); // Sort by newest first
+      .sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      ); // Sort by newest first
   };
 
   // Function to check if current user can edit a comment
@@ -195,7 +207,12 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
     setIsUpdatingComment(true);
     try {
-      await updateComment(id, editingCommentId, editingCommentText.trim(), user?.id ? parseInt(user.id) : undefined);
+      await updateComment(
+        id,
+        editingCommentId,
+        editingCommentText.trim(),
+        user?.id ? parseInt(user.id) : undefined
+      );
 
       // Refresh ticket data to get updated comments
       const updatedTicketResponse = await getTicketById(id);
@@ -212,14 +229,20 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
       // Show success notification
       if (notificationContext) {
-        notificationContext.success("Comment Updated", "Your comment has been updated successfully.");
+        notificationContext.success(
+          "Comment Updated",
+          "Your comment has been updated successfully."
+        );
       }
     } catch (error) {
       console.error("Error updating comment:", error);
 
       // Show error notification
       if (notificationContext) {
-        notificationContext.error("Error Updating Comment", "Failed to update comment. Please try again.");
+        notificationContext.error(
+          "Error Updating Comment",
+          "Failed to update comment. Please try again."
+        );
       }
     } finally {
       setIsUpdatingComment(false);
@@ -241,21 +264,25 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
         // Get the single ticket from API response - guaranteed to have exactly one ticket
         const foundTicket: ApiTicketResponse = ticketResponse;
-        const mappedAttachments = foundTicket?.attachments?.map((att: {
-          filename: string;
-          size: number;
-          fileType?: string;
-          fileData?: string;
-          fileSize?: number;
-          fileName?: string;
-        }) => ({
-          fileType: att.fileType || "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // or detect from filename
-          fileData: att.fileData || "", // base64 or blob string if you have it
-          fileSize: att.fileSize || att.size,
-          fileName: att.fileName || att.filename,
-          filename: att.filename,
-          size: att.size,
-        }));
+        const mappedAttachments = foundTicket?.attachments?.map(
+          (att: {
+            filename: string;
+            size: number;
+            fileType?: string;
+            fileData?: string;
+            fileSize?: number;
+            fileName?: string;
+          }) => ({
+            fileType:
+              att.fileType ||
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // or detect from filename
+            fileData: att.fileData || "", // base64 or blob string if you have it
+            fileSize: att.fileSize || att.size,
+            fileName: att.fileName || att.filename,
+            filename: att.filename,
+            size: att.size,
+          })
+        );
         if (foundTicket) {
           // Transform API response to our TicketData interface
           const transformedTicket: TicketData = {
@@ -276,11 +303,11 @@ const TicketDetailsPageProfessional: React.FC = () => {
             },
             assignedTo: foundTicket.assignedToEmployeeDetails
               ? {
-                employeeName:
-                  foundTicket.assignedToEmployeeDetails.employeeName,
-                designation:
-                  foundTicket.assignedToEmployeeDetails.designation,
-              }
+                  employeeName:
+                    foundTicket.assignedToEmployeeDetails.employeeName,
+                  designation:
+                    foundTicket.assignedToEmployeeDetails.designation,
+                }
               : undefined,
             department:
               foundTicket.helpdeskDepartmentDetails?.name ||
@@ -311,8 +338,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
           // If no comments exist, add a system comment
 
           setComments(transformedComments);
-
-
         } else {
           console.error("Ticket not found");
           setTicket(null);
@@ -327,6 +352,25 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
     loadTicketData();
   }, [id]);
+
+  // Handle keyboard events for image modal
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && selectedImage) {
+        setSelectedImage(null);
+      }
+    };
+
+    if (selectedImage) {
+      document.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden"; // Prevent background scrolling
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "unset";
+    };
+  }, [selectedImage]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
@@ -442,9 +486,10 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
       // Success notification
       if (notificationContext) {
-        const message = uploadedAttachments.length > 0
-          ? `Comment added with ${uploadedAttachments.length} attachment(s).`
-          : "Your comment has been added successfully.";
+        const message =
+          uploadedAttachments.length > 0
+            ? `Comment added with ${uploadedAttachments.length} attachment(s).`
+            : "Your comment has been added successfully.";
         notificationContext.success("Comment Added", message);
       }
     } catch (error) {
@@ -460,23 +505,28 @@ const TicketDetailsPageProfessional: React.FC = () => {
     }
   };
 
-
-  const handleCommentAttachment = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCommentAttachment = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const files = event.target.files;
     if (files && files.length > 0) {
       const newFiles = Array.from(files);
-      setCommentAttachments(prev => [...prev, ...newFiles]);
+      setCommentAttachments((prev) => [...prev, ...newFiles]);
       console.log("Files selected:", newFiles);
     }
     // Reset the input value so the same file can be selected again if needed
-    event.target.value = '';
+    event.target.value = "";
   };
 
   const removeCommentAttachment = (index: number) => {
     setCommentAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
-  function downloadAttachment(fileName: string, fileData: string, fileType: string) {
+  function downloadAttachment(
+    fileName: string,
+    fileData: string,
+    fileType: string
+  ) {
     const link = document.createElement("a");
     link.href = `data:${fileType};base64,${fileData}`;
     link.download = fileName;
@@ -485,12 +535,33 @@ const TicketDetailsPageProfessional: React.FC = () => {
     document.body.removeChild(link);
   }
 
-
-  function getAttachmentPreview(fileName: string, fileData: string, fileType: string) {
+  function getAttachmentPreview(
+    fileName: string,
+    fileData: string,
+    fileType: string
+  ) {
     if (fileType.startsWith("image/")) {
-      return <img src={`data:${fileType};base64,${fileData}`} alt={fileName} style={{ maxWidth: "100px" }} />;
+      return (
+        <img
+          src={`data:${fileType};base64,${fileData}`}
+          alt={fileName}
+          style={{
+            maxWidth: "120px",
+            maxHeight: "120px",
+            borderRadius: "4px",
+            objectFit: "cover",
+          }}
+          onClick={() =>
+            setSelectedImage({
+              src: `data:${fileType};base64,${fileData}`,
+              alt: fileName,
+            })
+          }
+        />
+      );
     }
-    return <div className="file-icon">📄</div>;
+    // For non-image files, show the appropriate file icon
+    return getFileIcon(fileName, 40);
   }
 
   const getPriorityColor = (priority: string) => {
@@ -601,28 +672,52 @@ const TicketDetailsPageProfessional: React.FC = () => {
               {/* All Ticket Information in One Grid */}
               <div className="comprehensive-info-grid">
                 {/* Requester Information */}
-                <div className="info-section">
+                <div className="info-section requester-info-section">
                   <h3>Requester Information</h3>
                   <div className="info-items">
-                    <div className="info-item">
+                    <div className="info-item requester-info-item">
                       <label>Requested By</label>
-                      <div className="info-value">
-                        {ticket.requestedBy.profilePic ? (
-                          <div className="profile-pic-container">
+                      <div className="info-value requester-info-value">
+                        <div className="requester-avatar">
+                          {ticket.requestedBy.profilePic ? (
                             <img
-                              src={`data:${ticket.requestedBy.profilePic}`}
+                              src={
+                                ticket.requestedBy.profilePic &&
+                                ticket.requestedBy.profilePic
+                                  ? `data:${ticket.requestedBy.profilePic};base64,${ticket.requestedBy.profilePic}`
+                                  : ""
+                              }
                               alt={ticket.requestedBy.employeeName}
+                              style={{
+                                width: "48px",
+                                height: "48px",
+                                borderRadius: "50%",
+                                objectFit: "cover",
+                                border: "2px solid #e3e7ef",
+                                background: "#f5f7fa",
+                              }}
                               className="profile-pic"
                             />
-                          </div>
-                        ) : (
-                          <FaUser />
-                        )}
-                        <div>
-                          <div className="primary-text">
+                          ) : (
+                            <div className="avatar-initials">
+                              {/* Show initials if available, fallback to icon */}
+                              {ticket.requestedBy.employeeName ? (
+                                ticket.requestedBy.employeeName
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")
+                                  .toUpperCase()
+                              ) : (
+                                <FaUser />
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        <div className="requester-details">
+                          <div className="primary-text requester-name">
                             {ticket.requestedBy.employeeName}
                           </div>
-                          <div className="secondary-text">
+                          <div className="secondary-text requester-role">
                             {ticket.requestedBy.designation}
                           </div>
                         </div>
@@ -742,17 +837,30 @@ const TicketDetailsPageProfessional: React.FC = () => {
                     {ticket.attachments.map((attachment, index) => (
                       <div key={index} className="attachment-card">
                         <div className="attachment-preview">
-                          {getAttachmentPreview(attachment.fileName, attachment.fileData, attachment.fileType)}
+                          {getAttachmentPreview(
+                            attachment.fileName,
+                            attachment.fileData,
+                            attachment.fileType
+                          )}
                         </div>
                         <div className="attachment-info">
-                          <div className="attachment-name" title={attachment.fileName}>
+                          <div
+                            className="attachment-name"
+                            title={attachment.fileName}
+                          >
                             {attachment.fileName}
                           </div>
                           <div className="attachment-size">
                             {formatFileSize2(attachment.fileSize)}
                           </div>
                           <button
-                            onClick={() => downloadAttachment(attachment.fileName, attachment.fileData, attachment.fileType)}
+                            onClick={() =>
+                              downloadAttachment(
+                                attachment.fileName,
+                                attachment.fileData,
+                                attachment.fileType
+                              )
+                            }
                             className="download-btn"
                           >
                             <FaDownload />
@@ -764,7 +872,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
                   </div>
                 </div>
               )}
-
 
               {/* Activity Timeline */}
               <div className="activity-section card-section">
@@ -796,7 +903,12 @@ const TicketDetailsPageProfessional: React.FC = () => {
                               <div className="comment-actions">
                                 <button
                                   className="edit-comment-btn"
-                                  onClick={() => startEditComment(comment.id, comment.content)}
+                                  onClick={() =>
+                                    startEditComment(
+                                      comment.id,
+                                      comment.content
+                                    )
+                                  }
                                   title="Edit comment"
                                 >
                                   Edit
@@ -810,14 +922,19 @@ const TicketDetailsPageProfessional: React.FC = () => {
                             <div className="edit-comment-form">
                               <textarea
                                 value={editingCommentText}
-                                onChange={(e) => setEditingCommentText(e.target.value)}
+                                onChange={(e) =>
+                                  setEditingCommentText(e.target.value)
+                                }
                                 rows={3}
                                 className="edit-comment-input"
                               />
                               <div className="edit-comment-actions">
                                 <button
                                   onClick={handleUpdateComment}
-                                  disabled={!editingCommentText.trim() || isUpdatingComment}
+                                  disabled={
+                                    !editingCommentText.trim() ||
+                                    isUpdatingComment
+                                  }
                                   className="save-comment-btn"
                                 >
                                   {isUpdatingComment ? (
@@ -899,7 +1016,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                        if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
                           e.preventDefault();
                           handleAddComment();
                         }
@@ -968,6 +1085,25 @@ const TicketDetailsPageProfessional: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <div className="image-modal" onClick={() => setSelectedImage(null)}>
+          <div
+            className="image-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="image-modal-close"
+              onClick={() => setSelectedImage(null)}
+            >
+              <FaTimes />
+            </button>
+            <img src={selectedImage.src} alt={selectedImage.alt} />
+            <div className="image-modal-title">{selectedImage.alt}</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

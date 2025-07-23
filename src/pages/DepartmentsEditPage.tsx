@@ -19,7 +19,6 @@ import {
 import {
   getHelpdeskDepartmentWithEmployees,
   updateHelpdeskDepartment,
-  type HelpdeskDepartmentPayload,
   type Employee,
 } from "../services/helpdeskDepartmentService";
 import "../styles/createSimple.css";
@@ -32,6 +31,7 @@ interface DepartmentFormData {
     isActive: boolean;
     employeeObj?: EmployeeSearchResult;
     searchQuery?: string;
+    originalId?: string; // Store the original UUID from API response
   }[];
 }
 
@@ -96,8 +96,9 @@ export const DepartmentsEditPage: React.FC = () => {
           ? employees.map((emp: Employee) => ({
               employeeId: emp.employeeId.toString(),
               isActive: emp.isActive,
+              originalId: emp.id, // Store the original UUID from API response
               employeeObj: {
-                id: emp.employeeId,
+                id: emp.employeeId, // Use employeeId for EmployeeSearchResult (number)
                 employeeName: emp.employeeProfilePicNameDTO.employeeName,
                 employeeId: emp.employeeId.toString(),
                 email: "", // Email not provided in new API response
@@ -112,6 +113,7 @@ export const DepartmentsEditPage: React.FC = () => {
                 isActive: true,
                 employeeObj: undefined,
                 searchQuery: "",
+                originalId: undefined,
               },
             ];
 
@@ -186,20 +188,25 @@ export const DepartmentsEditPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const payload: HelpdeskDepartmentPayload = {
+      // Build payload matching the sample structure
+      const payload = {
         department: {
+          id: id,
           name: formData.name.trim(),
           isActive: formData.isActive,
         },
         employees: formData.employees
           .filter((emp) => emp.employeeObj && emp.employeeId)
           .map((emp) => ({
+            // Use the original UUID id from the get API response
+            id: emp.originalId ?? "",
+            helpdeskDepartmentId: id,
             employeeId: parseInt(emp.employeeId),
             isActive: emp.isActive,
           })),
       };
 
-      await updateHelpdeskDepartment(id, payload);
+      await updateHelpdeskDepartment(payload);
 
       addNotification({
         type: "success",
@@ -239,6 +246,7 @@ export const DepartmentsEditPage: React.FC = () => {
           isActive: true,
           employeeObj: undefined,
           searchQuery: "",
+          originalId: undefined,
         },
       ],
     }));

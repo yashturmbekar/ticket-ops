@@ -50,7 +50,7 @@ export const useDepartmentEdit = (options: DepartmentEditHookOptions = {}) => {
 
   // Update department
   const updateDepartment = useCallback(
-    async (id: string, payload: HelpdeskDepartmentPayload) => {
+    async (_id: string, payload: HelpdeskDepartmentPayload) => {
       try {
         setLoading(true);
         setError(null);

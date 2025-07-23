@@ -289,6 +289,12 @@ const TicketDetailsPageProfessional: React.FC = () => {
           
           // If no comments exist, add a system comment
 
+          const transformedComments = transformComments(foundTicket.comments);
+          
+          // If no comments exist, add a system comment
+          
+          setComments(transformedComments);
+
           
         } else {
           console.error("Ticket not found");

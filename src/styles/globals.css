@@ -59,6 +59,7 @@
 
   /* Modern Spacing System */
   --spacing-0: 0;
+  --spacing-0-5: 0.125rem; /* Added for ultra-compact spacing */
   --spacing-1: 0.25rem;
   --spacing-2: 0.5rem;
   --spacing-3: 0.75rem;

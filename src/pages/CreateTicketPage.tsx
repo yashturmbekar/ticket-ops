@@ -80,6 +80,15 @@ export const CreateTicketPage: React.FC = () => {
       newErrors.category = "Category is required";
     }
 
+    if (formData.attachments.length > 3) {
+      addNotification({
+        type: "error",
+        title: "❌ Too Many Attachments",
+        message: "Please remove some attachments. Maximum of 3 files allowed.",
+      });
+      return false;
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -172,9 +181,31 @@ export const CreateTicketPage: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
+      const currentCount = formData.attachments.length;
+      const availableSlots = 3 - currentCount;
+
+      if (availableSlots <= 0) {
+        addNotification({
+          type: "warning",
+          title: "⚠️ Attachment Limit Reached",
+          message: "You can only attach up to 3 files per ticket.",
+        });
+        return;
+      }
+
+      const filesToAdd = files.slice(0, availableSlots);
+
+      if (files.length > availableSlots) {
+        addNotification({
+          type: "warning",
+          title: "⚠️ Some Files Not Added",
+          message: `Only ${availableSlots} file(s) could be added. Maximum of 3 attachments allowed.`,
+        });
+      }
+
       setFormData((prev) => ({
         ...prev,
-        attachments: [...prev.attachments, ...files],
+        attachments: [...prev.attachments, ...filesToAdd],
       }));
     }
   };
@@ -192,6 +223,53 @@ export const CreateTicketPage: React.FC = () => {
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
+
+  const isImageFile = (file: File): boolean => {
+    return file.type.startsWith("image/");
+  };
+
+  // Component for rendering individual file items
+  const FileItem: React.FC<{ file: File; index: number }> = ({
+    file,
+    index,
+  }) => {
+    const [imagePreview, setImagePreview] = React.useState<string>("");
+
+    React.useEffect(() => {
+      if (isImageFile(file)) {
+        const reader = new FileReader();
+        reader.onload = (e) => setImagePreview(e.target?.result as string);
+        reader.readAsDataURL(file);
+      }
+    }, [file]);
+
+    const isImage = isImageFile(file);
+
+    return (
+      <div className={`create-file-item ${isImage ? "has-image" : ""}`}>
+        {isImage && imagePreview && (
+          <img
+            src={imagePreview}
+            alt={file.name}
+            className="create-file-image-preview"
+          />
+        )}
+        <div className="create-file-info">
+          <span className="create-file-name" title={file.name}>
+            {file.name}
+          </span>
+          <span className="create-file-size">{formatFileSize(file.size)}</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => handleFileRemove(index)}
+          className="create-file-remove"
+        >
+          <FaTimes />
+        </button>
+      </div>
+    );
   };
 
   return (
@@ -313,45 +391,51 @@ export const CreateTicketPage: React.FC = () => {
                 Screenshots, error logs, or other relevant files
               </span>
             </label>
-            <div className="create-file-upload">
-              <input
-                type="file"
-                id="file-upload"
-                multiple
-                onChange={handleFileChange}
-                className="create-file-input"
-                accept=".jpg,.jpeg,.png,.pdf,.txt,.log,.docx,.xlsx"
-              />
-              <label htmlFor="file-upload" className="create-file-label">
-                <FaPaperclip />
-                <span>Choose files or drag them here</span>
-                <small>
-                  Max 10MB per file. Supported: images, PDFs, documents
-                </small>
-              </label>
-            </div>
-
-            {formData.attachments.length > 0 && (
-              <div className="create-file-list">
-                {formData.attachments.map((file, index) => (
-                  <div key={index} className="create-file-item">
-                    <div className="create-file-info">
-                      <span className="create-file-name">{file.name}</span>
-                      <span className="create-file-size">
-                        {formatFileSize(file.size)}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleFileRemove(index)}
-                      className="create-file-remove"
-                    >
-                      <FaTimes />
-                    </button>
-                  </div>
-                ))}
+            <div className="create-attachment-container">
+              <div className="create-file-upload">
+                <input
+                  type="file"
+                  id="file-upload"
+                  multiple
+                  onChange={handleFileChange}
+                  className="create-file-input"
+                  accept=".jpg,.jpeg,.png,.pdf,.txt,.log,.docx,.xlsx"
+                  disabled={formData.attachments.length >= 3}
+                />
+                <label
+                  htmlFor="file-upload"
+                  className={`create-file-label ${
+                    formData.attachments.length >= 3 ? "disabled" : ""
+                  }`}
+                >
+                  <FaPaperclip />
+                  <span>
+                    {formData.attachments.length >= 3
+                      ? "Maximum 3 files reached"
+                      : "Choose files or drag here"}
+                  </span>
+                  <small>
+                    {formData.attachments.length >= 3
+                      ? `${formData.attachments.length}/3 files attached`
+                      : "Max 10MB per file (3 files max)"}
+                  </small>
+                </label>
               </div>
-            )}
+
+              <div className="create-file-preview">
+                {formData.attachments.length > 0 ? (
+                  <div className="create-file-list">
+                    {formData.attachments.map((file, index) => (
+                      <FileItem key={index} file={file} index={index} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="create-file-preview-empty">
+                    No files selected
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 

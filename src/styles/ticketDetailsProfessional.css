@@ -1,3 +1,9 @@
+/* Professional layout for requester info value */
+.info-value.requester-info-value {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
 /* ========================================================================================
    PROFESSIONAL TICKET DETAILS PAGE - MATCHING CURRENT THEME
    Enterprise-grade styling consistent with IT ticket management system theme

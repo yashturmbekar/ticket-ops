@@ -85,6 +85,7 @@ export const LoginPage: React.FC = () => {
         </form>
 
         <div className="login-footer">
+          <h6>Use your redfish credentials to log in.</h6>
           <p>&copy; 2025 Tickets-Ops. All rights reserved.</p>
         </div>
       </div>

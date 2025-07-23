@@ -22,6 +22,7 @@ import { NetworkPage } from "./pages/NetworkPage.tsx";
 import { SettingsPage } from "./pages/SettingsPage.tsx";
 import DepartmentsCreatePage from "./pages/DepartmentsCreatePage";
 import DepartmentsPage from "./pages/DepartmentsPage";
+import DepartmentsEditPage from "./pages/DepartmentsEditPage";
 import { useAuth } from "./hooks/useAuth";
 import { UserRole } from "./types";
 import "./styles/globals.css";
@@ -184,6 +185,16 @@ const AppContent: React.FC = () => {
             <ProtectedRoute>
               <LayoutWrapper>
                 <DepartmentsCreatePage />
+              </LayoutWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/departments/edit/:id"
+          element={
+            <ProtectedRoute>
+              <LayoutWrapper>
+                <DepartmentsEditPage />
               </LayoutWrapper>
             </ProtectedRoute>
           }

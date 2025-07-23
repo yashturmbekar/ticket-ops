@@ -8,18 +8,15 @@ import {
   FaArrowUp,
   FaArrowDown,
   FaFilter,
-  FaPlus,
   FaUsers,
   FaChartLine,
   FaBolt,
   FaEye,
 } from "react-icons/fa";
-import { Loader } from "../common";
+import { Loader, TicketTile } from "../common";
 import type { Ticket, TicketStatus, Priority } from "../../types";
-import { getTicketStats, searchTickets } from "../../services";
-import { useNotifications } from "../../hooks";
-import { transformApiTicketsToTickets } from "../../utils/apiTransforms";
-import "../../styles/dashboardModern.css";
+import "../../styles/dashboard.css";
+import "../../styles/ticketsDashboard.css";
 
 interface DashboardStats {
   totalTickets: number;
@@ -34,7 +31,6 @@ interface DashboardStats {
 
 export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { addNotification } = useNotifications();
   const [stats, setStats] = useState<DashboardStats>({
     totalTickets: 0,
     openTickets: 0,
@@ -53,95 +49,146 @@ export const AdminDashboard: React.FC = () => {
       try {
         setLoading(true);
 
-        // Fetch real stats from API
-        const [statsResponse, recentTicketsResponse] = await Promise.all([
-          getTicketStats(),
-          searchTickets({}, 0, 10, "createdAt,desc"), // Get 10 most recent tickets
-        ]);
-
-        // Process stats data
-        const apiStats = statsResponse.data;
-        const processedStats: DashboardStats = {
-          totalTickets: apiStats.totalTickets || 0,
-          openTickets: apiStats.openTickets || 0,
-          resolvedTickets: apiStats.resolvedTickets || 0,
-          overdueTickets: apiStats.overdueTickets || 0,
-          slaBreaches: apiStats.slaBreaches || 0,
-          avgResolutionTime: apiStats.avgResolutionTime || 0,
-          userSatisfaction: apiStats.userSatisfaction || 0,
-          todayTickets: apiStats.todayTickets || 0,
+        // Mock data for demonstration
+        const mockStats = {
+          totalTickets: 1247,
+          openTickets: 89,
+          resolvedTickets: 1158,
+          overdueTickets: 12,
+          slaBreaches: 5,
+          avgResolutionTime: 18.5,
+          userSatisfaction: 4.2,
+          todayTickets: 24,
         };
 
-        // Process recent tickets
-        const apiTickets =
-          recentTicketsResponse.data?.items ||
-          recentTicketsResponse.items ||
-          [];
-        const transformedTickets = transformApiTicketsToTickets(apiTickets);
+        const mockTickets: Ticket[] = [
+          {
+            id: "T-001",
+            title: "Email server not responding",
+            description:
+              "Users unable to access email services. Multiple departments affected.",
+            priority: "high" as Priority,
+            status: "RAISED" as TicketStatus,
+            assignedTo: "John Smith",
+            createdAt: new Date("2024-01-15T08:30:00"),
+            updatedAt: new Date("2024-01-15T08:30:00"),
+            createdBy: "user@company.com",
+            category: "hardware",
+            slaDeadline: new Date("2024-01-15T12:30:00"),
+            tags: ["urgent", "email", "server"],
+            attachments: [],
+            comments: [],
+            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
+          },
+          {
+            id: "T-002",
+            title: "Software installation request",
+            description:
+              "Need Adobe Creative Suite installed on workstation for new designer.",
+            priority: "medium" as Priority,
+            status: "IN_PROGRESS" as TicketStatus,
+            assignedTo: "Jane Doe",
+            createdAt: new Date("2024-01-15T09:15:00"),
+            updatedAt: new Date("2024-01-15T09:15:00"),
+            createdBy: "designer@company.com",
+            category: "software",
+            slaDeadline: new Date("2024-01-15T17:15:00"),
+            tags: ["software", "installation", "adobe"],
+            attachments: [],
+            comments: [],
+            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
+          },
+          {
+            id: "T-003",
+            title: "Network connectivity issues",
+            description:
+              "Intermittent connection drops affecting productivity in Marketing dept.",
+            priority: "high" as Priority,
+            status: "RAISED" as TicketStatus,
+            assignedTo: "Mike Wilson",
+            createdAt: new Date("2024-01-15T10:00:00"),
+            updatedAt: new Date("2024-01-15T10:00:00"),
+            createdBy: "manager@company.com",
+            category: "network",
+            slaDeadline: new Date("2024-01-15T14:00:00"),
+            tags: ["network", "connectivity", "urgent"],
+            attachments: [],
+            comments: [],
+            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
+          },
+          {
+            id: "T-004",
+            title: "Password reset request",
+            description:
+              "User unable to access account after multiple failed login attempts.",
+            priority: "low" as Priority,
+            status: "resolved" as TicketStatus,
+            assignedTo: "Sarah Johnson",
+            createdAt: new Date("2024-01-15T07:45:00"),
+            updatedAt: new Date("2024-01-15T08:15:00"),
+            createdBy: "employee@company.com",
+            category: "access",
+            slaDeadline: new Date("2024-01-15T16:45:00"),
+            tags: [],
+            attachments: [],
+            comments: [],
+            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
+          },
+          {
+            id: "T-005",
+            title: "Printer not working",
+            description:
+              "Office printer showing error messages and not responding to print jobs.",
+            priority: "medium" as Priority,
+            status: "IN_PROGRESS" as TicketStatus,
+            assignedTo: "Tom Brown",
+            createdAt: new Date("2024-01-15T11:20:00"),
+            updatedAt: new Date("2024-01-15T11:45:00"),
+            createdBy: "reception@company.com",
+            category: "hardware",
+            slaDeadline: new Date("2024-01-15T15:20:00"),
+            tags: [],
+            attachments: [],
+            comments: [],
+            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
+          },
+          {
+            id: "T-006",
+            title: "Database performance slow",
+            description:
+              "Application queries taking longer than usual, affecting user experience.",
+            priority: "high" as Priority,
+            status: "RAISED" as TicketStatus,
+            assignedTo: "Alex Chen",
+            createdAt: new Date("2024-01-15T12:10:00"),
+            updatedAt: new Date("2024-01-15T12:10:00"),
+            createdBy: "dev@company.com",
+            category: "software",
+            slaDeadline: new Date("2024-01-15T16:10:00"),
+            tags: [],
+            attachments: [],
+            comments: [],
+            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
+          },
+        ];
 
-        setStats(processedStats);
-        setRecentTickets(transformedTickets);
-      } catch (error: unknown) {
+        // Filter out resolved/closed tickets for dashboard display
+        const activeTickets = mockTickets.filter(
+          (ticket) =>
+            ticket.status !== "RESOLVED" && ticket.status !== "APPROVED"
+        );
+
+        setStats(mockStats);
+        setRecentTickets(activeTickets);
+      } catch (error) {
         console.error("Error fetching dashboard data:", error);
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
-        addNotification({
-          type: "error",
-          title: "Failed to Load Dashboard",
-          message: `Failed to load dashboard data: ${errorMessage}`,
-        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchDashboardData();
-  }, [addNotification]);
-
-  const getTicketPriorityClass = (priority: Priority): string => {
-    return priority;
-  };
-
-  const getTicketStatusClass = (status: TicketStatus): string => {
-    return status;
-  };
-
-  const getSLAStatus = (deadline: Date): { status: string; text: string } => {
-    const now = new Date();
-    const hoursUntilDeadline =
-      (deadline.getTime() - now.getTime()) / (1000 * 60 * 60);
-
-    if (hoursUntilDeadline < 0) {
-      return { status: "critical", text: "Overdue" };
-    } else if (hoursUntilDeadline < 2) {
-      return { status: "warning", text: "Due soon" };
-    } else {
-      return { status: "good", text: "On track" };
-    }
-  };
-
-  const formatTimeAgo = (date: Date): string => {
-    const now = new Date();
-    const diffInMinutes = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60)
-    );
-
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes}m ago`;
-    } else if (diffInMinutes < 1440) {
-      return `${Math.floor(diffInMinutes / 60)}h ago`;
-    } else {
-      return `${Math.floor(diffInMinutes / 1440)}d ago`;
-    }
-  };
-
-  const getInitials = (name: string): string => {
-    return name
-      .split(" ")
-      .map((word) => word.charAt(0))
-      .join("")
-      .toUpperCase();
-  };
+  }, []);
 
   const handleTicketClick = (ticketId: string) => {
     navigate(`/tickets/${ticketId}`);
@@ -168,13 +215,6 @@ export const AdminDashboard: React.FC = () => {
           >
             <FaChartLine />
             <span>View Reports</span>
-          </button>
-          <button
-            className="btn btn-primary"
-            onClick={() => navigate("/tickets/create")}
-          >
-            <FaPlus />
-            <span>Create Ticket</span>
           </button>
         </div>
       </div>
@@ -204,7 +244,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
           <div className="modern-stat-value">{stats.openTickets}</div>
-          <div className="modern-stat-label">Open Tickets</div>
+          <div className="modern-stat-label">Raised Tickets</div>
           <div className="modern-stat-change neutral">
             <span>Active workload</span>
           </div>
@@ -289,60 +329,29 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="modern-tickets-grid">
+        <div className="dashboard-tickets-grid">
           {recentTickets.map((ticket) => {
-            const slaStatus = getSLAStatus(ticket.slaDeadline);
-
             return (
-              <div
+              <TicketTile
                 key={ticket.id}
-                className="modern-ticket-tile"
-                onClick={() => handleTicketClick(ticket.id)}
-              >
-                <div className="modern-ticket-header">
-                  <span className="modern-ticket-id">{ticket.id}</span>
-                  <span
-                    className={`modern-ticket-priority ${getTicketPriorityClass(
-                      ticket.priority
-                    )}`}
-                  >
-                    {ticket.priority}
-                  </span>
-                </div>
-
-                <h3 className="modern-ticket-title">{ticket.title}</h3>
-                <p className="modern-ticket-description">
-                  {ticket.description}
-                </p>
-
-                <div className="modern-ticket-meta">
-                  <div className="modern-ticket-assignee">
-                    <div className="modern-ticket-avatar">
-                      {getInitials(ticket.assignedTo || "Unknown")}
-                    </div>
-                    <span>{ticket.assignedTo}</span>
-                  </div>
-                  <span className="modern-ticket-date">
-                    {formatTimeAgo(ticket.createdAt)}
-                  </span>
-                </div>
-
-                <div className="modern-ticket-footer">
-                  <span
-                    className={`modern-ticket-status ${getTicketStatusClass(
-                      ticket.status
-                    )}`}
-                  >
-                    {ticket.status.replace("_", " ")}
-                  </span>
-                  <div className="modern-ticket-sla">
-                    <div
-                      className={`modern-sla-indicator ${slaStatus.status}`}
-                    ></div>
-                    <span>{slaStatus.text}</span>
-                  </div>
-                </div>
-              </div>
+                ticket={{
+                  id: ticket.id,
+                  ticketCode: `TKT-${ticket.id.slice(0, 8)}`,
+                  title: ticket.title,
+                  description: ticket.description,
+                  status: ticket.status,
+                  priority: ticket.priority,
+                  assignedTo: ticket.assignedTo,
+                  department: ticket.assignedDepartmentName,
+                  createdAt: ticket.createdAt.toISOString(),
+                  slaDeadline: ticket.slaDeadline?.toISOString(),
+                  commentCount: ticket.comments?.length || 0,
+                  attachmentCount: ticket.attachments?.length || 0,
+                  tags: ticket.tags,
+                }}
+                onClick={handleTicketClick}
+                compact={true}
+              />
             );
           })}
         </div>

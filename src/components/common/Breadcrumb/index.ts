@@ -1,1 +1,1 @@
-export { Breadcrumb } from "./BreadcrumbNew";
+export { Breadcrumb } from "./Breadcrumb";

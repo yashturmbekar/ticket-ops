@@ -1,7 +1,7 @@
 import React from "react";
-import { AdminDashboard } from "./AdminDashboardNew";
-import { ManagerDashboard } from "./ManagerDashboardNew";
-import { EmployeeDashboard } from "./EmployeeDashboardNew";
+import { AdminDashboard } from "./AdminDashboard";
+import { ManagerDashboard } from "./ManagerDashboard";
+import { EmployeeDashboard } from "./EmployeeDashboard";
 import { useAuth } from "../../hooks/useAuth";
 import { UserRole } from "../../types";
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Header } from "./Header";
-import SideNavModern from "./SideNavModern";
+import SideNavModern from "./SideNav";
 import { Breadcrumb } from "../common/Breadcrumb";
 import { FloatingActionButton } from "../common/FloatingActionButton";
 import "./AppLayout.css";

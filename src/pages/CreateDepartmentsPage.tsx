@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FaBuilding,
   FaSave,
@@ -9,18 +9,14 @@ import {
   FaUser,
   FaSearch,
 } from "react-icons/fa";
-import { Loader, ButtonLoader, Modal, Button } from "../components/common";
+import { ButtonLoader, Modal, Button } from "../components/common";
 import { useNotifications } from "../hooks/useNotifications";
 import {
   useEmployeeSearch,
   type EmployeeSearchResult,
 } from "../hooks/useEmployeeSearch";
-import {
-  getHelpdeskDepartmentWithEmployees,
-  updateHelpdeskDepartment,
-  type Employee,
-} from "../services/helpdeskDepartmentService";
-import "../styles/createSimple.css";
+import { createHelpdeskDepartment } from "../services/helpdeskDepartmentService";
+import "../styles/departmentActions.css";
 
 interface DepartmentFormData {
   name: string;
@@ -30,12 +26,10 @@ interface DepartmentFormData {
     isActive: boolean;
     employeeObj?: EmployeeSearchResult;
     searchQuery?: string;
-    originalId?: string; // Store the original UUID from API response
   }[];
 }
 
-export const DepartmentsEditPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+export const DepartmentsCreatePage: React.FC = () => {
   const navigate = useNavigate();
   const { addNotification } = useNotifications();
   const {
@@ -44,7 +38,6 @@ export const DepartmentsEditPage: React.FC = () => {
     search: searchEmployees,
   } = useEmployeeSearch();
   const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -66,78 +59,6 @@ export const DepartmentsEditPage: React.FC = () => {
     employees?: string;
     general?: string;
   }>({});
-
-  // Load department data for editing
-  const loadDepartment = React.useCallback(async () => {
-    if (!id) {
-      addNotification({
-        type: "error",
-        title: "Invalid Department ID",
-        message: "No department ID provided.",
-      });
-      navigate("/departments");
-      return;
-    }
-
-    try {
-      setInitialLoading(true);
-
-      // Use the new API to get department with employees
-      const response = await getHelpdeskDepartmentWithEmployees(id);
-      console.log(response);
-
-      if (response && response.department) {
-        const { department, employees } = response;
-
-        // Convert department data to form format
-        const employeesFormData = employees?.length
-          ? employees.map((emp: Employee) => ({
-              employeeId: emp.employeeId.toString(),
-              isActive: emp.isActive,
-              originalId: emp.id, // Store the original UUID from API response
-              employeeObj: {
-                id: emp.employeeId, // Use employeeId for EmployeeSearchResult (number)
-                employeeName: emp.employeeProfilePicNameDTO.employeeName,
-                employeeId: emp.employeeId.toString(),
-                email: "", // Email not provided in new API response
-                designation: emp.employeeProfilePicNameDTO.designation,
-                departmentName: department.name,
-              } as EmployeeSearchResult,
-              searchQuery: emp.employeeProfilePicNameDTO.employeeName,
-            }))
-          : [];
-
-        setFormData({
-          name: department.name,
-          isActive: department.isActive,
-          employees: employeesFormData,
-        });
-      } else {
-        addNotification({
-          type: "error",
-          title: "Department Not Found",
-          message: "The requested department could not be found.",
-        });
-        navigate("/departments");
-      }
-    } catch (error) {
-      console.error("Error loading department:", error);
-      addNotification({
-        type: "error",
-        title: "Failed to Load Department",
-        message: "Could not load department details. Please try again.",
-      });
-      navigate("/departments");
-    } finally {
-      setInitialLoading(false);
-    }
-  }, [id, addNotification, navigate]);
-
-  useEffect(() => {
-    if (id) {
-      loadDepartment();
-    }
-  }, [id, loadDepartment]);
 
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
@@ -173,50 +94,64 @@ export const DepartmentsEditPage: React.FC = () => {
       return;
     }
 
-    if (!id) return;
-
     setLoading(true);
 
     try {
-      // Build payload matching the sample structure
       const payload = {
         department: {
-          id: id,
           name: formData.name.trim(),
           isActive: formData.isActive,
         },
-        employees: formData.employees
-          .filter((emp) => emp.employeeObj && emp.employeeId)
-          .map((emp) => ({
-            // Use the original UUID id from the get API response
-            id: emp.originalId ?? "",
-            helpdeskDepartmentId: id,
-            employeeId: parseInt(emp.employeeId),
-            isActive: emp.isActive,
-          })),
+        employees: formData.employees.map((emp) => ({
+          employeeId: Number(emp.employeeId),
+          isActive: emp.isActive,
+        })),
       };
 
-      await updateHelpdeskDepartment(payload);
+      await createHelpdeskDepartment(payload);
 
       addNotification({
         type: "success",
-        title: "✅ Department Updated Successfully",
-        message: `Department "${formData.name}" has been updated successfully!`,
+        title: "🏢 Department Created Successfully!",
+        message: `Department "${formData.name}" has been created with ${
+          formData.employees.filter((emp) => emp.employeeId).length
+        } employee(s) assigned.`,
       });
 
       navigate("/departments");
     } catch (error: unknown) {
-      console.error("Error updating department:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
+      console.error("Failed to create department:", error);
 
-      addNotification({
-        type: "error",
-        title: "❌ Failed to Update Department",
-        message:
-          errorMessage ||
-          "There was an error updating the department. Please check your input and try again.",
-      });
+      // Check for duplicate name error from backend
+      const errorResponse = error as {
+        response?: {
+          data?: { errorKey?: string; title?: string; message?: string };
+        };
+      };
+
+      if (
+        errorResponse?.response?.data?.errorKey === "duplicate_name" ||
+        errorResponse?.response?.data?.title?.includes(
+          "Department with the same name already exists"
+        )
+      ) {
+        addNotification({
+          type: "warning",
+          title: "⚠️ Department Name Already Exists",
+          message: `A department with the name "${formData.name}" already exists. Please choose a different name.`,
+        });
+      } else {
+        const errorMessage =
+          errorResponse?.response?.data?.message ||
+          (error instanceof Error ? error.message : "Unknown error occurred");
+        addNotification({
+          type: "error",
+          title: "❌ Failed to Create Department",
+          message:
+            errorMessage ||
+            "There was an error creating the department. Please check your input and try again.",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -261,7 +196,6 @@ export const DepartmentsEditPage: React.FC = () => {
           isActive: true,
           employeeObj: employee,
           searchQuery: employee.employeeName,
-          originalId: undefined, // New employee, no original ID
         },
       ],
     }));
@@ -309,12 +243,6 @@ export const DepartmentsEditPage: React.FC = () => {
     }));
   };
 
-  if (initialLoading) {
-    return (
-      <Loader centered text="Loading department details..." minHeight="60vh" />
-    );
-  }
-
   return (
     <div className="create-page">
       {/* Page Title */}
@@ -324,9 +252,9 @@ export const DepartmentsEditPage: React.FC = () => {
             <FaBuilding />
           </div>
           <div className="create-page-title-text">
-            <h1 className="create-page-title">Edit Department</h1>
+            <h1 className="create-page-title">Create New Department</h1>
             <p className="create-page-subtitle">
-              Update department information and employee assignments
+              Set up a new helpdesk department with assigned employees
             </p>
           </div>
         </div>
@@ -386,9 +314,9 @@ export const DepartmentsEditPage: React.FC = () => {
           {/* Employee Search Section */}
           <div className="create-form-group">
             <label className="create-form-label">
-              Add More Employees
+              Add Employees
               <span className="create-form-hint">
-                Search and add additional employees to this department
+                Search and add employees to this department
               </span>
             </label>
 
@@ -452,7 +380,7 @@ export const DepartmentsEditPage: React.FC = () => {
               {formData.employees.length === 0 ? (
                 <div className="employee-list-empty">
                   <FaUser className="empty-icon" />
-                  <p>No employees assigned to this department. Search above to add employees.</p>
+                  <p>No employees added yet. Search above to add employees.</p>
                 </div>
               ) : (
                 <div className="employee-list-table">
@@ -538,12 +466,12 @@ export const DepartmentsEditPage: React.FC = () => {
               {loading ? (
                 <>
                   <ButtonLoader variant="white" />
-                  <span>Updating...</span>
+                  <span>Creating...</span>
                 </>
               ) : (
                 <>
                   <FaSave />
-                  <span>Update Department</span>
+                  <span>Create Department</span>
                 </>
               )}
             </button>
@@ -593,5 +521,4 @@ export const DepartmentsEditPage: React.FC = () => {
   );
 };
 
-export default DepartmentsEditPage;
-
+export default DepartmentsCreatePage;

@@ -28,7 +28,7 @@ import { searchHelpdeskDepartments } from "../services/helpdeskDepartmentService
 import type { HelpdeskDepartment } from "../services/helpdeskDepartmentService";
 import { useNotifications } from "../hooks/useNotifications";
 import { transformApiTicketsToTickets } from "../utils/apiTransforms";
-import "../styles/ticketsModern.css";
+import "../styles/ticketsDashboard.css";
 
 interface TicketsFilter {
   status: string;

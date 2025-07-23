@@ -5,7 +5,7 @@ import { Loader } from "../components/common";
 import { RoleWelcome } from "../components/common/RoleWelcome";
 import { AdminDashboard } from "../components/dashboards/AdminDashboard";
 import { ManagerDashboard } from "../components/dashboards/ManagerDashboard";
-import { EmployeeDashboard } from "../components/dashboards/EmployeeDashboardNew";
+import { EmployeeDashboard } from "../components/dashboards/EmployeeDashboard";
 import "../styles/dashboard.css";
 
 export const DashboardPage: React.FC = () => {
@@ -54,13 +54,13 @@ export const DashboardPage: React.FC = () => {
     case UserRole.EMPLOYEE:
       return (
         <DashboardLayout>
-          <EmployeeDashboard  />
+          <EmployeeDashboard />
         </DashboardLayout>
       );
     default:
       return (
         <DashboardLayout>
-          <EmployeeDashboard/>
+          <EmployeeDashboard />
         </DashboardLayout>
       );
   }

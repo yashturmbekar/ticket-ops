@@ -12,7 +12,7 @@ import {
   FaBuilding,
 } from "react-icons/fa";
 import { useNavigation } from "../../hooks/useNavigation";
-import "./SideNavModern.css";
+import "./SideNav.css";
 
 interface SideNavProps {
   isMobileMenuOpen?: boolean;

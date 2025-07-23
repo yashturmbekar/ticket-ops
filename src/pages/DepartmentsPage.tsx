@@ -16,7 +16,7 @@ import {
   type Employee,
 } from "../services/helpdeskDepartmentService";
 import { useNotifications } from "../hooks/useNotifications";
-import "../styles/ticketsModern.css";
+import "../styles/ticketsDashboard.css";
 import "../styles/departments.css";
 
 interface DepartmentWithEmployees extends HelpdeskDepartment {

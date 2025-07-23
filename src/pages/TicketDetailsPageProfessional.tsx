@@ -116,6 +116,10 @@ interface TicketData {
   dueDate?: string;
   assetTag?: string;
   attachments: Array<{
+    fileType: string;
+    fileData: string;
+    fileSize: number;
+    fileName: string;
     filename: string;
     size: number;
   }>;
@@ -193,11 +197,11 @@ const TicketDetailsPageProfessional: React.FC = () => {
     setIsUpdatingComment(true);
     try {
       await updateComment(id, editingCommentId, editingCommentText.trim(), user?.id ? parseInt(user.id) : undefined);
-      
+
       // Refresh ticket data to get updated comments
       const updatedTicketResponse = await getTicketById(id);
       const updatedTicket: ApiTicketResponse = updatedTicketResponse;
-      
+
       if (updatedTicket) {
         const updatedComments = transformComments(updatedTicket.comments);
         setComments(updatedComments);
@@ -213,7 +217,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
       }
     } catch (error) {
       console.error("Error updating comment:", error);
-      
+
       // Show error notification
       if (notificationContext) {
         notificationContext.error("Error Updating Comment", "Failed to update comment. Please try again.");
@@ -238,7 +242,14 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
         // Get the single ticket from API response - guaranteed to have exactly one ticket
         const foundTicket: ApiTicketResponse = ticketResponse;
-
+        const mappedAttachments = foundTicket?.attachments?.map((att: any) => ({
+          fileType: att.fileType || "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // or detect from filename
+          fileData: att.fileData || "", // base64 or blob string if you have it
+          fileSize: att.fileSize || att.size,
+          fileName: att.fileName || att.filename,
+          filename: att.filename,
+          size: att.size,
+        }));
         if (foundTicket) {
           // Transform API response to our TicketData interface
           const transformedTicket: TicketData = {
@@ -259,11 +270,11 @@ const TicketDetailsPageProfessional: React.FC = () => {
             },
             assignedTo: foundTicket.assignedToEmployeeDetails
               ? {
-                  employeeName:
-                    foundTicket.assignedToEmployeeDetails.employeeName,
-                  designation:
-                    foundTicket.assignedToEmployeeDetails.designation,
-                }
+                employeeName:
+                  foundTicket.assignedToEmployeeDetails.employeeName,
+                designation:
+                  foundTicket.assignedToEmployeeDetails.designation,
+              }
               : undefined,
             department:
               foundTicket.helpdeskDepartmentDetails?.name ||
@@ -274,7 +285,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
             dateModified: foundTicket.lastModifiedDate,
             dueDate: foundTicket.slaDeadline,
             assetTag: foundTicket.assetTag,
-            attachments: foundTicket.attachments || [],
+            attachments: mappedAttachments || [],
           };
 
           setTicket(transformedTicket);
@@ -286,16 +297,16 @@ const TicketDetailsPageProfessional: React.FC = () => {
           );
 
           // Transform and set comments from ticket response
-          
+
           // If no comments exist, add a system comment
 
           const transformedComments = transformComments(foundTicket.comments);
-          
+
           // If no comments exist, add a system comment
-          
+
           setComments(transformedComments);
 
-          
+
         } else {
           console.error("Ticket not found");
           setTicket(null);
@@ -322,9 +333,15 @@ const TicketDetailsPageProfessional: React.FC = () => {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
+  function formatFileSize2(size: number): string {
+    if (!size) return "0 B";
+    const i = Math.floor(Math.log(size) / Math.log(1024));
+    const sizes = ["B", "KB", "MB", "GB"];
+    return `${(size / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+  }
 
   const getFileIcon = (filename: string, size?: number) => {
-    const ext = filename.split(".").pop()?.toLowerCase();
+    const ext = filename?.split(".").pop()?.toLowerCase();
     const iconSize = size || 16;
     switch (ext) {
       case "pdf":
@@ -371,7 +388,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
     try {
       // Upload attachments first if any
       const uploadedAttachments: Array<{ filename: string; size: number }> = [];
-      
+
       if (commentAttachments.length > 0) {
         for (const file of commentAttachments) {
           try {
@@ -395,32 +412,32 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
       // Call the actual API to add comment
       const response = await addComment(id, newComment.trim());
-      
+
       console.log("Comment added successfully:", response);
 
       // Refresh ticket data to get updated comments
       const updatedTicketResponse = await getTicketById(id);
       const updatedTicket: ApiTicketResponse = updatedTicketResponse;
-      
+
       if (updatedTicket) {
         const updatedComments = transformComments(updatedTicket.comments);
         setComments(updatedComments);
       }
-      
+
       // Clear the form
       setNewComment("");
       setCommentAttachments([]);
 
       // Show success notification
       if (notificationContext) {
-        const message = uploadedAttachments.length > 0 
+        const message = uploadedAttachments.length > 0
           ? `Comment added with ${uploadedAttachments.length} attachment(s).`
           : "Your comment has been added successfully.";
         notificationContext.success("Comment Added", message);
       }
     } catch (error) {
       console.error("Error adding comment:", error);
-      
+
       // Show error notification
       if (notificationContext) {
         notificationContext.error(
@@ -444,35 +461,22 @@ const TicketDetailsPageProfessional: React.FC = () => {
     setCommentAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const downloadAttachment = (filename: string) => {
-    // Simulate file download
-    console.log("Downloading:", filename);
-  };
+  function downloadAttachment(fileName: string, fileData: string, fileType: string) {
+    const link = document.createElement("a");
+    link.href = `data:${fileType};base64,${fileData}`;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 
-  const getAttachmentPreview = (filename: string) => {
-    const extension = filename.split(".").pop()?.toLowerCase();
-    const isImage = ["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(
-      extension || ""
-    );
 
-    if (isImage) {
-      return (
-        <div className="image-preview">
-          <FaFileImage size={48} />
-          <span className="preview-label">Image</span>
-        </div>
-      );
+  function getAttachmentPreview(fileName: string, fileData: string, fileType: string) {
+    if (fileType.startsWith("image/")) {
+      return <img src={`data:${fileType};base64,${fileData}`} alt={fileName} style={{ maxWidth: "100px" }} />;
     }
-
-    return (
-      <div className="file-preview">
-        {getFileIcon(filename, 48)}
-        <span className="preview-label">
-          {extension?.toUpperCase() || "File"}
-        </span>
-      </div>
-    );
-  };
+    return <div className="file-icon">📄</div>;
+  }
 
   const getPriorityColor = (priority: string) => {
     switch (priority.toLowerCase()) {
@@ -715,7 +719,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
                   </div>
                 </div>
               </div>
-
               {/* Attachments with Preview */}
               {ticket.attachments && ticket.attachments.length > 0 && (
                 <div className="attachments-section card-section">
@@ -724,22 +727,17 @@ const TicketDetailsPageProfessional: React.FC = () => {
                     {ticket.attachments.map((attachment, index) => (
                       <div key={index} className="attachment-card">
                         <div className="attachment-preview">
-                          {getAttachmentPreview(attachment.filename)}
+                          {getAttachmentPreview(attachment.fileName, attachment.fileData, attachment.fileType)}
                         </div>
                         <div className="attachment-info">
-                          <div
-                            className="attachment-name"
-                            title={attachment.filename}
-                          >
-                            {attachment.filename}
+                          <div className="attachment-name" title={attachment.fileName}>
+                            {attachment.fileName}
                           </div>
                           <div className="attachment-size">
-                            {formatFileSize(attachment.size)}
+                            {formatFileSize2(attachment.fileSize)}
                           </div>
                           <button
-                            onClick={() =>
-                              downloadAttachment(attachment.filename)
-                            }
+                            onClick={() => downloadAttachment(attachment.fileName, attachment.fileData, attachment.fileType)}
                             className="download-btn"
                           >
                             <FaDownload />
@@ -751,6 +749,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
                   </div>
                 </div>
               )}
+
 
               {/* Activity Timeline */}
               <div className="activity-section card-section">

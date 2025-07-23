@@ -52,11 +52,8 @@ export const DepartmentsPage: React.FC = () => {
         "id,desc"
       );
 
-      console.log("API Response:", response);
-
       // Extract departments from response - API returns 'items' array
       const departmentsList = response.data?.items || response.items || [];
-      console.log("Departments List:", departmentsList);
       setDepartments(departmentsList);
     } catch (error) {
       console.error("Error loading departments:", error);

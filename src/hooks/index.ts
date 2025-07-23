@@ -2,6 +2,7 @@ export { useAuth } from "./useAuth";
 export { useTheme } from "./useTheme";
 export { useNotifications } from "./useNotifications";
 export { useRealtime } from "./useRealtime";
+export { useDepartmentEdit } from "./useDepartmentEdit";
 export {
   useApi,
   usePaginatedApi,

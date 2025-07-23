@@ -107,65 +107,64 @@ export const CreateTicketPage: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!validateForm()) {
-    addNotification({
-      type: "warning",
-      title: "⚠️ Form Validation Failed",
-      message: "Please fill in all required fields before submitting your ticket.",
-    });
-    return;
-  }
+    if (!validateForm()) {
+      addNotification({
+        type: "warning",
+        title: "⚠️ Form Validation Failed",
+        message: "Please fill in all required fields before submitting your ticket.",
+      });
+      return;
+    }
 
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    // Convert files to byte arrays
-    const byteArrays = await Promise.all(
-      formData.attachments.map(async (file) => ({
-        fileName: file.name,
-        fileData: await fileToByteArray(file),
-        fileSize: file.size,
-        fileType: file.type,
-      }))
-    );
+    try {
+      // Convert files to byte arrays
+      const byteArrays = await Promise.all(
+        formData.attachments.map(async (file) => ({
+          fileName: file.name,
+          fileData: await fileToByteArray(file),
+          fileSize: file.size,
+          fileType: file.type,
+        }))
+      );
 
-    // Construct ticket data
-    const ticketData = {
-      title: formData.title,
-      description: formData.description,
-      assignedDepartmentId: formData.category,
-      requestedBy: user?.email || "",
-      status: TicketStatus.RAISED,
-      priority: "LOW",
-      attachments: byteArrays,
-    };
+      // Construct ticket data
+      const ticketData = {
+        title: formData.title,
+        description: formData.description,
+        assignedDepartmentId: formData.category,
+        requestedBy: user?.email || "",
+        status: TicketStatus.RAISED,
+        priority: "LOW",
+        attachments: byteArrays,
+      };
 
-    // Call API
-    const response = await createTicket(ticketData);
-    console.log("Ticket created successfully:", response);
+      // Call API
+      const response = await createTicket(ticketData);
+      console.log("Ticket created successfully:", response);
 
-    addNotification({
-      type: "success",
-      title: "🎫 Ticket Created Successfully!",
-      message: `Your support ticket "${formData.title}" has been created and assigned to the ${
-        categories.find((c) => c.id === formData.category)?.name || "selected"
-      } department.`,
-    });
+      addNotification({
+        type: "success",
+        title: "🎫 Ticket Created Successfully!",
+        message: `Your support ticket "${formData.title}" has been created and assigned to the ${categories.find((c) => c.id === formData.category)?.name || "selected"
+          } department.`,
+      });
 
-    navigate("/tickets");
-  } catch (error) {
-    console.error("Error creating ticket:", error);
-    addNotification({
-      type: "error",
-      title: "❌ Failed to Create Ticket",
-      message: "There was an error creating your support ticket. Please try again.",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+      navigate("/tickets");
+    } catch (error) {
+      console.error("Error creating ticket:", error);
+      addNotification({
+        type: "error",
+        title: "❌ Failed to Create Ticket",
+        message: "There was an error creating your support ticket. Please try again.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   const handleCancel = () => {
@@ -320,9 +319,8 @@ export const CreateTicketPage: React.FC = () => {
               </span>
             </label>
             <textarea
-              className={`create-form-textarea ${
-                errors.description ? "error" : ""
-              }`}
+              className={`create-form-textarea ${errors.description ? "error" : ""
+                }`}
               value={formData.description}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -385,49 +383,61 @@ export const CreateTicketPage: React.FC = () => {
                 Screenshots, error logs, or other relevant files
               </span>
             </label>
-            <div className="create-attachment-container">
-              <div className="create-file-upload">
-                <input
-                  type="file"
-                  id="file-upload"
-                  multiple
-                  onChange={(e: any) => handleFileChange(e)}
-                  className="create-file-input"
-                  accept=".jpg,.jpeg,.png,.pdf,.txt,.log,.docx,.xlsx"
-                  disabled={formData.attachments.length >= 3}
-                />
-                <label
-                  htmlFor="file-upload"
-                  className={`create-file-label ${
-                    formData.attachments.length >= 3 ? "disabled" : ""
-                  }`}
-                >
-                  <FaPaperclip />
-                  <span>
-                    {formData.attachments.length >= 3
-                      ? "Maximum 3 files reached"
-                      : "Choose files or drag here"}
-                  </span>
-                  <small>
-                    {formData.attachments.length >= 3
-                      ? `${formData.attachments.length}/3 files attached`
-                      : "Max 10MB per file (3 files max)"}
-                  </small>
-                </label>
-              </div>
+            <div className="create-form-group">
+              <label className="create-form-label">
+                Attachments
+                <span className="create-form-hint">
+                  Screenshots, error logs, or other relevant files
+                </span>
+              </label>
 
-              <div className="create-file-preview">
-                {formData.attachments.length > 0 ? (
-                  <div className="create-file-list">
-                    {formData.attachments.map((file, index) => (
-                      <FileItem key={index} file={file} index={index} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="create-file-preview-empty">
-                    No files selected
-                  </div>
-                )}
+              <div className="create-attachment-container">
+                {/* File Upload Input */}
+                <div className="create-file-upload">
+                  <input
+                    type="file"
+                    id="file-upload"
+                    multiple
+                    onChange={handleFileChange}
+                    className="create-file-input"
+                    accept=".jpg,.jpeg,.png,.pdf,.txt,.log,.docx,.xlsx"
+                    disabled={formData.attachments.length >= 3}
+                  />
+
+                  {/* Label for Upload */}
+                  <label
+                    htmlFor="file-upload"
+                    className={`create-file-label ${formData.attachments.length >= 3 ? "disabled" : ""
+                      }`}
+                  >
+                    <FaPaperclip />
+                    <span>
+                      {formData.attachments.length >= 3
+                        ? "Maximum 3 files reached"
+                        : "Choose files or drag here"}
+                    </span>
+                    <small>
+                      {formData.attachments.length >= 3
+                        ? `${formData.attachments.length}/3 files attached`
+                        : "Max 10MB per file (3 files max)"}
+                    </small>
+                  </label>
+                </div>
+
+                {/* File Preview List */}
+                <div className="create-file-preview">
+                  {formData.attachments.length > 0 ? (
+                    <div className="create-file-list">
+                      {formData.attachments.map((file, index) => (
+                        <FileItem key={index} file={file} index={index} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="create-file-preview-empty">
+                      No files selected
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

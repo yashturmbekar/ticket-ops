@@ -88,11 +88,10 @@ export const searchHelpdeskDepartments = async (
 };
 
 export const updateHelpdeskDepartment = async (
-  id: string,
   payload: HelpdeskDepartmentPayload
 ) => {
   const response = await apiClient.put(
-    `/helpdesk-departments/${id}/with-employees`,
+    `/helpdesk-departments`,
     payload
   );
   return response.data;

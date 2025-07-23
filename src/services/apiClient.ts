@@ -7,6 +7,10 @@ export function getToken(): string | null {
   return localStorage.getItem(AUTH_TOKEN_KEY);
 }
 
+export function setToken(token: string): void {
+  localStorage.setItem(AUTH_TOKEN_KEY, token);
+}
+
 export function removeToken(): void {
   localStorage.removeItem(AUTH_TOKEN_KEY);
 }
@@ -18,7 +22,7 @@ const instance = axios.create({
   timeout: API_TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
-    'ngrok-skip-browser-warning': '69420',
+    'ngrok-skip-browser-warning': 'true',
   },
 });
 
@@ -76,6 +80,8 @@ const apiClient = {
   delete: async (url: string, config = {}): Promise<any> => {
     return (await instance.delete(url, config)).data;
   },
+
+
 };
 
-export default apiClient; 
+export default apiClient;

@@ -178,7 +178,7 @@ export const EmployeeDashboard: React.FC = () => {
       {/* My Tickets Section */}
       <div className="modern-tickets-section">
         <div className="modern-section-header">
-          <h2 className="modern-section-title">My Tickets</h2>
+          <h2 className="modern-section-title">Recent Tickets</h2>
           <div className="modern-section-actions">
             <button
               className="btn btn-secondary btn-sm"
@@ -191,7 +191,7 @@ export const EmployeeDashboard: React.FC = () => {
         </div>
 
         <div className="dashboard-tickets-grid">
-          {myTickets.map((ticket) => {
+           {myTickets.slice(0, 4).map((ticket) => {
             return (
               <TicketTile
                 key={ticket.id}

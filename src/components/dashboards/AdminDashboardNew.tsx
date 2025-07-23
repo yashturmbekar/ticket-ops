@@ -330,7 +330,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         <div className="dashboard-tickets-grid">
-          {recentTickets.map((ticket) => {
+          {recentTickets.slice(0, 4).map((ticket) => {
             return (
               <TicketTile
                 key={ticket.id}

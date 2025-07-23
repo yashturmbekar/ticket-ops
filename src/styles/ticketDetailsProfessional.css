@@ -2160,3 +2160,153 @@ textarea:focus-visible {
   background: var(--color-primary-dark);
   transform: translateY(-1px);
 }
+
+/* ==================== COMMENT EDIT FUNCTIONALITY ==================== */
+.timeline-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.comment-actions {
+  display: flex;
+  gap: var(--spacing-1);
+}
+
+.edit-comment-btn {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--border-radius);
+  transition: var(--transition-normal);
+  text-decoration: underline;
+}
+
+.edit-comment-btn:hover {
+  background: var(--color-primary-lightest);
+  color: var(--color-primary-dark);
+}
+
+.edit-comment-form {
+  margin-top: var(--spacing-2);
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-3);
+}
+
+.edit-comment-input {
+  width: 100%;
+  padding: var(--spacing-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 100px;
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  transition: var(--transition-normal);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.edit-comment-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-lightest), inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.edit-comment-actions {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-2);
+  justify-content: flex-end;
+  padding-top: var(--spacing-2);
+  border-top: 1px solid var(--color-border);
+}
+
+.save-comment-btn,
+.cancel-comment-btn {
+  padding: var(--spacing-1) var(--spacing-3);
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.save-comment-btn {
+  background: var(--color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font-weight: var(--font-weight-medium);
+  min-width: 80px;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.save-comment-btn:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.save-comment-btn:disabled {
+  background: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.save-comment-btn:disabled .button-loader {
+  opacity: 0.7;
+}
+
+.save-comment-btn .button-loader {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.submit-button {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.cancel-comment-btn {
+  background: var(--color-background-secondary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  font-weight: var(--font-weight-medium);
+  min-width: 80px;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.cancel-comment-btn:hover:not(:disabled) {
+  background: var(--color-border);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.cancel-comment-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}

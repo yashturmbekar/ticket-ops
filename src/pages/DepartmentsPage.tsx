@@ -8,7 +8,7 @@ import {
   FaUsers,
   FaSearch,
 } from "react-icons/fa";
-import { Loader } from "../components/common";
+import { Loader, Modal, Button } from "../components/common";
 import {
   searchHelpdeskDepartments,
   deleteHelpdeskDepartment,
@@ -36,6 +36,13 @@ export const DepartmentsPage: React.FC = () => {
   const [expandedDepartments, setExpandedDepartments] = useState<Set<string>>(
     new Set()
   );
+  
+  // Confirmation modal state
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [departmentToDelete, setDepartmentToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   // Load departments
   const loadDepartments = React.useCallback(async () => {
@@ -89,29 +96,38 @@ export const DepartmentsPage: React.FC = () => {
     loadDepartments();
   }, [loadDepartments]);
 
-  const handleDeleteDepartment = async (id: string, name: string) => {
-    if (
-      !window.confirm(`Are you sure you want to delete "${name}" department?`)
-    ) {
-      return;
-    }
+  const handleDeleteDepartment = (id: string, name: string) => {
+    setDepartmentToDelete({ id, name });
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDeleteDepartment = async () => {
+    if (!departmentToDelete) return;
 
     try {
-      await deleteHelpdeskDepartment(id);
+      await deleteHelpdeskDepartment(departmentToDelete.id);
       addNotification({
         type: "success",
-        title: "Department Deleted",
-        message: `Department "${name}" has been deleted successfully.`,
+        title: "✅ Department Deleted",
+        message: `Department "${departmentToDelete.name}" has been deleted successfully.`,
       });
       loadDepartments();
     } catch (error) {
       console.error("Error deleting department:", error);
       addNotification({
         type: "error",
-        title: "Delete Failed",
+        title: "❌ Delete Failed",
         message: "Could not delete department. Please try again.",
       });
+    } finally {
+      setShowDeleteConfirmation(false);
+      setDepartmentToDelete(null);
     }
+  };
+
+  const cancelDeleteDepartment = () => {
+    setShowDeleteConfirmation(false);
+    setDepartmentToDelete(null);
   };
 
   const toggleDepartmentExpansion = (departmentId: string) => {
@@ -374,6 +390,46 @@ export const DepartmentsPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={showDeleteConfirmation}
+        onClose={cancelDeleteDepartment}
+        title="Confirm Department Deletion"
+        size="small"
+        className="modal-confirm"
+        footer={
+          <div className="modal-footer">
+            <Button
+              variant="secondary"
+              onClick={cancelDeleteDepartment}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="error"
+              onClick={confirmDeleteDepartment}
+              disabled={loading}
+              className="btn-delete-confirm"
+            >
+              Delete Department
+            </Button>
+          </div>
+        }
+      >
+        <div className="modal-confirm-icon error">
+          <FaTrash />
+        </div>
+        <div className="modal-confirm-title">
+          Delete Department
+        </div>
+        <div className="modal-confirm-message">
+          Are you sure you want to delete <strong>"{departmentToDelete?.name}"</strong>? 
+          This action will permanently delete the department and cannot be undone. 
+          All associated employee assignments will be removed.
+        </div>
+      </Modal>
     </div>
   );
 };

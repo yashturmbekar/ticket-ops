@@ -10,16 +10,12 @@ import {
   FaEye,
   FaEyeSlash,
   FaUserTimes,
-  FaToggleOn,
-  FaToggleOff,
 } from "react-icons/fa";
 import { Loader } from "../components/common";
 import {
   searchHelpdeskDepartments,
   deleteHelpdeskDepartment,
-  toggleDepartmentStatus,
   removeEmployeeFromDepartment,
-  toggleEmployeeStatus,
   type HelpdeskDepartment,
 } from "../services/helpdeskDepartmentService";
 import { useNotifications } from "../hooks/useNotifications";
@@ -103,31 +99,6 @@ export const DepartmentsPage: React.FC = () => {
     }
   };
 
-  const handleToggleDepartmentStatus = async (
-    id: string,
-    name: string,
-    currentStatus: boolean
-  ) => {
-    try {
-      await toggleDepartmentStatus(id, !currentStatus);
-      addNotification({
-        type: "success",
-        title: "Status Updated",
-        message: `Department "${name}" has been ${
-          !currentStatus ? "activated" : "deactivated"
-        }.`,
-      });
-      loadDepartments();
-    } catch (error) {
-      console.error("Error updating department status:", error);
-      addNotification({
-        type: "error",
-        title: "Update Failed",
-        message: "Could not update department status. Please try again.",
-      });
-    }
-  };
-
   const handleRemoveEmployee = async (
     departmentId: string,
     employeeId: number,
@@ -155,32 +126,6 @@ export const DepartmentsPage: React.FC = () => {
         type: "error",
         title: "Remove Failed",
         message: "Could not remove employee. Please try again.",
-      });
-    }
-  };
-
-  const handleToggleEmployeeStatus = async (
-    departmentId: string,
-    employeeId: number,
-    employeeName: string,
-    currentStatus: boolean
-  ) => {
-    try {
-      await toggleEmployeeStatus(departmentId, employeeId, !currentStatus);
-      addNotification({
-        type: "success",
-        title: "Employee Status Updated",
-        message: `${employeeName} has been ${
-          !currentStatus ? "activated" : "deactivated"
-        }.`,
-      });
-      loadDepartments();
-    } catch (error) {
-      console.error("Error updating employee status:", error);
-      addNotification({
-        type: "error",
-        title: "Update Failed",
-        message: "Could not update employee status. Please try again.",
       });
     }
   };
@@ -342,27 +287,6 @@ export const DepartmentsPage: React.FC = () => {
                             <FaEdit />
                           </Link>
                           <button
-                            className="action-btn toggle-btn"
-                            onClick={() =>
-                              handleToggleDepartmentStatus(
-                                department.id,
-                                department.name,
-                                department.isActive
-                              )
-                            }
-                            title={
-                              department.isActive
-                                ? "Deactivate Department"
-                                : "Activate Department"
-                            }
-                          >
-                            {department.isActive ? (
-                              <FaToggleOff />
-                            ) : (
-                              <FaToggleOn />
-                            )}
-                          </button>
-                          <button
                             className="action-btn delete-btn"
                             onClick={() =>
                               handleDeleteDepartment(
@@ -415,28 +339,6 @@ export const DepartmentsPage: React.FC = () => {
                                       </span>
                                     </div>
                                     <div className="employee-actions">
-                                      <button
-                                        className="employee-action-btn toggle-btn"
-                                        onClick={() =>
-                                          handleToggleEmployeeStatus(
-                                            department.id,
-                                            employee.id,
-                                            employee.employeeName,
-                                            employee.isActive
-                                          )
-                                        }
-                                        title={
-                                          employee.isActive
-                                            ? "Deactivate Employee"
-                                            : "Activate Employee"
-                                        }
-                                      >
-                                        {employee.isActive ? (
-                                          <FaToggleOff />
-                                        ) : (
-                                          <FaToggleOn />
-                                        )}
-                                      </button>
                                       <button
                                         className="employee-action-btn remove-btn"
                                         onClick={() =>

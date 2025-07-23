@@ -669,28 +669,49 @@ const TicketDetailsPageProfessional: React.FC = () => {
               {/* All Ticket Information in One Grid */}
               <div className="comprehensive-info-grid">
                 {/* Requester Information */}
-                <div className="info-section">
+                <div className="info-section requester-info-section">
                   <h3>Requester Information</h3>
                   <div className="info-items">
-                    <div className="info-item">
+                    <div className="info-item requester-info-item">
                       <label>Requested By</label>
-                      <div className="info-value">
-                        {ticket.requestedBy.profilePic ? (
-                          <div className="profile-pic-container">
+                      <div className="info-value requester-info-value">
+                        <div className="requester-avatar">
+                          {ticket.requestedBy.profilePic ? (
                             <img
-                              src={`data:${ticket.requestedBy.profilePic}`}
+                              src={
+                                ticket.requestedBy.profilePic && ticket.requestedBy.profilePic
+                                  ? `data:${ticket.requestedBy.profilePic};base64,${ticket.requestedBy.profilePic}`
+                                  : ""
+                              }
                               alt={ticket.requestedBy.employeeName}
+                              style={{
+                                width: "48px",
+                                height: "48px",
+                                borderRadius: "50%",
+                                objectFit: "cover",
+                                border: "2px solid #e3e7ef",
+                                background: "#f5f7fa"
+                              }}
                               className="profile-pic"
                             />
-                          </div>
-                        ) : (
-                          <FaUser />
-                        )}
-                        <div>
-                          <div className="primary-text">
+                          ) : (
+                            <div className="avatar-initials">
+                              {/* Show initials if available, fallback to icon */}
+                              {ticket.requestedBy.employeeName
+                                ? ticket.requestedBy.employeeName
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")
+                                    .toUpperCase()
+                                : <FaUser />}
+                            </div>
+                          )}
+                        </div>
+                        <div className="requester-details">
+                          <div className="primary-text requester-name">
                             {ticket.requestedBy.employeeName}
                           </div>
-                          <div className="secondary-text">
+                          <div className="secondary-text requester-role">
                             {ticket.requestedBy.designation}
                           </div>
                         </div>

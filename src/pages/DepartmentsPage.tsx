@@ -7,8 +7,6 @@ import {
   FaTrash,
   FaUsers,
   FaSearch,
-  FaEye,
-  FaEyeSlash,
 } from "react-icons/fa";
 import { Loader } from "../components/common";
 import {
@@ -145,7 +143,7 @@ export const DepartmentsPage: React.FC = () => {
         <div className="tickets-page-title-section">
           <h1 className="tickets-page-title">Departments</h1>
           <p className="tickets-page-subtitle">
-            Manage helpdesk departments and their employees
+            Manage helpdesk departments and their assigned employees
           </p>
         </div>
 
@@ -208,7 +206,7 @@ export const DepartmentsPage: React.FC = () => {
                   <th>#</th>
                   <th>Department Name</th>
                   <th>Status</th>
-                  <th>Employees</th>
+                  <th>Assigned Employees</th>
                   <th>Created Date</th>
                   <th>Last Modified</th>
                   <th>Actions</th>
@@ -238,31 +236,54 @@ export const DepartmentsPage: React.FC = () => {
                       </td>
                       <td>
                         <div className="employees-info">
-                          <FaUsers className="employees-icon" />
-                          <span>
-                            {department.employees?.length || 0} employee
-                            {(department.employees?.length || 0) !== 1
-                              ? "s"
-                              : ""}
-                          </span>
-                          {(department.employees?.length || 0) > 0 && (
-                            <button
-                              className="expand-btn"
-                              onClick={() =>
-                                toggleDepartmentExpansion(department.id)
-                              }
-                            >
-                              {expandedDepartments.has(department.id) ? (
-                                <FaEyeSlash />
-                              ) : (
-                                <FaEye />
+                          {department.employees &&
+                          department.employees.length > 0 ? (
+                            <div className="employee-names-list">
+                              {(expandedDepartments.has(department.id)
+                                ? department.employees
+                                : department.employees.slice(0, 3)
+                              ).map((employee) => (
+                                <div
+                                  key={employee.id}
+                                  className="employee-name-item"
+                                >
+                                  {employee.employeeProfilePicNameDTO
+                                    ?.employeeName || "N/A"}
+                                </div>
+                              ))}
+                              {department.employees.length > 3 && (
+                                <button
+                                  className="expand-btn"
+                                  onClick={() =>
+                                    toggleDepartmentExpansion(department.id)
+                                  }
+                                >
+                                  {expandedDepartments.has(department.id)
+                                    ? "Show Less"
+                                    : `+${
+                                        department.employees.length - 3
+                                      } more`}
+                                </button>
                               )}
-                            </button>
+                            </div>
+                          ) : (
+                            <div className="no-employees">
+                              <FaUsers className="employees-icon" />
+                              <span>No employees assigned</span>
+                            </div>
                           )}
                         </div>
                       </td>
-                      <td>{formatDate(department.createdDate)}</td>
-                      <td>{formatDate(department.lastModifiedDate)}</td>
+                      <td>
+                        <span className="date-text">
+                          {formatDate(department.createdDate)}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="date-text">
+                          {formatDate(department.lastModifiedDate)}
+                        </span>
+                      </td>
                       <td>
                         <div className="action-buttons">
                           <Link
@@ -295,7 +316,7 @@ export const DepartmentsPage: React.FC = () => {
                         <tr className="employees-expansion-row">
                           <td colSpan={7}>
                             <div className="employees-expansion">
-                              <h4>Department Employees</h4>
+                              <h4>Assigned Employees</h4>
                               <div className="employees-grid">
                                 {department.employees.map((employee) => (
                                   <div

@@ -337,7 +337,6 @@
 
 .modern-dropdown-header {
   padding: var(--spacing-4) var(--spacing-6);
-  border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -369,8 +368,7 @@
 }
 
 .modern-user-menu .modern-dropdown-header {
-  padding: var(--spacing-4) var(--spacing-4);
-  border-bottom: 1px solid var(--color-border);
+  padding: var(--spacing-3) var(--spacing-5);
 }
 
 .modern-user-menu .modern-user-profile {
@@ -391,7 +389,7 @@
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin: 0;
+  margin: 6px 0 0 0;
 }
 
 .modern-user-menu .modern-dropdown-item {

@@ -5,7 +5,7 @@
 /**
  * Converts a base64 profile picture to a data URL for display
  * @param profilePic - The base64 encoded image string
- * @param contentType - The content type (e.g., "data:image/jpeg")
+ * @param contentType - The content type (e.g., "data:image/jpeg" or "image/jpeg")
  * @returns Complete data URL for the image
  */
 export const getProfileImageUrl = (
@@ -16,9 +16,11 @@ export const getProfileImageUrl = (
     return null;
   }
 
-  // If contentType already includes the full data URL prefix, use profilePic directly
+  // If contentType already includes the full data URL prefix, construct properly
   if (contentType.startsWith("data:")) {
-    return `${contentType},${profilePic}`;
+    // Extract the MIME type from the data URL
+    const mimeType = contentType.split(",")[0];
+    return `${mimeType};base64,${profilePic}`;
   }
 
   // Otherwise, construct the data URL

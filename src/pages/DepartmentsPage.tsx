@@ -9,23 +9,30 @@ import {
   FaSearch,
   FaEye,
   FaEyeSlash,
-  FaUserTimes,
 } from "react-icons/fa";
 import { Loader } from "../components/common";
 import {
   searchHelpdeskDepartments,
-  getHelpdeskDepartmentWithEmployees,
   deleteHelpdeskDepartment,
-  removeEmployeeFromDepartment,
   type HelpdeskDepartment,
+  type Employee,
 } from "../services/helpdeskDepartmentService";
 import { useNotifications } from "../hooks/useNotifications";
 import "../styles/ticketsModern.css";
 import "../styles/departments.css";
 
+interface DepartmentWithEmployees extends HelpdeskDepartment {
+  employees: Employee[];
+}
+
+interface DepartmentSearchItem {
+  department: HelpdeskDepartment;
+  employees: Employee[];
+}
+
 export const DepartmentsPage: React.FC = () => {
   const { addNotification } = useNotifications();
-  const [departments, setDepartments] = useState<HelpdeskDepartment[]>([]);
+  const [departments, setDepartments] = useState<DepartmentWithEmployees[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedDepartments, setExpandedDepartments] = useState<Set<string>>(
@@ -45,7 +52,7 @@ export const DepartmentsPage: React.FC = () => {
         searchCriteria.search = searchQuery;
       }
 
-      // Call the search API to get departments list
+      // Call the new search API
       const response = await searchHelpdeskDepartments(
         searchCriteria,
         0,
@@ -54,32 +61,20 @@ export const DepartmentsPage: React.FC = () => {
       );
 
       // Extract departments from response - API returns 'items' array
-      const departmentsList = response.data?.items || response.items || [];
+      const responseData = response.data || response;
+      const departmentItems = responseData.items || [];
 
-      // For each department, fetch detailed information with employees
-      const departmentsWithEmployees = await Promise.all(
-        departmentsList.map(async (dept: HelpdeskDepartment) => {
-          try {
-            const detailedResponse = await getHelpdeskDepartmentWithEmployees(
-              dept.id
-            );
-            // Merge the basic department info with the detailed response
-            return {
-              ...dept,
-              employees: detailedResponse.employees,
-            };
-          } catch (error) {
-            console.error(
-              `Error loading employees for department ${dept.id}:`,
-              error
-            );
-            // Return the basic department info if detailed fetch fails
-            return dept;
-          }
+      // Transform the data to include employees in department objects
+      const departmentsList: DepartmentWithEmployees[] = departmentItems.map(
+        (item: DepartmentSearchItem) => ({
+          ...item.department,
+          employees: item.employees || [],
         })
       );
 
-      setDepartments(departmentsWithEmployees);
+      console.log("Departments response:", response);
+      console.log("Transformed departments:", departmentsList);
+      setDepartments(departmentsList);
     } catch (error) {
       console.error("Error loading departments:", error);
       addNotification({
@@ -117,37 +112,6 @@ export const DepartmentsPage: React.FC = () => {
         type: "error",
         title: "Delete Failed",
         message: "Could not delete department. Please try again.",
-      });
-    }
-  };
-
-  const handleRemoveEmployee = async (
-    departmentId: string,
-    employeeId: number,
-    employeeName: string
-  ) => {
-    if (
-      !window.confirm(
-        `Are you sure you want to remove "${employeeName}" from this department?`
-      )
-    ) {
-      return;
-    }
-
-    try {
-      await removeEmployeeFromDepartment(departmentId, employeeId);
-      addNotification({
-        type: "success",
-        title: "Employee Removed",
-        message: `${employeeName} has been removed from the department.`,
-      });
-      loadDepartments();
-    } catch (error) {
-      console.error("Error removing employee:", error);
-      addNotification({
-        type: "error",
-        title: "Remove Failed",
-        message: "Could not remove employee. Please try again.",
       });
     }
   };
@@ -324,7 +288,7 @@ export const DepartmentsPage: React.FC = () => {
                       </td>
                     </tr>
 
-                    {/* Expanded Employee Details */}
+                    {/* Expanded Employee Details
                     {expandedDepartments.has(department.id) &&
                       department.employees &&
                       department.employees.length > 0 && (
@@ -340,16 +304,13 @@ export const DepartmentsPage: React.FC = () => {
                                   >
                                     <div className="employee-info">
                                       <div className="employee-name">
-                                        {
-                                          employee.employeeProfilePicNameDTO
-                                            .employeeName
-                                        }
+                                        {employee.employeeProfilePicNameDTO?.employeeName || 'N/A'}
+                                      </div>
+                                      <div className="employee-email">
+                                        {employee.employeeProfilePicNameDTO?.email || 'N/A'}
                                       </div>
                                       <div className="employee-designation">
-                                        {
-                                          employee.employeeProfilePicNameDTO
-                                            .designation
-                                        }
+                                        {employee.employeeProfilePicNameDTO?.designation || 'N/A'}
                                       </div>
                                       <span
                                         className={`employee-status ${
@@ -369,9 +330,8 @@ export const DepartmentsPage: React.FC = () => {
                                         onClick={() =>
                                           handleRemoveEmployee(
                                             department.id,
-                                            employee.employeeId,
-                                            employee.employeeProfilePicNameDTO
-                                              .employeeName
+                                            employee.id,
+                                            employee.employeeName
                                           )
                                         }
                                         title="Remove from Department"
@@ -385,7 +345,7 @@ export const DepartmentsPage: React.FC = () => {
                             </div>
                           </td>
                         </tr>
-                      )}
+                      )} */}
                   </React.Fragment>
                 ))}
               </tbody>

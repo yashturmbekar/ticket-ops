@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { useEmployeeProfile } from "../../hooks/useEmployeeProfile";
 import { UserRole } from "../../types";
+import {
+  getProfileImageUrl,
+  getDisplayName,
+  getDisplayRole,
+} from "../../utils/profileUtils";
+import { USER_ROLE_LABELS } from "../../constants/userRoles";
 import "./SideNav.css";
 
 interface NavItem {
@@ -14,6 +21,7 @@ interface NavItem {
 
 const SideNav: React.FC = () => {
   const { user, logout } = useAuth();
+  const { profile } = useEmployeeProfile();
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -144,9 +152,7 @@ const SideNav: React.FC = () => {
         <div className="side-nav-header">
           <div className="brand">
             <img src="/redfish-logo.svg" alt="Redfish" width="24" height="24" />
-            {!isCollapsed && (
-              <span className="brand-text">Ticket-Ops</span>
-            )}
+            {!isCollapsed && <span className="brand-text">Ticket-Ops</span>}
           </div>
           <button
             className="collapse-btn"
@@ -182,21 +188,47 @@ const SideNav: React.FC = () => {
         <div className="side-nav-footer">
           <div className="user-info">
             <div className="user-avatar">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-              </svg>
+              {profile?.profilePic ? (
+                <img
+                  src={
+                    getProfileImageUrl(
+                      profile.profilePic,
+                      profile.profilePicContentType
+                    ) || ""
+                  }
+                  alt={profile.employeeName}
+                  width="24"
+                  height="24"
+                  style={{ borderRadius: "50%", objectFit: "cover" }}
+                />
+              ) : (
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                </svg>
+              )}
             </div>
             {!isCollapsed && (
               <div className="user-details">
                 <div className="user-name">
-                  {user ? `${user.firstName} ${user.lastName}` : "User"}
+                  {getDisplayName(
+                    profile?.employeeName,
+                    user?.firstName,
+                    user?.lastName,
+                    user?.username
+                  )}
                 </div>
-                <div className="user-role">{user?.role || "Role"}</div>
+                <div className="user-role">
+                  {getDisplayRole(
+                    profile?.designation,
+                    user?.role,
+                    USER_ROLE_LABELS
+                  )}
+                </div>
               </div>
             )}
           </div>

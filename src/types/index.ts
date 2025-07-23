@@ -19,6 +19,17 @@ export interface User {
   updatedAt: Date;
 }
 
+// Employee Profile interface for homepage API
+export interface EmployeeProfile {
+  id: number;
+  employeeName: string;
+  designation: string;
+  profilePic?: string;
+  profilePicContentType?: string;
+  timesheetForCurrentWeekend: unknown[];
+  locationId: number;
+}
+
 // API Response interfaces to match backend structure
 export interface ApiTicketResponse {
   id: string;

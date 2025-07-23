@@ -19,6 +19,7 @@ export {
   deleteUser,
   changeUserStatus,
   resetUserPassword,
+  getEmployeeProfile,
 } from "./userService";
 
 export {

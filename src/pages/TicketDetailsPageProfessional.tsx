@@ -150,6 +150,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingCommentText, setEditingCommentText] = useState("");
   const [isUpdatingComment, setIsUpdatingComment] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<{src: string, alt: string} | null>(null);
 
   // Function to transform API comments to CommentData format
   const transformComments = (apiComments: ApiTicketResponse['comments']): CommentData[] => {
@@ -328,6 +329,25 @@ const TicketDetailsPageProfessional: React.FC = () => {
     loadTicketData();
   }, [id]);
 
+  // Handle keyboard events for image modal
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && selectedImage) {
+        setSelectedImage(null);
+      }
+    };
+
+    if (selectedImage) {
+      document.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedImage]);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
@@ -484,9 +504,20 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
   function getAttachmentPreview(fileName: string, fileData: string, fileType: string) {
     if (fileType.startsWith("image/")) {
-      return <img src={`data:${fileType};base64,${fileData}`} alt={fileName} style={{ maxWidth: "100px" }} />;
+      return (
+        <img 
+          src={`data:${fileType};base64,${fileData}`} 
+          alt={fileName} 
+          style={{ maxWidth: "120px", maxHeight: "120px", borderRadius: "4px", objectFit: "cover" }} 
+          onClick={() => setSelectedImage({
+            src: `data:${fileType};base64,${fileData}`,
+            alt: fileName
+          })}
+        />
+      );
     }
-    return <div className="file-icon">📄</div>;
+    // For non-image files, show the appropriate file icon
+    return getFileIcon(fileName, 40);
   }
 
   const getPriorityColor = (priority: string) => {
@@ -945,6 +976,27 @@ const TicketDetailsPageProfessional: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <div className="image-modal" onClick={() => setSelectedImage(null)}>
+          <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button 
+              className="image-modal-close"
+              onClick={() => setSelectedImage(null)}
+            >
+              <FaTimes />
+            </button>
+            <img 
+              src={selectedImage.src} 
+              alt={selectedImage.alt}
+            />
+            <div className="image-modal-title">
+              {selectedImage.alt}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

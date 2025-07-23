@@ -110,7 +110,7 @@ export const EmployeeDashboard: React.FC = () => {
       {/* Dashboard Header */}
       <div className="modern-dashboard-header">
         <div>
-          <h1 className="modern-dashboard-title">My Dashboard</h1>
+          <h1 className="modern-dashboard-title" style={{color:'#ff5d5d'}}>My Dashboard</h1>
           <p className="modern-dashboard-subtitle">
             Track your tickets and get the help you need
           </p>

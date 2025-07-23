@@ -1,6 +1,7 @@
 import React from "react";
 import { useAuth } from "../hooks/useAuth";
 import { UserRole } from "../types";
+import { Loader } from "../components/common";
 import { AdminDashboard } from "../components/dashboards/AdminDashboard";
 import { ManagerDashboard } from "../components/dashboards/ManagerDashboard";
 import { OperationsDashboard } from "../components/dashboards/OperationsDashboard";
@@ -13,12 +14,7 @@ export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
 
   if (!user) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Loading dashboard...</p>
-      </div>
-    );
+    return <Loader centered text="Loading dashboard..." minHeight="60vh" />;
   }
 
   // Render different dashboard based on user role

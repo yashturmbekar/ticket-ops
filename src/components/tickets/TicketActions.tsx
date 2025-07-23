@@ -33,7 +33,7 @@ import {
   watchTicket,
   unwatchTicket,
   printTicket,
-  exportTicket
+  exportTicket,
 } from "../../services/ticketActionsService";
 import type {
   Ticket,
@@ -145,10 +145,10 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
   const handleStatusUpdate = async (formData: Record<string, unknown>) => {
     try {
       setLoading(true);
-      const response = await updateStatus(
-        ticket.id,
-        { status: formData.status as TicketStatus, note: formData.note as string }
-      );
+      const response = await updateStatus(ticket.id, {
+        status: formData.status as TicketStatus,
+        note: formData.note as string,
+      });
 
       onTicketUpdate(response.data);
       addNotification({
@@ -220,14 +220,11 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
   const handleAddTimeEntry = async (formData: Record<string, unknown>) => {
     try {
       setLoading(true);
-      const response = await addTimeEntry(
-        ticket.id,
-        {
-          hours: formData.hours as number,
-          description: formData.description as string,
-          date: formData.date ? new Date(formData.date as string) : new Date()
-        }
-      );
+      const response = await addTimeEntry(ticket.id, {
+        hours: formData.hours as number,
+        description: formData.description as string,
+        date: formData.date ? new Date(formData.date as string) : new Date(),
+      });
 
       setTimeEntries((prev) => [...prev, response.data]);
       showNotification("success", "Time entry added successfully");
@@ -243,13 +240,10 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
   const handleCloseTicket = async (formData: Record<string, unknown>) => {
     try {
       setLoading(true);
-      const response = await closeTicket(
-        ticket.id,
-        {
-          resolution: formData.resolution as string,
-          satisfactionRating: formData.satisfactionRating as number
-        }
-      );
+      const response = await closeTicket(ticket.id, {
+        resolution: formData.resolution as string,
+        satisfactionRating: formData.satisfactionRating as number,
+      });
 
       onTicketUpdate(response.data);
       showNotification("success", "Ticket closed successfully");
@@ -291,10 +285,7 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
 
   const handleExport = async (format: "pdf" | "csv") => {
     try {
-      const response = await exportTicket(
-        ticket.id,
-        format
-      );
+      const response = await exportTicket(ticket.id, format);
       window.open(response.data.url, "_blank");
     } catch (error: unknown) {
       console.error("Failed to export ticket:", error);
@@ -345,16 +336,18 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
 
   const getStatusColor = (status: TicketStatus): string => {
     switch (status) {
-      case "open":
+      case "RAISED":
         return "#dc3545";
-      case "in_progress":
+      case "IN_PROGRESS":
         return "#007bff";
-      case "pending":
+      case "PENDING_APPROVAL":
         return "#ffc107";
-      case "resolved":
+      case "RESOLVED":
         return "#28a745";
-      case "closed":
-        return "#6c757d";
+      case "APPROVED":
+        return "#28a745";
+      case "REJECTED":
+        return "#dc3545";
       default:
         return "#6c757d";
     }
@@ -362,13 +355,13 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
 
   const getPriorityColor = (priority: Priority): string => {
     switch (priority) {
-      case "critical":
+      case "CRITICAL":
         return "#dc3545";
-      case "high":
+      case "HIGH":
         return "#fd7e14";
-      case "medium":
+      case "MEDIUM":
         return "#ffc107";
-      case "low":
+      case "LOW":
         return "#28a745";
       default:
         return "#6c757d";
@@ -505,7 +498,7 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
           >
             Log Time
           </Button>
-          {ticket.status !== "closed" && (
+          {ticket.status !== "RESOLVED" && ticket.status !== "APPROVED" && (
             <Button
               variant="success"
               size="sm"
@@ -564,7 +557,7 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
                 </div>
                 <div className="detail-item">
                   <label>Category:</label>
-                  <p>{ticket.category}</p>
+                  <p>{ticket.assignedDepartmentId}</p>
                 </div>
                 <div className="detail-item">
                   <label>Created:</label>
@@ -696,10 +689,12 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
               name="status"
               required
               options={[
-                { value: "open", label: "Open" },
-                { value: "in_progress", label: "In Progress" },
-                { value: "pending", label: "Pending" },
-                { value: "resolved", label: "Resolved" },
+                { value: "RAISED", label: "Raised" },
+                { value: "IN_PROGRESS", label: "In Progress" },
+                { value: "PENDING_APPROVAL", label: "Pending Approval" },
+                { value: "RESOLVED", label: "Resolved" },
+                { value: "APPROVED", label: "Approved" },
+                { value: "REJECTED", label: "Rejected" },
               ]}
             />
           </FormField>

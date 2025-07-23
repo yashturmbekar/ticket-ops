@@ -1,35 +1,35 @@
 export const TICKET_STATUS_LABELS = {
-  open: "Open",
-  in_progress: "In Progress",
-  pending: "Pending",
-  resolved: "Resolved",
-  closed: "Closed",
-  cancelled: "Cancelled",
+  RAISED: "Raised",
+  IN_PROGRESS: "In Progress",
+  PENDING_APPROVAL: "Pending Approval",
+  RESOLVED: "Resolved",
+  APPROVED: "Approved",
+  REJECTED: "Rejected",
 } as const;
 
 export const TICKET_STATUS_COLORS = {
-  open: "#dc3545",
-  in_progress: "#007bff",
-  pending: "#ffc107",
-  resolved: "#28a745",
-  closed: "#6c757d",
-  cancelled: "#17a2b8",
+  RAISED: "#dc3545",
+  IN_PROGRESS: "#007bff",
+  PENDING_APPROVAL: "#ffc107",
+  RESOLVED: "#28a745",
+  APPROVED: "#198754",
+  REJECTED: "#dc3545",
 } as const;
 
 export const TICKET_STATUS_ICONS = {
-  open: "FaExclamationCircle",
-  in_progress: "FaSpinner",
-  pending: "FaClock",
-  resolved: "FaCheckCircle",
-  closed: "FaTimesCircle",
-  cancelled: "FaBan",
+  RAISED: "FaExclamationCircle",
+  IN_PROGRESS: "FaSpinner",
+  PENDING_APPROVAL: "FaClock",
+  RESOLVED: "FaCheckCircle",
+  APPROVED: "FaCheck",
+  REJECTED: "FaTimes",
 } as const;
 
 export const TICKET_STATUS_ORDER = [
-  "open",
-  "in_progress",
-  "pending",
-  "resolved",
-  "closed",
-  "cancelled",
+  "RAISED",
+  "IN_PROGRESS",
+  "PENDING_APPROVAL",
+  "APPROVED",
+  "RESOLVED",
+  "REJECTED",
 ] as const;

@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 import api from "../services/api";
 
@@ -18,7 +18,9 @@ interface EmployeeSearchApiResponse {
   links?: Record<string, string | null>;
 }
 
-function isApiError(error: unknown): error is { response?: { data?: { message?: string } } } {
+function isApiError(
+  error: unknown
+): error is { response?: { data?: { message?: string } } } {
   return (
     typeof error === "object" &&
     error !== null &&
@@ -39,7 +41,7 @@ function debounceString(fn: (query: string) => void, delay: number) {
 }
 
 export function useEmployeeSearch({
-  endpoint = "/searchemployees?page=0&size=10&sort=lastModifiedDate,desc",
+  endpoint = "/api/searchemployees?page=0&size=10&sort=lastModifiedDate,desc",
   debounceMs = 300,
   params = { isactive: true } as Record<string, unknown>,
 }: {
@@ -53,20 +55,21 @@ export function useEmployeeSearch({
   const fetchEmployees = async (query: string) => {
     if (!query) return { items: [] };
     // api.post returns { data: EmployeeSearchApiResponse }
-    return api.post<EmployeeSearchApiResponse>(endpoint, { ...params, name: query });
+    return api.post<EmployeeSearchApiResponse>(endpoint, {
+      ...params,
+      name: query,
+    });
   };
 
-  const {
-    data,
-    isFetching,
-    error,
-  } = useQuery({
+  const { data, isFetching, error } = useQuery({
     queryKey: ["employee-search", endpoint, params, input.current],
     queryFn: async () => {
       if (!input.current) return { items: [] };
       const res = await fetchEmployees(input.current);
       // If api.post returns { data }, extract .data, else fallback
-      return (res && 'data' in res) ? (res as { data: EmployeeSearchApiResponse }).data : res;
+      return res && "data" in res
+        ? (res as { data: EmployeeSearchApiResponse }).data
+        : res;
     },
     enabled: !!input.current,
     staleTime: 1000 * 60,
@@ -77,15 +80,20 @@ export function useEmployeeSearch({
   const debouncedSearch = useRef(
     debounceString((query: string) => {
       input.current = query;
-      queryClient.invalidateQueries({ queryKey: ["employee-search", endpoint, params] });
+      queryClient.invalidateQueries({
+        queryKey: ["employee-search", endpoint, params],
+      });
     }, debounceMs)
   ).current;
 
   return {
     results: data?.items || [],
     loading: isFetching,
-    error: error ? (isApiError(error) ? error.response?.data?.message || "Search failed" : (error as Error).message) : null,
+    error: error
+      ? isApiError(error)
+        ? error.response?.data?.message || "Search failed"
+        : (error as Error).message
+      : null,
     search: debouncedSearch,
   };
 }
-

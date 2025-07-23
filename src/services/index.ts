@@ -19,6 +19,7 @@ export {
   deleteUser,
   changeUserStatus,
   resetUserPassword,
+  getEmployeeProfile,
 } from "./userService";
 
 export {
@@ -49,6 +50,7 @@ export {
   bulkCloseTickets,
   exportTickets,
   getTicketStats,
+  searchTickets,
 } from "./ticketService";
 
 export {
@@ -140,9 +142,16 @@ export {
   off,
 } from "./websocketService";
 
+export {
+  // Helpdesk Departments
+  createHelpdeskDepartment,
+  searchHelpdeskDepartments,
+} from "./helpdeskDepartmentService";
+
 // Re-export types that still exist
 export type { UserFilters } from "./userService";
 export type { TicketFilters } from "./ticketService";
 export type { AssetFilters } from "./assetService";
 export type { KnowledgeSearchParams } from "./knowledgeService";
 export type { ReportFilters } from "./reportsService";
+export type { HelpdeskDepartment } from "./helpdeskDepartmentService";

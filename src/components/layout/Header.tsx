@@ -1,31 +1,31 @@
 import React, { useState, useEffect } from "react";
-import {
-  FaBars,
-  FaBell,
-  FaSearch,
-  FaUser,
-  FaSignOutAlt,
-  FaCog,
-  FaMoon,
-  FaSun,
-  FaChevronDown,
-  FaTicketAlt,
-  FaPlus,
-} from "react-icons/fa";
+import { FaBars, FaBell, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import { useAuth } from "../../hooks/useAuth";
-import { useTheme } from "../../hooks/useTheme";
+import { useEmployeeProfile } from "../../hooks/useEmployeeProfile";
 import { USER_ROLE_LABELS } from "../../constants/userRoles";
-import "./Header.css";
+import {
+  getProfileImageUrl,
+  getInitialsFromName,
+  getDisplayName,
+  getDisplayRole,
+} from "../../utils/profileUtils";
+import "./HeaderModern.css";
 import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   onMenuToggle: () => void;
+  onSidebarToggle?: () => void;
   isMenuOpen: boolean;
+  isCollapsed?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onMenuToggle, isMenuOpen }) => {
+export const Header: React.FC<HeaderProps> = ({
+  onMenuToggle,
+  onSidebarToggle,
+  isCollapsed = false,
+}) => {
   const { user, logout } = useAuth();
-  const { themeName, toggleTheme } = useTheme();
+  const { profile } = useEmployeeProfile();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const navigate = useNavigate();
@@ -35,13 +35,13 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle, isMenuOpen }) => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         isUserMenuOpen &&
-        !(event.target as Element).closest(".user-dropdown")
+        !(event.target as Element).closest(".modern-user-dropdown")
       ) {
         setIsUserMenuOpen(false);
       }
       if (
         isNotificationOpen &&
-        !(event.target as Element).closest(".notification-dropdown")
+        !(event.target as Element).closest(".modern-notification-dropdown")
       ) {
         setIsNotificationOpen(false);
       }
@@ -74,26 +74,22 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle, isMenuOpen }) => {
   };
 
   const getUserDisplayName = () => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName} ${user.lastName}`;
-    }
-    return user?.username || "User";
+    return getDisplayName(
+      profile?.employeeName,
+      user?.firstName,
+      user?.lastName,
+      user?.username
+    );
   };
 
   const getUserInitials = () => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName.charAt(0).toUpperCase()}${user.lastName
-        .charAt(0)
-        .toUpperCase()}`;
-    }
-    if (user?.username) {
-      const username = user.username.toUpperCase();
-      return username.length >= 2 ? username.substring(0, 2) : username;
-    }
-    return "U";
+    const displayName = getUserDisplayName();
+    return getInitialsFromName(displayName);
   };
 
   const toggleUserMenu = () => {
+    console.log("Toggle user menu clicked, current state:", isUserMenuOpen);
+    console.log("User data in toggle:", user);
     setIsUserMenuOpen(!isUserMenuOpen);
     setIsNotificationOpen(false);
   };
@@ -103,190 +99,212 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle, isMenuOpen }) => {
     setIsUserMenuOpen(false);
   };
 
-  const handleNewTicket = () => {
-    navigate("/dashboard", { state: { activeTab: "create" } });
-  };
-
-  const handleProfileClick = () => {
-    setIsUserMenuOpen(false);
-    // Navigate to profile page
-    console.log("Navigate to profile page");
-  };
-
-  const handleSettingsClick = () => {
-    setIsUserMenuOpen(false);
-    // Navigate to settings page
-    console.log("Navigate to settings page");
+  const getRoleLabel = () => {
+    return getDisplayRole(profile?.designation, user?.role, USER_ROLE_LABELS);
   };
 
   return (
-    <header className="header">
-      <div className="header-content">
-        <div className="header-left">
+    <header className="modern-header">
+      <div className="modern-header-left">
+        {/* Mobile menu toggle */}
+        <button
+          className="modern-mobile-menu-btn"
+          onClick={onMenuToggle}
+          aria-label="Toggle mobile menu"
+        >
+          <FaBars />
+        </button>
+
+        {/* Desktop sidebar toggle */}
+        {onSidebarToggle && (
           <button
-            className="menu-toggle"
-            onClick={onMenuToggle}
-            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            className="modern-sidebar-toggle"
+            onClick={onSidebarToggle}
+            aria-label="Toggle sidebar"
           >
-            <FaBars />
+            {isCollapsed ? <FaAngleRight /> : <FaAngleLeft />}
           </button>
-          <div className="logo">
-            <img
-              src="/redfish-logo.svg"
-              alt="RedFish IT"
-              className="logo-image"
-            />
-            <div className="logo-text">
-              <span className="logo-primary">RedFish</span>
-              <span className="logo-secondary">Ticket-Ops</span>
-            </div>
-          </div>
+        )}
+
+        {/* Logo and brand */}
+        <div className="modern-brand">
+          <img
+            src="/redfish-logo.svg"
+            alt="Redfish"
+            className="modern-brand-logo"
+          />
+          <span className="modern-brand-text">Ticket-Ops</span>
         </div>
+      </div>
 
-        <div className="header-center">
-          <div className="search-container">
-            <FaSearch className="search-icon" />
-            <input
-              type="text"
-              placeholder="Search tickets, users, assets..."
-              className="search-input"
-            />
-          </div>
-        </div>
+      <div className="modern-header-right">
+        {/* Notifications */}
+        <div className="modern-notification-dropdown">
+          <button
+            className="modern-icon-btn modern-notification-btn"
+            onClick={toggleNotifications}
+            aria-expanded={isNotificationOpen}
+            title="Notifications"
+          >
+            <FaBell />
+            <span className="modern-notification-badge">3</span>
+          </button>
 
-        <div className="header-right">
-          <div className="header-actions">
-            <button
-              className="action-btn create-ticket-btn"
-              onClick={handleNewTicket}
-            >
-              <FaPlus />
-              <span>New Ticket</span>
-            </button>
-
-            <div className="notification-dropdown">
-              <button
-                className="notification-btn"
-                onClick={toggleNotifications}
-                aria-label="Notifications"
-              >
-                <FaBell />
-                <span className="notification-badge">3</span>
-              </button>
-
-              {isNotificationOpen && (
-                <div className="notification-menu">
-                  <div className="notification-header">
-                    <h3>Notifications</h3>
-                    <button className="mark-all-read">Mark all as read</button>
-                  </div>
-                  <div className="notification-list">
-                    <div className="notification-item">
-                      <FaTicketAlt className="notification-icon" />
-                      <div className="notification-content">
-                        <p>New ticket assigned to you</p>
-                        <span className="notification-time">2 min ago</span>
-                      </div>
-                    </div>
-                    <div className="notification-item">
-                      <FaTicketAlt className="notification-icon" />
-                      <div className="notification-content">
-                        <p>Ticket #1234 updated</p>
-                        <span className="notification-time">5 min ago</span>
-                      </div>
-                    </div>
-                    <div className="notification-item">
-                      <FaTicketAlt className="notification-icon" />
-                      <div className="notification-content">
-                        <p>High priority ticket created</p>
-                        <span className="notification-time">10 min ago</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="notification-footer">
-                    <button className="view-all-btn">
-                      View all notifications
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <button
-              className="theme-toggle"
-              onClick={toggleTheme}
-              title={`Switch to ${
-                themeName === "light" ? "dark" : "light"
-              } mode`}
-            >
-              {themeName === "light" ? <FaMoon /> : <FaSun />}
-            </button>
-          </div>
-
-          <div className="user-dropdown">
-            <button
-              className="user-menu-toggle"
-              onClick={toggleUserMenu}
-              aria-expanded={isUserMenuOpen}
-            >
-              <div className="user-avatar">{getUserInitials()}</div>
-              <div className="user-info">
-                <span className="user-name">{getUserDisplayName()}</span>
-                <span className="user-role">
-                  {user?.role && USER_ROLE_LABELS[user.role]}
-                </span>
+          {isNotificationOpen && (
+            <div className="modern-dropdown-menu modern-notification-menu">
+              <div className="modern-dropdown-header">
+                <h3>Notifications</h3>
+                <button className="modern-text-btn">Mark all read</button>
               </div>
-              <FaChevronDown
-                className={`chevron ${isUserMenuOpen ? "rotated" : ""}`}
-              />
-            </button>
-
-            {isUserMenuOpen && (
-              <div className="user-menu">
-                <div className="user-menu-header">
-                  <div className="user-avatar-large">{getUserInitials()}</div>
-                  <div className="user-details">
-                    <span className="user-name-large">
-                      {getUserDisplayName()}
-                    </span>
-                    <span className="user-email">{user?.email}</span>
-                    <span className="user-role-badge">
-                      {user?.role && USER_ROLE_LABELS[user.role]}
+              <div className="modern-notification-list">
+                <div className="modern-notification-item">
+                  <div className="modern-notification-content">
+                    <p className="modern-notification-title">
+                      New ticket assigned
+                    </p>
+                    <p className="modern-notification-text">
+                      Ticket #T-001 has been assigned to you
+                    </p>
+                    <span className="modern-notification-time">
+                      2 minutes ago
                     </span>
                   </div>
                 </div>
-
-                <div className="user-menu-divider"></div>
-
-                <div className="user-menu-items">
-                  <button
-                    className="user-menu-item"
-                    onClick={handleProfileClick}
-                  >
-                    <FaUser />
-                    <span>Profile</span>
-                  </button>
-                  <button
-                    className="user-menu-item"
-                    onClick={handleSettingsClick}
-                  >
-                    <FaCog />
-                    <span>Settings</span>
-                  </button>
+                <div className="modern-notification-item">
+                  <div className="modern-notification-content">
+                    <p className="modern-notification-title">SLA Warning</p>
+                    <p className="modern-notification-text">
+                      Ticket #T-015 is approaching SLA deadline
+                    </p>
+                    <span className="modern-notification-time">
+                      15 minutes ago
+                    </span>
+                  </div>
                 </div>
-
-                <div className="user-menu-divider"></div>
-
-                <button
-                  className="user-menu-item logout-item"
-                  onClick={handleLogout}
-                >
-                  <FaSignOutAlt />
-                  <span>Sign out</span>
+                <div className="modern-notification-item">
+                  <div className="modern-notification-content">
+                    <p className="modern-notification-title">System Update</p>
+                    <p className="modern-notification-text">
+                      Maintenance scheduled for tonight at 2 AM
+                    </p>
+                    <span className="modern-notification-time">1 hour ago</span>
+                  </div>
+                </div>
+              </div>
+              <div className="modern-dropdown-footer">
+                <button className="modern-text-btn">
+                  View all notifications
                 </button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
+        </div>
+
+        {/* User Name */}
+        <span className="modern-user-name-display">{getUserDisplayName()}</span>
+
+        {/* User Profile Photo */}
+        <div className="modern-user-dropdown">
+          <button
+            className="modern-user-profile-btn"
+            onClick={toggleUserMenu}
+            aria-expanded={isUserMenuOpen}
+          >
+            <div className="modern-user-avatar">
+              {profile?.profilePic ? (
+                <img
+                  src={
+                    getProfileImageUrl(
+                      profile.profilePic,
+                      profile.profilePicContentType
+                    ) || ""
+                  }
+                  alt={profile.employeeName}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                getUserInitials()
+              )}
+            </div>
+          </button>
+
+          {isUserMenuOpen && (
+            <div
+              className="modern-dropdown-menu modern-user-menu"
+              style={{
+                backgroundColor: "#ffffff",
+                border: "1px solid #ccc",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                zIndex: 9999,
+              }}
+            >
+              <div className="modern-dropdown-header">
+                <div className="modern-user-profile">
+                  <div className="modern-user-avatar-large">
+                    {profile?.profilePic ? (
+                      <img
+                        src={
+                          getProfileImageUrl(
+                            profile.profilePic,
+                            profile.profilePicContentType
+                          ) || ""
+                        }
+                        alt={profile.employeeName}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      getUserInitials()
+                    )}
+                  </div>
+                  <div>
+                    <p className="modern-user-name">{getUserDisplayName()}</p>
+                    <p className="modern-user-role">{getRoleLabel()}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modern-dropdown-divider" />
+
+              <button
+                className="modern-dropdown-item"
+                onClick={() => {
+                  navigate("/profile");
+                  setIsUserMenuOpen(false);
+                }}
+              >
+                <span>My Account</span>
+              </button>
+
+              <button
+                className="modern-dropdown-item"
+                onClick={() => {
+                  navigate("/settings");
+                  setIsUserMenuOpen(false);
+                }}
+              >
+                <span>Change Password</span>
+              </button>
+
+              <div className="modern-dropdown-divider" />
+
+              <button
+                className="modern-dropdown-item modern-logout-item"
+                onClick={handleLogout}
+              >
+                <span>Logout</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

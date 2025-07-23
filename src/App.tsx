@@ -11,7 +11,9 @@ import { NotificationProvider } from "./contexts/NotificationContext";
 import { LoginPage } from "./components/auth";
 import { NotificationContainer } from "./components/common/NotificationContainer";
 import AppLayout from "./components/layout/AppLayout";
-import { TicketsPage } from "./pages/TicketsPage.tsx";
+import { TicketsPage } from "./pages/TicketsPageNew";
+import { CreateTicketPage } from "./pages/CreateTicketPage";
+import TicketDetailsPageProfessional from "./pages/TicketDetailsPageProfessional";
 import { AssetsPage } from "./pages/AssetsPage.tsx";
 import { UsersPage } from "./pages/UsersPage.tsx";
 import { KnowledgePage } from "./pages/KnowledgePage.tsx";
@@ -19,6 +21,8 @@ import { ReportsPage } from "./pages/ReportsPage.tsx";
 import { NetworkPage } from "./pages/NetworkPage.tsx";
 import { SettingsPage } from "./pages/SettingsPage.tsx";
 import DepartmentsCreatePage from "./pages/DepartmentsCreatePage";
+import DepartmentsPage from "./pages/DepartmentsPage";
+import DepartmentsEditPage from "./pages/DepartmentsEditPage";
 import { useAuth } from "./hooks/useAuth";
 import { UserRole } from "./types";
 import "./styles/globals.css";
@@ -96,6 +100,26 @@ const AppContent: React.FC = () => {
           }
         />
         <Route
+          path="/tickets/create"
+          element={
+            <ProtectedRoute>
+              <LayoutWrapper>
+                <CreateTicketPage />
+              </LayoutWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tickets/:id"
+          element={
+            <ProtectedRoute>
+              <LayoutWrapper>
+                <TicketDetailsPageProfessional />
+              </LayoutWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/assets"
           element={
             <ProtectedRoute>
@@ -146,11 +170,31 @@ const AppContent: React.FC = () => {
           }
         />
         <Route
+          path="/departments"
+          element={
+            <ProtectedRoute>
+              <LayoutWrapper>
+                <DepartmentsPage />
+              </LayoutWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/departments/create"
           element={
             <ProtectedRoute>
               <LayoutWrapper>
                 <DepartmentsCreatePage />
+              </LayoutWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/departments/edit/:id"
+          element={
+            <ProtectedRoute>
+              <LayoutWrapper>
+                <DepartmentsEditPage />
               </LayoutWrapper>
             </ProtectedRoute>
           }

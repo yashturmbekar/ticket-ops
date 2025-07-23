@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Loader } from "../components/common";
 import type { Asset, AssetType, AssetStatus } from "../types";
 import { AssetType as AT, AssetStatus as AS } from "../types";
 import "../styles/assets.css";
@@ -233,12 +234,7 @@ export const AssetsPage: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="compact-header">
-        <h1>Assets</h1>
-        <p>Loading assets...</p>
-      </div>
-    );
+    return <Loader centered text="Loading assets..." minHeight="60vh" />;
   }
 
   return (

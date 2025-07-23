@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { getTickets, updateTicket } from "../../services";
+import { getTickets, updateTicket, getTicketStats } from "../../services";
+import { useNotifications } from "../../hooks";
+import { transformApiTicketsToTickets } from "../../utils/apiTransforms";
 import type { Ticket, TicketStatus, Priority } from "../../types";
 import "./OperationsDashboard.css";
 
@@ -17,6 +19,7 @@ interface OperationsMetrics {
 
 export const OperationsDashboard: React.FC = () => {
   const { user } = useAuth();
+  const { addNotification } = useNotifications();
   const [metrics, setMetrics] = useState<OperationsMetrics>({
     assignedTickets: 0,
     openTickets: 0,
@@ -37,26 +40,34 @@ export const OperationsDashboard: React.FC = () => {
     try {
       setLoading(true);
 
-      // Load tickets
-      const ticketsResponse = await getTickets({
-        page: 1,
-        limit: 100,
-      });
+      // Load tickets and stats in parallel
+      const [ticketsResponse, statsResponse] = await Promise.all([
+        getTickets({ page: 1, limit: 100 }),
+        getTicketStats(),
+      ]);
 
       if (ticketsResponse.success && ticketsResponse.data?.data) {
-        const allTickets = ticketsResponse.data.data;
+        const apiTickets = ticketsResponse.data.data;
+        // Transform API tickets to internal format if needed
+        const allTickets =
+          Array.isArray(apiTickets) &&
+          apiTickets.length > 0 &&
+          "ticketCode" in apiTickets[0]
+            ? transformApiTicketsToTickets(apiTickets)
+            : apiTickets;
+
         const userTickets = allTickets.filter(
           (t: Ticket) => t.assignedTo === user?.id
         );
         setTickets(userTickets);
 
-        // Calculate metrics
+        // Calculate real metrics from tickets
         const assignedTickets = userTickets.length;
         const openTickets = userTickets.filter(
-          (t: Ticket) => t.status === "open"
+          (t: Ticket) => t.status === "RAISED"
         ).length;
         const inProgressTickets = userTickets.filter(
-          (t: Ticket) => t.status === "in_progress"
+          (t: Ticket) => t.status === "IN_PROGRESS"
         ).length;
         const resolvedToday = userTickets.filter((t: Ticket) => {
           const today = new Date();
@@ -69,25 +80,35 @@ export const OperationsDashboard: React.FC = () => {
           (t: Ticket) => t.slaDeadline && new Date(t.slaDeadline) < new Date()
         ).length;
 
+        // Use stats API data where available
+        const apiStats = statsResponse.data || {};
+
         setMetrics({
           assignedTickets,
           openTickets,
           inProgressTickets,
           resolvedToday,
-          avgResolutionTime: 2.3, // Mock data
+          avgResolutionTime: apiStats.avgResolutionTime || 0,
           slaBreaches,
-          teamAvgResolutionTime: 2.8, // Mock data
-          performanceScore: 92, // Mock data
+          teamAvgResolutionTime: apiStats.teamAvgResolutionTime || 0,
+          performanceScore: apiStats.performanceScore || 0,
         });
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error loading operations dashboard:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      addNotification({
+        type: "error",
+        title: "Failed to Load Dashboard",
+        message: `Failed to load operations dashboard: ${errorMessage}`,
+      });
       // Ensure tickets is always an array even on error
       setTickets([]);
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, addNotification]);
 
   useEffect(() => {
     loadDashboardData();
@@ -105,12 +126,18 @@ export const OperationsDashboard: React.FC = () => {
 
   const getStatusBadge = (status: TicketStatus) => {
     switch (status) {
-      case "open":
-        return <span className="compact-badge open">Open</span>;
-      case "in_progress":
+      case "RAISED":
+        return <span className="compact-badge open">Raised</span>;
+      case "IN_PROGRESS":
         return <span className="compact-badge in-progress">In Progress</span>;
-      case "resolved":
+      case "RESOLVED":
         return <span className="compact-badge closed">Resolved</span>;
+      case "APPROVED":
+        return <span className="compact-badge closed">Approved</span>;
+      case "REJECTED":
+        return <span className="compact-badge rejected">Rejected</span>;
+      case "PENDING_APPROVAL":
+        return <span className="compact-badge pending">Pending Approval</span>;
       default:
         return <span className="compact-badge">{status}</span>;
     }
@@ -118,11 +145,11 @@ export const OperationsDashboard: React.FC = () => {
 
   const getPriorityBadge = (priority: Priority) => {
     switch (priority) {
-      case "high":
+      case "HIGH":
         return <span className="compact-badge high">High</span>;
-      case "medium":
+      case "MEDIUM":
         return <span className="compact-badge medium">Medium</span>;
-      case "low":
+      case "LOW":
         return <span className="compact-badge low">Low</span>;
       default:
         return <span className="compact-badge">{priority}</span>;
@@ -268,23 +295,23 @@ export const OperationsDashboard: React.FC = () => {
                   </td>
                   <td>
                     <div className="actions-container">
-                      {ticket.status === "open" && (
+                      {ticket.status === "RAISED" && (
                         <button
                           className="compact-btn primary"
                           onClick={(e) => {
                             e.stopPropagation();
-                            updateTicketStatus(ticket.id, "in_progress");
+                            updateTicketStatus(ticket.id, "IN_PROGRESS");
                           }}
                         >
                           Start
                         </button>
                       )}
-                      {ticket.status === "in_progress" && (
+                      {ticket.status === "IN_PROGRESS" && (
                         <button
                           className="compact-btn success"
                           onClick={(e) => {
                             e.stopPropagation();
-                            updateTicketStatus(ticket.id, "resolved");
+                            updateTicketStatus(ticket.id, "RESOLVED");
                           }}
                         >
                           Resolve

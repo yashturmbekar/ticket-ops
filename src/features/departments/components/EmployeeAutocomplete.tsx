@@ -64,7 +64,7 @@ const EmployeeAutocomplete: React.FC<Props> = ({
       isOptionEqualToValue={(option, value) =>
         option.employeeId === value.employeeId
       }
-      PaperComponent={(props) => <StyledPaper {...props} />}
+      PaperComponent={StyledPaper}
       renderInput={(params) => (
         <TextField
           {...params}

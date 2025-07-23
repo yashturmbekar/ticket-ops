@@ -19,13 +19,50 @@ export interface User {
   updatedAt: Date;
 }
 
+// Employee Profile interface for homepage API
+export interface EmployeeProfile {
+  id: number;
+  employeeName: string;
+  designation: string;
+  profilePic?: string;
+  profilePicContentType?: string;
+  timesheetForCurrentWeekend: unknown[];
+  locationId: number;
+}
+
+// API Response interfaces to match backend structure
+export interface ApiTicketResponse {
+  id: string;
+  title: string;
+  description: string;
+  status: TicketStatus;
+  ticketCode: string;
+  priority: Priority;
+  raisedByEmployeeId: number;
+  raiserEmployeeDetails: {
+    employeeName: string;
+    id: number;
+    profilePic?: string;
+    profilePicContentType?: string;
+    designation: string;
+  };
+  assignedDepartmentId: string;
+  assignedToEmployeeId?: number;
+  isActive: boolean;
+  createdDate: string;
+  lastModifiedDate: string;
+  comment?: string;
+  ticketCommentDTO?: Record<string, unknown>;
+  attachments?: Record<string, unknown>[];
+}
+
 export interface Ticket {
   id: string;
   title: string;
   description: string;
   status: TicketStatus;
   priority: Priority;
-  category: Category;
+  assignedDepartmentId: string;
   createdBy: string;
   assignedTo?: string;
   createdAt: Date;
@@ -42,6 +79,7 @@ export interface Ticket {
   requesterEmail?: string;
   requesterPhone?: string;
   location?: string;
+  category?: Category;
   asset?: string; // Asset ID
 }
 
@@ -275,21 +313,21 @@ export const UserRole = {
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
 export const TicketStatus = {
-  OPEN: "open",
-  IN_PROGRESS: "in_progress",
-  PENDING: "pending",
-  RESOLVED: "resolved",
-  CLOSED: "closed",
-  CANCELLED: "cancelled",
+  RAISED: "RAISED",
+  IN_PROGRESS: "IN_PROGRESS",
+  PENDING_APPROVAL: "PENDING_APPROVAL",
+  RESOLVED: "RESOLVED",
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
 } as const;
 
 export type TicketStatus = (typeof TicketStatus)[keyof typeof TicketStatus];
 
 export const Priority = {
-  LOW: "low",
-  MEDIUM: "medium",
-  HIGH: "high",
-  CRITICAL: "critical",
+  LOW: "LOW",
+  MEDIUM: "MEDIUM",
+  HIGH: "HIGH",
+  CRITICAL: "CRITICAL",
 } as const;
 
 export type Priority = (typeof Priority)[keyof typeof Priority];

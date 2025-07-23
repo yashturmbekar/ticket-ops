@@ -1,181 +1,471 @@
-import React, { useState, useEffect } from "react";
-import { Modal, Box, IconButton } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import HelpdeskDepartmentCreateForm from "../features/departments/components/HelpdeskDepartmentCreateForm";
-import type { HelpdeskDepartmentPayload } from "../features/departments/components/HelpdeskDepartmentCreateForm";
-import { createHelpdeskDepartment, getHelpdeskDepartmentsById } from "../services/helpdeskDepartmentService";
-import { getHelpdeskDepartmentsList } from "../services/helpdeskDepartmentService";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  FaBuilding,
+  FaSave,
+  FaTimes,
+  FaExclamationTriangle,
+  FaPlus,
+  FaTrash,
+  FaUser,
+  FaSearch,
+} from "react-icons/fa";
+import { ButtonLoader } from "../components/common";
+import { useNotifications } from "../hooks/useNotifications";
+import {
+  useEmployeeSearch,
+  type EmployeeSearchResult,
+} from "../hooks/useEmployeeSearch";
+import { createHelpdeskDepartment } from "../services/helpdeskDepartmentService";
+import "../styles/createSimple.css";
 
-// Add proper response type
-interface Department {
-  id: string;
+interface DepartmentFormData {
   name: string;
   isActive: boolean;
-  createdDate: string;
-  lastModifiedDate?: string;
+  employees: {
+    employeeId: string;
+    isActive: boolean;
+    employeeObj?: EmployeeSearchResult;
+    searchQuery?: string;
+  }[];
 }
 
-interface DepartmentsListMeta {
-  totalPages?: number;
-  itemsPerPage?: number;
-}
-
-interface DepartmentsListResponse {
-  items: Department[];
-  meta: DepartmentsListMeta;
-}
-
-const DepartmentsCreatePage: React.FC = () => {
+export const DepartmentsCreatePage: React.FC = () => {
+  const navigate = useNavigate();
+  const { addNotification } = useNotifications();
+  const {
+    results: employeeResults,
+    loading: employeeLoading,
+    search: searchEmployees,
+  } = useEmployeeSearch();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [showList, setShowList] = useState(false);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editDepartment, setEditDepartment] = useState<Department | null>(null);
-  // Fetch department by id (for edit)
-  const fetchDepartmentById = async (id: string) => {
-    try {
-      // You need to implement this API in your service layer
-      const res: any = await getHelpdeskDepartmentsById(id);
-      // If paginated, get first item; else, fallback
-      if (Array.isArray(res.items) && res.items.length > 0) {
-        setEditDepartment(res.items[0]);
-      } else if (Array.isArray(res) && res.length > 0) {
-        setEditDepartment(res[0]);
-      } else {
-        setEditDepartment(null);
-      }
-      setEditModalOpen(true);
-    } catch (e) {
-      setEditDepartment(null);
-      setEditModalOpen(false);
+  const [showDropdowns, setShowDropdowns] = useState<{
+    [key: number]: boolean;
+  }>({});
+
+  const [formData, setFormData] = useState<DepartmentFormData>({
+    name: "",
+    isActive: true,
+    employees: [
+      {
+        employeeId: "",
+        isActive: true,
+        employeeObj: undefined,
+        searchQuery: "",
+      },
+    ],
+  });
+
+  const [errors, setErrors] = useState<{
+    name?: string;
+    employees?: string;
+    general?: string;
+  }>({});
+
+  const validateForm = (): boolean => {
+    const newErrors: typeof errors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Department name is required";
     }
-  };  
 
-  // Type guard for paginated response
-  function isPaginatedResponse(obj: any): obj is { items: Department[]; meta: DepartmentsListMeta } {
-    return obj && Array.isArray(obj.items) && typeof obj.meta === 'object';
-  }
+    // Validate employees
+    const hasInvalidEmployees = formData.employees.some(
+      (emp) => !emp.employeeObj || !emp.employeeId
+    );
 
-  const fetchDepartmentList = async (pageNum = 1) => {
-    let payload = {
-      orgId: "101", // Replace with actual orgId
-      name: "",
-      isActive: true,
-      page: pageNum - 1, // backend is 0-based
-      size: itemsPerPage,
-    };
-
-    try {
-      const res: any = await getHelpdeskDepartmentsList(payload);
-      setShowList(true);
-      if (isPaginatedResponse(res)) {
-        setDepartments(res.items);
-        setTotalPages(res.meta?.totalPages || 1);
-        setItemsPerPage(res.meta?.itemsPerPage || 10);
-      } else {
-        setDepartments([]);
-        setTotalPages(1);
-      }
-      // Debug log
-      // console.log('Departments API response:', res);
-    } catch (e) {
-      setDepartments([]);
-      setTotalPages(1);
-      // Optionally handle error
-      // console.error('Failed to fetch departments', e);
+    if (hasInvalidEmployees) {
+      newErrors.employees =
+        "All employees must be selected from search results";
     }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  useEffect(() => {
-    fetchDepartmentList(page);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const handleSubmit = async (payload: HelpdeskDepartmentPayload) => {
+    if (!validateForm()) {
+      addNotification({
+        type: "warning",
+        title: "⚠️ Form Validation Failed",
+        message:
+          "Please provide a department name and ensure all employee selections are valid.",
+      });
+      return;
+    }
+
     setLoading(true);
-    setError(null);
+
     try {
+      const payload = {
+        department: {
+          name: formData.name.trim(),
+          isActive: formData.isActive,
+        },
+        employees: formData.employees.map((emp) => ({
+          employeeId: Number(emp.employeeId),
+          isActive: emp.isActive,
+        })),
+      };
+
       await createHelpdeskDepartment(payload);
-      await fetchDepartmentList(page);
-      setShowList(true);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || "Failed to create department");
+
+      addNotification({
+        type: "success",
+        title: "🏢 Department Created Successfully!",
+        message: `Department "${formData.name}" has been created with ${
+          formData.employees.filter((emp) => emp.employeeId).length
+        } employee(s) assigned.`,
+      });
+
+      navigate("/departments");
+    } catch (error: unknown) {
+      console.error("Failed to create department:", error);
+
+      // Check for duplicate name error from backend
+      const errorResponse = error as {
+        response?: {
+          data?: { errorKey?: string; title?: string; message?: string };
+        };
+      };
+
+      if (
+        errorResponse?.response?.data?.errorKey === "duplicate_name" ||
+        errorResponse?.response?.data?.title?.includes(
+          "Department with the same name already exists"
+        )
+      ) {
+        addNotification({
+          type: "warning",
+          title: "⚠️ Department Name Already Exists",
+          message: `A department with the name "${formData.name}" already exists. Please choose a different name.`,
+        });
+      } else {
+        const errorMessage =
+          errorResponse?.response?.data?.message ||
+          (error instanceof Error ? error.message : "Unknown error occurred");
+        addNotification({
+          type: "error",
+          title: "❌ Failed to Create Department",
+          message:
+            errorMessage ||
+            "There was an error creating the department. Please check your input and try again.",
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePrevPage = () => {
-    if (page > 1) setPage(page - 1);
+  const handleCancel = () => {
+    navigate(-1);
   };
-  const handleNextPage = () => {
-    if (page < totalPages) setPage(page + 1);
+
+  const addEmployee = () => {
+    setFormData((prev) => ({
+      ...prev,
+      employees: [
+        ...prev.employees,
+        {
+          employeeId: "",
+          isActive: true,
+          employeeObj: undefined,
+          searchQuery: "",
+        },
+      ],
+    }));
   };
-  const handleGoToPage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = Number(e.target.value);
-    if (val >= 1 && val <= totalPages) setPage(val);
+
+  const removeEmployee = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      employees: prev.employees.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updateEmployee = (
+    index: number,
+    field: keyof DepartmentFormData["employees"][0],
+    value: string | boolean | EmployeeSearchResult | undefined
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      employees: prev.employees.map((emp, i) =>
+        i === index ? { ...emp, [field]: value } : emp
+      ),
+    }));
   };
 
   return (
-    <div style={{ padding: 32 }}>
-      <HelpdeskDepartmentCreateForm onSubmit={handleSubmit} loading={loading} error={error} />
-      {showList && (
-        <div style={{ marginTop: 40 }}>
-          <h2>Departments</h2>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr>
-                <th style={{ borderBottom: "1px solid #ccc", textAlign: "left", padding: 8 }}>ID</th>
-                <th style={{ borderBottom: "1px solid #ccc", textAlign: "left", padding: 8 }}>Name</th>
-                <th style={{ borderBottom: "1px solid #ccc", textAlign: "left", padding: 8 }}>Active</th>
-                <th style={{ borderBottom: "1px solid #ccc", textAlign: "left", padding: 8 }}>Created Date</th>
-                <th style={{ borderBottom: "1px solid #ccc", textAlign: "left", padding: 8 }}>Last Modified</th>
-                <th style={{ borderBottom: "1px solid #ccc", textAlign: "left", padding: 8 }}>Edit</th>
-              </tr>
-            </thead>
-            <tbody>
-              {departments.map((dept: Department) => (
-                <tr key={dept.id}>
-                  <td style={{ padding: 8 }}>{dept.id}</td>
-                  <td style={{ padding: 8 }}>{dept.name}</td>
-                  <td style={{ padding: 8 }}>{dept.isActive ? "Yes" : "No"}</td>
-                  <td style={{ padding: 8 }}>{dept.createdDate ? new Date(dept.createdDate).toLocaleString() : "-"}</td>
-                  <td style={{ padding: 8 }}>{dept.lastModifiedDate ? new Date(dept.lastModifiedDate).toLocaleString() : "-"}</td>
-                  <td style={{ padding: 8 }}>
-                    <IconButton aria-label="edit" onClick={() => fetchDepartmentById(dept.id)}>
-                      <EditIcon />
-                    </IconButton>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {/* Pagination Controls */}
-          <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 16 }}>
-            <button onClick={handlePrevPage} disabled={page === 1}>Prev</button>
-            <span>Page</span>
-            <input type="number" min={1} max={totalPages} value={page} onChange={handleGoToPage} style={{ width: 50 }} />
-            <span>of {totalPages}</span>
-            <button onClick={handleNextPage} disabled={page === totalPages}>Next</button>
+    <div className="create-page">
+      {/* Page Title */}
+      <div className="create-page-header">
+        <div className="create-page-title-section">
+          <div className="create-page-icon">
+            <FaBuilding />
+          </div>
+          <div className="create-page-title-text">
+            <h1 className="create-page-title">Create New Department</h1>
+            <p className="create-page-subtitle">
+              Set up a new helpdesk department with assigned employees
+            </p>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Edit Modal */}
-      <Modal open={editModalOpen} onClose={() => setEditModalOpen(false)}>
-        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', boxShadow: 24, p: 4, minWidth: 400 }}>
-          <HelpdeskDepartmentCreateForm
-            onSubmit={handleSubmit}
-            loading={loading}
-            error={error}
-            initialData={editDepartment}
-          />
-        </Box>
-      </Modal>
+      <form onSubmit={handleSubmit} className="create-form-simple">
+        <div className="create-form-grid-simple">
+          {/* Department Name */}
+          <div className="create-form-group">
+            <label className="create-form-label">
+              Department Name *
+              <span className="create-form-hint">
+                Name of the helpdesk department
+              </span>
+            </label>
+            <input
+              type="text"
+              className={`create-form-input ${errors.name ? "error" : ""}`}
+              value={formData.name}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, name: e.target.value }))
+              }
+              placeholder="e.g., IT Support, HR, Finance"
+              maxLength={100}
+            />
+            {errors.name && (
+              <div className="create-form-error">
+                <FaExclamationTriangle />
+                <span>{errors.name}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Department Status */}
+          <div className="create-form-group">
+            <label className="create-form-label">
+              Status
+              <span className="create-form-hint">
+                Whether this department is active and accepting tickets
+              </span>
+            </label>
+            <select
+              className="create-form-select"
+              value={formData.isActive ? "true" : "false"}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  isActive: e.target.value === "true",
+                }))
+              }
+            >
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+          </div>
+
+          {/* Employees */}
+          <div className="create-form-group">
+            <label className="create-form-label">
+              Department Employees
+              <span className="create-form-hint">
+                Assign employees to this department
+              </span>
+            </label>
+
+            <div className="employee-list">
+              {formData.employees.map((employee, index) => (
+                <div key={index} className="employee-item">
+                  <div className="employee-input-group">
+                    <div className="employee-search-field">
+                      <div className="employee-search-container">
+                        <FaSearch className="search-icon" />
+                        <input
+                          type="text"
+                          className="create-form-input"
+                          value={employee.searchQuery || ""}
+                          onChange={(e) => {
+                            const query = e.target.value;
+                            updateEmployee(index, "searchQuery", query);
+                            if (query) {
+                              searchEmployees(query);
+                              setShowDropdowns((prev) => ({
+                                ...prev,
+                                [index]: true,
+                              }));
+                            } else {
+                              setShowDropdowns((prev) => ({
+                                ...prev,
+                                [index]: false,
+                              }));
+                            }
+                          }}
+                          placeholder="Search employee by name..."
+                          autoComplete="off"
+                        />
+
+                        {/* Search Results Dropdown */}
+                        {showDropdowns[index] && employeeResults.length > 0 && (
+                          <div className="employee-search-dropdown">
+                            {employeeResults.map((result) => (
+                              <div
+                                key={result.id}
+                                className="employee-search-item"
+                                onClick={() => {
+                                  updateEmployee(index, "employeeObj", result);
+                                  updateEmployee(
+                                    index,
+                                    "employeeId",
+                                    result.id.toString()
+                                  );
+                                  updateEmployee(
+                                    index,
+                                    "searchQuery",
+                                    result.employeeName
+                                  );
+                                  setShowDropdowns((prev) => ({
+                                    ...prev,
+                                    [index]: false,
+                                  }));
+                                }}
+                              >
+                                <div className="employee-search-info">
+                                  <FaUser className="employee-icon" />
+                                  <div className="employee-details">
+                                    <div className="employee-name">
+                                      {result.employeeName}
+                                    </div>
+                                    <div className="employee-meta">
+                                      {result.departmentName} •{" "}
+                                      {result.designation}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+
+                            {employeeLoading && (
+                              <div className="employee-search-loading">
+                                <ButtonLoader variant="primary" />
+                                <span>Searching...</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Selected Employee Display */}
+                      {employee.employeeObj && (
+                        <div className="selected-employee">
+                          <FaUser className="employee-icon" />
+                          <div className="employee-details">
+                            <div className="employee-name">
+                              {employee.employeeObj.employeeName}
+                            </div>
+                            <div className="employee-meta">
+                              {employee.employeeObj.departmentName} •{" "}
+                              {employee.employeeObj.designation}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            className="clear-employee"
+                            onClick={() => {
+                              updateEmployee(index, "employeeObj", undefined);
+                              updateEmployee(index, "employeeId", "");
+                              updateEmployee(index, "searchQuery", "");
+                            }}
+                          >
+                            <FaTimes />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="employee-status-field">
+                      <select
+                        className="create-form-select"
+                        value={employee.isActive ? "true" : "false"}
+                        onChange={(e) =>
+                          updateEmployee(
+                            index,
+                            "isActive",
+                            e.target.value === "true"
+                          )
+                        }
+                      >
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                      </select>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => removeEmployee(index)}
+                      className="btn-icon btn-danger"
+                      disabled={formData.employees.length === 1}
+                      title="Remove Employee"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={addEmployee}
+                className="btn btn-outline"
+              >
+                <FaPlus />
+                <span>Add Employee</span>
+              </button>
+            </div>
+
+            {errors.employees && (
+              <div className="create-form-error">
+                <FaExclamationTriangle />
+                <span>{errors.employees}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Form Actions */}
+        <div className="create-form-actions">
+          <div className="create-form-buttons">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="btn btn-secondary"
+              disabled={loading}
+            >
+              <FaTimes />
+              <span>Cancel</span>
+            </button>
+
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <ButtonLoader variant="white" />
+                  <span>Creating...</span>
+                </>
+              ) : (
+                <>
+                  <FaSave />
+                  <span>Create Department</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
   );
 };

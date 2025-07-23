@@ -6,7 +6,7 @@ export const SUPPORT_EMAIL = "support@company.com";
 
 // API Configuration
 export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+  import.meta.env.VITE_API_BASE_URL || "https://qa.redfishapp.com";
 export const WEBSOCKET_URL =
   import.meta.env.VITE_WEBSOCKET_URL || "ws://localhost:3000";
 export const API_TIMEOUT = 10000; // 10 seconds default

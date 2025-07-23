@@ -1,8 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaBell, FaFilter, FaCog } from "react-icons/fa";
+import {
+  FaTicketAlt,
+  FaCheckCircle,
+  FaExclamationTriangle,
+  FaClock,
+  FaArrowUp,
+  FaArrowDown,
+  FaFilter,
+  FaPlus,
+  FaUsers,
+  FaChartLine,
+  FaBolt,
+  FaEye,
+} from "react-icons/fa";
+import { Loader } from "../common";
 import type { Ticket, TicketStatus, Priority } from "../../types";
-import "./AdminDashboard.css";
+import { getTicketStats, searchTickets } from "../../services";
+import { useNotifications } from "../../hooks";
+import { transformApiTicketsToTickets } from "../../utils/apiTransforms";
+import "../../styles/dashboardModern.css";
 
 interface DashboardStats {
   totalTickets: number;
@@ -12,20 +29,12 @@ interface DashboardStats {
   slaBreaches: number;
   avgResolutionTime: number;
   userSatisfaction: number;
-}
-
-interface SLABreach {
-  id: string;
-  title: string;
-  priority: Priority;
-  createdAt: Date;
-  slaDeadline: Date;
-  assignedTo: string;
-  timeBreach: number; // hours over SLA
+  todayTickets: number;
 }
 
 export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { addNotification } = useNotifications();
   const [stats, setStats] = useState<DashboardStats>({
     totalTickets: 0,
     openTickets: 0,
@@ -34,9 +43,9 @@ export const AdminDashboard: React.FC = () => {
     slaBreaches: 0,
     avgResolutionTime: 0,
     userSatisfaction: 0,
+    todayTickets: 0,
   });
   const [recentTickets, setRecentTickets] = useState<Ticket[]>([]);
-  const [slaBreaches, setSlaBreaches] = useState<SLABreach[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,288 +53,298 @@ export const AdminDashboard: React.FC = () => {
       try {
         setLoading(true);
 
-        // Mock data for demonstration
-        const mockStats = {
-          totalTickets: 1247,
-          openTickets: 89,
-          resolvedTickets: 1158,
-          overdueTickets: 12,
-          slaBreaches: 5,
-          avgResolutionTime: 18.5,
-          userSatisfaction: 4.2,
+        // Fetch real stats from API
+        const [statsResponse, recentTicketsResponse] = await Promise.all([
+          getTicketStats(),
+          searchTickets({}, 0, 10, "createdAt,desc"), // Get 10 most recent tickets
+        ]);
+
+        // Process stats data
+        const apiStats = statsResponse.data;
+        const processedStats: DashboardStats = {
+          totalTickets: apiStats.totalTickets || 0,
+          openTickets: apiStats.openTickets || 0,
+          resolvedTickets: apiStats.resolvedTickets || 0,
+          overdueTickets: apiStats.overdueTickets || 0,
+          slaBreaches: apiStats.slaBreaches || 0,
+          avgResolutionTime: apiStats.avgResolutionTime || 0,
+          userSatisfaction: apiStats.userSatisfaction || 0,
+          todayTickets: apiStats.todayTickets || 0,
         };
 
-        const mockTickets: Ticket[] = [
-          {
-            id: "T-001",
-            title: "Email server not responding",
-            description: "Users unable to access email",
-            priority: "high" as Priority,
-            status: "open" as TicketStatus,
-            assignedTo: "John Smith",
-            createdAt: new Date("2024-01-15T08:30:00"),
-            updatedAt: new Date("2024-01-15T08:30:00"),
-            createdBy: "user@company.com",
-            category: "hardware",
-            slaDeadline: new Date("2024-01-15T12:30:00"),
-            tags: [],
-            attachments: [],
-            comments: [],
-          },
-          {
-            id: "T-002",
-            title: "Software installation request",
-            description: "Need Adobe Creative Suite installed",
-            priority: "medium" as Priority,
-            status: "in_progress" as TicketStatus,
-            assignedTo: "Jane Doe",
-            createdAt: new Date("2024-01-15T09:15:00"),
-            updatedAt: new Date("2024-01-15T09:15:00"),
-            createdBy: "designer@company.com",
-            category: "software",
-            slaDeadline: new Date("2024-01-15T17:15:00"),
-            tags: [],
-            attachments: [],
-            comments: [],
-          },
-          {
-            id: "T-003",
-            title: "Network connectivity issues",
-            description: "Intermittent connection drops",
-            priority: "high" as Priority,
-            status: "open" as TicketStatus,
-            assignedTo: "Mike Wilson",
-            createdAt: new Date("2024-01-15T10:00:00"),
-            updatedAt: new Date("2024-01-15T10:00:00"),
-            createdBy: "manager@company.com",
-            category: "network",
-            slaDeadline: new Date("2024-01-15T14:00:00"),
-            tags: [],
-            attachments: [],
-            comments: [],
-          },
-        ];
+        // Process recent tickets
+        const apiTickets =
+          recentTicketsResponse.data?.items ||
+          recentTicketsResponse.items ||
+          [];
+        const transformedTickets = transformApiTicketsToTickets(apiTickets);
 
-        const mockBreaches: SLABreach[] = [
-          {
-            id: "T-045",
-            title: "Critical system outage",
-            priority: "critical" as Priority,
-            createdAt: new Date("2024-01-14T14:00:00"),
-            slaDeadline: new Date("2024-01-14T16:00:00"),
-            assignedTo: "John Smith",
-            timeBreach: 26,
-          },
-          {
-            id: "T-078",
-            title: "Database performance issues",
-            priority: "high" as Priority,
-            createdAt: new Date("2024-01-14T16:30:00"),
-            slaDeadline: new Date("2024-01-14T20:30:00"),
-            assignedTo: "Jane Doe",
-            timeBreach: 8,
-          },
-        ];
-
-        setStats(mockStats);
-        setRecentTickets(mockTickets);
-        setSlaBreaches(mockBreaches);
-      } catch (error) {
+        setStats(processedStats);
+        setRecentTickets(transformedTickets);
+      } catch (error: unknown) {
         console.error("Error fetching dashboard data:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error occurred";
+        addNotification({
+          type: "error",
+          title: "Failed to Load Dashboard",
+          message: `Failed to load dashboard data: ${errorMessage}`,
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchDashboardData();
-  }, []);
+  }, [addNotification]);
 
-  const formatDate = (date: Date): string => {
-    return new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date);
+  const getTicketPriorityClass = (priority: Priority): string => {
+    return priority;
   };
 
-  const formatTime = (hours: number): string => {
-    if (hours < 24) {
-      return `${hours}h`;
-    }
-    const days = Math.floor(hours / 24);
-    const remainingHours = hours % 24;
-    return `${days}d ${remainingHours}h`;
+  const getTicketStatusClass = (status: TicketStatus): string => {
+    return status;
   };
 
-  const getPriorityColor = (priority: Priority): string => {
-    switch (priority) {
-      case "critical":
-        return "error";
-      case "high":
-        return "warning";
-      case "medium":
-        return "info";
-      case "low":
-        return "success";
-      default:
-        return "secondary";
+  const getSLAStatus = (deadline: Date): { status: string; text: string } => {
+    const now = new Date();
+    const hoursUntilDeadline =
+      (deadline.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+    if (hoursUntilDeadline < 0) {
+      return { status: "critical", text: "Overdue" };
+    } else if (hoursUntilDeadline < 2) {
+      return { status: "warning", text: "Due soon" };
+    } else {
+      return { status: "good", text: "On track" };
     }
   };
 
-  const getStatusColor = (status: TicketStatus): string => {
-    switch (status) {
-      case "open":
-        return "info";
-      case "in_progress":
-        return "warning";
-      case "resolved":
-        return "success";
-      case "closed":
-        return "secondary";
-      default:
-        return "secondary";
+  const formatTimeAgo = (date: Date): string => {
+    const now = new Date();
+    const diffInMinutes = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60)
+    );
+
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes}m ago`;
+    } else if (diffInMinutes < 1440) {
+      return `${Math.floor(diffInMinutes / 60)}h ago`;
+    } else {
+      return `${Math.floor(diffInMinutes / 1440)}d ago`;
     }
+  };
+
+  const getInitials = (name: string): string => {
+    return name
+      .split(" ")
+      .map((word) => word.charAt(0))
+      .join("")
+      .toUpperCase();
+  };
+
+  const handleTicketClick = (ticketId: string) => {
+    navigate(`/tickets/${ticketId}`);
   };
 
   if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Loading dashboard...</p>
-      </div>
-    );
+    return <Loader centered text="Loading dashboard..." minHeight="60vh" />;
   }
 
   return (
-    <div className="dashboard-page">
-      <div className="compact-header">
-        <h1>Admin Dashboard</h1>
-        <div className="actions-container">
-          <button className="compact-btn compact-btn-primary">
-            <FaBell /> Alerts ({stats.slaBreaches})
+    <div className="modern-dashboard">
+      {/* Dashboard Header */}
+      <div className="modern-dashboard-header">
+        <div>
+          <h1 className="modern-dashboard-title">Admin Dashboard</h1>
+          <p className="modern-dashboard-subtitle">
+            Monitor and manage your IT helpdesk operations
+          </p>
+        </div>
+        <div className="modern-dashboard-actions">
+          <button
+            className="btn btn-secondary"
+            onClick={() => navigate("/reports")}
+          >
+            <FaChartLine />
+            <span>View Reports</span>
           </button>
-          <button className="compact-btn">
-            <FaFilter /> Filters
-          </button>
-          <button className="compact-btn" onClick={() => navigate("/settings")}>
-            <FaCog /> Settings
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate("/tickets/create")}
+          >
+            <FaPlus />
+            <span>Create Ticket</span>
           </button>
         </div>
       </div>
 
-      {/* Stats Overview */}
-      <div className="compact-stats">
-        <div className="compact-stat">
-          <div className="compact-stat-value">{stats.totalTickets}</div>
-          <div className="compact-stat-label">Total Tickets</div>
-        </div>
-        <div className="compact-stat">
-          <div className="compact-stat-value">{stats.openTickets}</div>
-          <div className="compact-stat-label">Open Tickets</div>
-        </div>
-        <div className="compact-stat">
-          <div className="compact-stat-value">{stats.resolvedTickets}</div>
-          <div className="compact-stat-label">Resolved</div>
-        </div>
-        <div className="compact-stat">
-          <div className="compact-stat-value">{stats.overdueTickets}</div>
-          <div className="compact-stat-label">Overdue</div>
-        </div>
-        <div className="compact-stat">
-          <div className="compact-stat-value">{stats.slaBreaches}</div>
-          <div className="compact-stat-label">SLA Breaches</div>
-        </div>
-        <div className="compact-stat">
-          <div className="compact-stat-value">
-            {formatTime(stats.avgResolutionTime)}
+      {/* Stats Grid */}
+      <div className="modern-stats-grid">
+        <div className="modern-stat-card">
+          <div className="modern-stat-header">
+            <div className="modern-stat-icon primary">
+              <FaTicketAlt />
+            </div>
           </div>
-          <div className="compact-stat-label">Avg Resolution</div>
+          <div className="modern-stat-value">
+            {stats.totalTickets.toLocaleString()}
+          </div>
+          <div className="modern-stat-label">Total Tickets</div>
+          <div className="modern-stat-change positive">
+            <FaArrowUp />
+            <span>+12% from last month</span>
+          </div>
+        </div>
+
+        <div className="modern-stat-card">
+          <div className="modern-stat-header">
+            <div className="modern-stat-icon info">
+              <FaBolt />
+            </div>
+          </div>
+          <div className="modern-stat-value">{stats.openTickets}</div>
+          <div className="modern-stat-label">Open Tickets</div>
+          <div className="modern-stat-change neutral">
+            <span>Active workload</span>
+          </div>
+        </div>
+
+        <div className="modern-stat-card">
+          <div className="modern-stat-header">
+            <div className="modern-stat-icon success">
+              <FaCheckCircle />
+            </div>
+          </div>
+          <div className="modern-stat-value">
+            {stats.resolvedTickets.toLocaleString()}
+          </div>
+          <div className="modern-stat-label">Resolved Tickets</div>
+          <div className="modern-stat-change positive">
+            <FaArrowUp />
+            <span>+8% this week</span>
+          </div>
+        </div>
+
+        <div className="modern-stat-card">
+          <div className="modern-stat-header">
+            <div className="modern-stat-icon warning">
+              <FaExclamationTriangle />
+            </div>
+          </div>
+          <div className="modern-stat-value">{stats.overdueTickets}</div>
+          <div className="modern-stat-label">Overdue Tickets</div>
+          <div className="modern-stat-change negative">
+            <FaArrowDown />
+            <span>Needs attention</span>
+          </div>
+        </div>
+
+        <div className="modern-stat-card">
+          <div className="modern-stat-header">
+            <div className="modern-stat-icon error">
+              <FaClock />
+            </div>
+          </div>
+          <div className="modern-stat-value">{stats.slaBreaches}</div>
+          <div className="modern-stat-label">SLA Breaches</div>
+          <div className="modern-stat-change negative">
+            <span>Critical priority</span>
+          </div>
+        </div>
+
+        <div className="modern-stat-card">
+          <div className="modern-stat-header">
+            <div className="modern-stat-icon success">
+              <FaUsers />
+            </div>
+          </div>
+          <div className="modern-stat-value">
+            {stats.userSatisfaction.toFixed(1)}
+          </div>
+          <div className="modern-stat-label">User Satisfaction</div>
+          <div className="modern-stat-change positive">
+            <FaArrowUp />
+            <span>+0.3 this month</span>
+          </div>
         </div>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="compact-grid">
-        {/* Recent Tickets */}
-        <div className="compact-card">
-          <h3>Recent Tickets</h3>
-          <table className="compact-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Assigned</th>
-                <th>Created</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentTickets.map((ticket) => (
-                <tr key={ticket.id}>
-                  <td>#{ticket.id}</td>
-                  <td>{ticket.title}</td>
-                  <td>
-                    <span
-                      className={`compact-badge compact-badge-${getPriorityColor(
-                        ticket.priority
-                      )}`}
-                    >
-                      {ticket.priority}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      className={`compact-badge compact-badge-${getStatusColor(
-                        ticket.status
-                      )}`}
-                    >
-                      {ticket.status}
-                    </span>
-                  </td>
-                  <td>{ticket.assignedTo || "Unassigned"}</td>
-                  <td>{formatDate(ticket.createdAt)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Recent Tickets Section */}
+      <div className="modern-tickets-section">
+        <div className="modern-section-header">
+          <h2 className="modern-section-title">Recent Tickets</h2>
+          <div className="modern-section-actions">
+            <button className="btn btn-secondary btn-sm">
+              <FaFilter />
+              <span>Filter</span>
+            </button>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => navigate("/tickets")}
+            >
+              <FaEye />
+              <span>View All</span>
+            </button>
+          </div>
         </div>
 
-        {/* SLA Breaches */}
-        <div className="compact-card">
-          <h3>SLA Breaches</h3>
-          <table className="compact-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Priority</th>
-                <th>Assigned</th>
-                <th>Breach Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {slaBreaches.map((breach) => (
-                <tr key={breach.id}>
-                  <td>#{breach.id}</td>
-                  <td>{breach.title}</td>
-                  <td>
-                    <span
-                      className={`compact-badge compact-badge-${getPriorityColor(
-                        breach.priority
-                      )}`}
-                    >
-                      {breach.priority}
-                    </span>
-                  </td>
-                  <td>{breach.assignedTo}</td>
-                  <td className="text-error">
-                    +{formatTime(breach.timeBreach)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="modern-tickets-grid">
+          {recentTickets.map((ticket) => {
+            const slaStatus = getSLAStatus(ticket.slaDeadline);
+
+            return (
+              <div
+                key={ticket.id}
+                className="modern-ticket-tile"
+                onClick={() => handleTicketClick(ticket.id)}
+              >
+                <div className="modern-ticket-header">
+                  <span className="modern-ticket-id">{ticket.id}</span>
+                  <span
+                    className={`modern-ticket-priority ${getTicketPriorityClass(
+                      ticket.priority
+                    )}`}
+                  >
+                    {ticket.priority}
+                  </span>
+                </div>
+
+                <h3 className="modern-ticket-title">{ticket.title}</h3>
+                <p className="modern-ticket-description">
+                  {ticket.description}
+                </p>
+
+                <div className="modern-ticket-meta">
+                  <div className="modern-ticket-assignee">
+                    <div className="modern-ticket-avatar">
+                      {getInitials(ticket.assignedTo || "Unknown")}
+                    </div>
+                    <span>{ticket.assignedTo}</span>
+                  </div>
+                  <span className="modern-ticket-date">
+                    {formatTimeAgo(ticket.createdAt)}
+                  </span>
+                </div>
+
+                <div className="modern-ticket-footer">
+                  <span
+                    className={`modern-ticket-status ${getTicketStatusClass(
+                      ticket.status
+                    )}`}
+                  >
+                    {ticket.status.replace("_", " ")}
+                  </span>
+                  <div className="modern-ticket-sla">
+                    <div
+                      className={`modern-sla-indicator ${slaStatus.status}`}
+                    ></div>
+                    <span>{slaStatus.text}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

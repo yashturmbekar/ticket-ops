@@ -1,8 +1,12 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useAuth } from "../../hooks/useAuth";
-import { getMyTickets, createTicket } from "../../services";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import {
+  getMyTickets,
+  createTicket,
+  type HelpdeskDepartment,
+} from "../../services";
 import type { Ticket, Priority, TicketStatus } from "../../types";
 import "./EmployeeDashboard.css";
+import { getAllHelpdeskDepartments } from "../../services/helpdeskDepartmentService";
 
 interface TicketCounts {
   total: number;
@@ -16,7 +20,6 @@ interface CreateTicketForm {
   title: string;
   category: string;
   description: string;
-  priority: Priority;
   attachments: File[];
 }
 
@@ -24,9 +27,13 @@ interface EmployeeDashboardProps {
   initialTab?: "my-tickets" | "create" | "knowledge";
 }
 
-export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab }) => {
-  const { user } = useAuth();
+export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
+  initialTab,
+}) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [departments, setDepartments] = useState<HelpdeskDepartment[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const modalFileInputRef = useRef<HTMLInputElement>(null);
   const [ticketCounts, setTicketCounts] = useState<TicketCounts>({
     total: 0,
     open: 0,
@@ -40,7 +47,6 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
     title: "",
     category: "",
     description: "",
-    priority: "medium",
     attachments: [],
   });
   const [activeTab, setActiveTab] = useState<
@@ -52,21 +58,40 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
       setLoading(true);
       const response = await getMyTickets();
 
-      if (response.success && response.data?.data) {
-        const userTickets = response.data.data;
+      if (response && response.data) {
+        const userTickets = response.data;
         setTickets(userTickets);
 
         // Calculate counts
         const counts: TicketCounts = {
           total: userTickets.length,
-          open: userTickets.filter((t: Ticket) => t.status === "open").length,
+          open: userTickets.filter((t: Ticket) => t.status === "RAISED").length,
           inProgress: userTickets.filter(
-            (t: Ticket) => t.status === "in_progress"
+            (t: Ticket) => t.status === "IN_PROGRESS"
           ).length,
-          resolved: userTickets.filter((t: Ticket) => t.status === "resolved")
+          resolved: userTickets.filter((t: Ticket) => t.status === "RESOLVED")
             .length,
-          pending: userTickets.filter((t: Ticket) => t.status === "pending")
+          pending: userTickets.filter(
+            (t: Ticket) => t.status === "PENDING_APPROVAL"
+          ).length,
+        };
+        setTicketCounts(counts);
+      } else if (Array.isArray(response)) {
+        const userTickets = response;
+        setTickets(userTickets);
+
+        // Calculate counts
+        const counts: TicketCounts = {
+          total: userTickets.length,
+          open: userTickets.filter((t: Ticket) => t.status === "RAISED").length,
+          inProgress: userTickets.filter(
+            (t: Ticket) => t.status === "IN_PROGRESS"
+          ).length,
+          resolved: userTickets.filter((t: Ticket) => t.status === "RAISED")
             .length,
+          pending: userTickets.filter(
+            (t: Ticket) => t.status === "PENDING_APPROVAL"
+          ).length,
         };
         setTicketCounts(counts);
       }
@@ -78,36 +103,81 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
     }
   }, []);
 
+  const loadDepartments = useCallback(async () => {
+    try {
+      const response = await getAllHelpdeskDepartments();
+      console.log("Departments response:", response);
+      if (response && Array.isArray(response)) {
+        setDepartments(response);
+      } else if (response && response.data && Array.isArray(response.data)) {
+        setDepartments(response.data);
+      }
+    } catch (error) {
+      console.error("Error loading departments:", error);
+      setDepartments([]);
+    }
+  }, []);
+
   useEffect(() => {
     loadTickets();
-  }, [loadTickets]);
+    loadDepartments();
+  }, [loadTickets, loadDepartments]);
 
   const handleTicketClick = (ticket: Ticket) => {
     // TODO: Implement ticket detail view or navigation
     console.log("Ticket clicked:", ticket);
   };
 
+  const fileToByteArray = async (file: File): Promise<number[]> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (reader.result instanceof ArrayBuffer) {
+          const bytes = Array.from(new Uint8Array(reader.result));
+          resolve(bytes);
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
   const handleCreateTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Convert files to byte arrays
+      const byteArrays = await Promise.all(
+        createForm.attachments.map(async (file: File) => ({
+          fileName: file.name,
+          fileData: await fileToByteArray(file),
+          fileSize: file.size,
+          fileType: file.type,
+        }))
+      );
+
       const response = await createTicket({
         title: createForm.title,
         description: createForm.description,
-        status: "PENDING_APPROVAL",
-        assignedDepartmentId: user?.department || "",
-        assignedToEmployeeId: user?.id || "",
-        comment: createForm.description, // Using description as comment for now
+        assignedDepartmentId: createForm.category, // Now contains the department ID
+        comment: null, // Using description as comment for now
+        attachments: byteArrays,
       });
 
-      if (response.success) {
+      if (response) {
         setShowCreateModal(false);
         setCreateForm({
           title: "",
           category: "",
           description: "",
-          priority: "medium",
           attachments: [],
         });
+        // Clear file inputs
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        if (modalFileInputRef.current) {
+          modalFileInputRef.current.value = "";
+        }
         loadTickets();
       }
     } catch (error) {
@@ -117,13 +187,13 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
 
   const getStatusBadge = (status: TicketStatus) => {
     switch (status) {
-      case "open":
+      case "RAISED":
         return <span className="compact-badge open">Open</span>;
-      case "in_progress":
+      case "IN_PROGRESS":
         return <span className="compact-badge in-progress">In Progress</span>;
-      case "resolved":
+      case "RESOLVED":
         return <span className="compact-badge closed">Resolved</span>;
-      case "pending":
+      case "PENDING_APPROVAL":
         return <span className="compact-badge warning">Pending</span>;
       default:
         return <span className="compact-badge">{status}</span>;
@@ -132,15 +202,69 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
 
   const getPriorityBadge = (priority: Priority) => {
     switch (priority) {
-      case "high":
+      case "HIGH":
         return <span className="compact-badge high">High</span>;
-      case "medium":
+      case "MEDIUM":
         return <span className="compact-badge medium">Medium</span>;
-      case "low":
+      case "LOW":
         return <span className="compact-badge low">Low</span>;
       default:
         return <span className="compact-badge">{priority}</span>;
     }
+  };
+
+  const getDepartmentName = (categoryId: string) => {
+    const department = departments.find((dept) => dept.id === categoryId);
+    return department ? department.name : categoryId;
+  };
+
+  const getFilePreview = (file: File) => {
+    const isImage = file.type.startsWith("image/");
+
+    if (isImage) {
+      const url = URL.createObjectURL(file);
+      return (
+        <img
+          src={url}
+          alt={file.name}
+          className="file-preview-image"
+          onLoad={() => URL.revokeObjectURL(url)}
+        />
+      );
+    }
+
+    // File type icons
+    const getFileIcon = (type: string) => {
+      if (type.includes("pdf")) return "📄";
+      if (type.includes("word") || type.includes("document")) return "📝";
+      if (type.includes("excel") || type.includes("spreadsheet")) return "📊";
+      if (type.includes("powerpoint") || type.includes("presentation"))
+        return "📽️";
+      if (type.includes("video")) return "🎥";
+      if (type.includes("audio")) return "🎵";
+      if (
+        type.includes("zip") ||
+        type.includes("rar") ||
+        type.includes("archive")
+      )
+        return "📦";
+      if (type.includes("text")) return "📃";
+      return "📎";
+    };
+
+    return (
+      <div className="file-preview-icon">
+        <span className="file-icon">{getFileIcon(file.type)}</span>
+      </div>
+    );
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   if (loading) {
@@ -196,7 +320,9 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
       {/* Navigation Tabs */}
       <div className="actions-container">
         <button
-          className={`compact-btn ${activeTab === "my-tickets" ? "primary" : ""}`}
+          className={`compact-btn ${
+            activeTab === "my-tickets" ? "primary" : ""
+          }`}
           onClick={() => {
             setActiveTab("my-tickets");
             loadTickets();
@@ -242,7 +368,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
                 <tr key={ticket.id} onClick={() => handleTicketClick(ticket)}>
                   <td>#{ticket.id.slice(0, 8)}</td>
                   <td>{ticket.title}</td>
-                  <td>{ticket.category}</td>
+                  <td>{getDepartmentName(ticket.assignedDepartmentId)}</td>
                   <td>{getPriorityBadge(ticket.priority)}</td>
                   <td>{getStatusBadge(ticket.status)}</td>
                   <td>{new Date(ticket.createdAt).toLocaleDateString()}</td>
@@ -267,13 +393,12 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
                 type="text"
                 value={createForm.title}
                 onChange={(e) => {
-                  setCreateForm({ ...createForm, title: e.target.value })
+                  setCreateForm({ ...createForm, title: e.target.value });
                   // setCreateForm((prev) => ({
                   //   ...prev,
                   //   title: e.target.value,
                   // }))
-                }
-                }
+                }}
                 required
                 className="compact-input"
               />
@@ -289,29 +414,11 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
                 className="compact-input"
               >
                 <option value="">Select Category</option>
-                <option value="hardware">Hardware</option>
-                <option value="software">Software</option>
-                <option value="network">Network</option>
-                <option value="security">Security</option>
-                <option value="access">Access</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div className="compact-form-group">
-              <label>Priority</label>
-              <select
-                value={createForm.priority}
-                onChange={(e) =>
-                  setCreateForm({
-                    ...createForm,
-                    priority: e.target.value as Priority,
-                  })
-                }
-                className="compact-input"
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                {departments.map((dept) => (
+                  <option key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="compact-form-group">
@@ -326,22 +433,81 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
                 className="compact-input"
               />
             </div>
+            <div className="compact-form-group">
+              <label>Attachments</label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                onChange={(e) => {
+                  const files = Array.from(e.target.files || []);
+                  setCreateForm({ ...createForm, attachments: files });
+                }}
+                className="compact-input"
+                accept="*/*"
+              />
+              {createForm.attachments.length > 0 && (
+                <div className="attachment-list">
+                  <small>Selected files:</small>
+                  <div className="attachment-grid">
+                    {createForm.attachments.map((file: File, index: number) => (
+                      <div key={index} className="attachment-preview-item">
+                        <div className="file-preview-container">
+                          {getFilePreview(file)}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newAttachments =
+                                createForm.attachments.filter(
+                                  (_: File, i: number) => i !== index
+                                );
+                              setCreateForm({
+                                ...createForm,
+                                attachments: newAttachments,
+                              });
+                            }}
+                            className="remove-attachment-overlay"
+                            title="Remove file"
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <div className="file-info">
+                          <span className="file-name" title={file.name}>
+                            {file.name}
+                          </span>
+                          <span className="file-size">
+                            {formatFileSize(file.size)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
             <div className="actions-container">
-              <button type="submit" className="compact-btn primary" onSubmit={handleCreateTicket}>
+              <button
+                type="submit"
+                className="compact-btn primary"
+                onSubmit={handleCreateTicket}
+              >
                 Create Ticket
               </button>
               <button
                 type="button"
                 className="compact-btn"
-                onClick={() =>
+                onClick={() => {
                   setCreateForm({
                     title: "",
                     category: "",
                     description: "",
-                    priority: "medium",
                     attachments: [],
-                  })
-                }
+                  });
+                  if (fileInputRef.current) {
+                    fileInputRef.current.value = "";
+                  }
+                }}
               >
                 Reset
               </button>
@@ -446,29 +612,11 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
                   className="compact-input"
                 >
                   <option value="">Select Category</option>
-                  <option value="hardware">Hardware</option>
-                  <option value="software">Software</option>
-                  <option value="network">Network</option>
-                  <option value="security">Security</option>
-                  <option value="access">Access</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-              <div className="compact-form-group">
-                <label>Priority</label>
-                <select
-                  value={createForm.priority}
-                  onChange={(e) =>
-                    setCreateForm({
-                      ...createForm,
-                      priority: e.target.value as Priority,
-                    })
-                  }
-                  className="compact-input"
-                >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
+                  {departments.map((dept) => (
+                    <option key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="compact-form-group">
@@ -485,6 +633,61 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ initialTab
                   rows={4}
                   className="compact-input"
                 />
+              </div>
+              <div className="compact-form-group">
+                <label>Attachments</label>
+                <input
+                  ref={modalFileInputRef}
+                  type="file"
+                  multiple
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    setCreateForm({ ...createForm, attachments: files });
+                  }}
+                  className="compact-input"
+                  accept="*/*"
+                />
+                {createForm.attachments.length > 0 && (
+                  <div className="attachment-list">
+                    <small>Selected files:</small>
+                    <div className="attachment-grid">
+                      {createForm.attachments.map(
+                        (file: File, index: number) => (
+                          <div key={index} className="attachment-preview-item">
+                            <div className="file-preview-container">
+                              {getFilePreview(file)}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newAttachments =
+                                    createForm.attachments.filter(
+                                      (_: File, i: number) => i !== index
+                                    );
+                                  setCreateForm({
+                                    ...createForm,
+                                    attachments: newAttachments,
+                                  });
+                                }}
+                                className="remove-attachment-overlay"
+                                title="Remove file"
+                              >
+                                ×
+                              </button>
+                            </div>
+                            <div className="file-info">
+                              <span className="file-name" title={file.name}>
+                                {file.name}
+                              </span>
+                              <span className="file-size">
+                                {formatFileSize(file.size)}
+                              </span>
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="actions-container">
                 <button type="submit" className="compact-btn primary">

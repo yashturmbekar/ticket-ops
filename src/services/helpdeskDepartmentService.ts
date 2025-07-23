@@ -1,31 +1,133 @@
-import type { ApiResponse } from "./api"; // Make sure ApiResponse is defined in your api service
+import apiClient from "./apiClient";
 
-export const getHelpdeskDepartmentsSearch = async (params: Record<string, string | number | boolean> = {}) => {
-  // api.get returns ApiResponse<T>, so response.data is the array or paginated object
-  const response: ApiResponse<any> = await api.get("/helpdesk-departments/with-employees", params);
-  // If response.data is an array, return it; if response.data.data is an array, return that
-  if (Array.isArray(response.data)) {
-    return response.data;
-  }
-  if (response.data && Array.isArray((response.data as any).data)) {
-    return (response.data as any).data;
-  }
-  return [];
+export interface HelpdeskDepartmentPayload {
+  department: {
+    name: string;
+    isActive: boolean;
+  };
+  employees: {
+    employeeId: number;
+    isActive: boolean;
+  }[];
+}
+
+export interface HelpdeskDepartment {
+  id: string;
+  name: string;
+  isActive: boolean;
+  createdDate: string;
+  lastModifiedDate: string;
+  organizationId: number;
+  employees?: Employee[];
+}
+
+export interface Employee {
+  id: string;
+  helpdeskDepartmentId: string;
+  employeeId: number;
+  employeeProfilePicNameDTO: {
+    employeeName: string;
+    id: number;
+    profilePic: string;
+    profilePicContentType: string;
+    designation: string;
+  };
+  isActive: boolean;
+  createdDate: string;
+  lastModifiedDate: string;
+}
+
+export interface DepartmentWithEmployeesResponse {
+  department: {
+    id: string;
+    name: string;
+    isActive: boolean;
+    createdDate: string;
+    lastModifiedDate: string;
+  };
+  employees: Employee[];
+}
+
+export const createHelpdeskDepartment = async (
+  payload: HelpdeskDepartmentPayload
+) => {
+  const response = await apiClient.post(
+    "/helpdesk-departments/with-employees",
+    payload
+  );
+  return response.data;
 };
-export const getHelpdeskDepartmentsList = async (payload: any) => {
-  // api.post returns the paginated response object
-  const response = await api.post("/helpdesk-departments/search", payload);
+
+export const getAllHelpdeskDepartments = async (query?: string) => {
+  const params = query ? { search: query } : {};
+  const response = await apiClient.get("/helpdesk-departments/all", {
+    params,
+  });
   return response;
 };
-export const getHelpdeskDepartmentsById = async (id: any) => {
-  // api.get returns the paginated response object
-  const response = await api.get(`/helpdesk-departments/${id}/with-employees`);
+
+export const getHelpdeskDepartmentWithEmployees = async (
+  id: string
+): Promise<DepartmentWithEmployeesResponse> => {
+  const response = await apiClient.get(
+    `/helpdesk-departments/${id}/with-employees`
+  );
   return response;
 };
-import type { HelpdeskDepartmentPayload } from "../features/departments/components/HelpdeskDepartmentCreateForm";
-import api from "./api";
 
-export const createHelpdeskDepartment = async (payload: HelpdeskDepartmentPayload) => {
-  const response = await api.post("/helpdesk-departments/with-employees", payload);
+export const searchHelpdeskDepartments = async (
+  searchData: Record<string, unknown>,
+  page = 0,
+  size = 10,
+  sort = "id,desc"
+) => {
+  return apiClient.post(
+    `/helpdesk-departments/search?page=${page}&size=${size}&sort=${sort}`,
+    searchData
+  );
+};
+
+export const updateHelpdeskDepartment = async (
+  id: string,
+  payload: HelpdeskDepartmentPayload
+) => {
+  const response = await apiClient.put(
+    `/helpdesk-departments/${id}/with-employees`,
+    payload
+  );
+  return response.data;
+};
+
+export const deleteHelpdeskDepartment = async (id: string) => {
+  const response = await apiClient.delete(`/helpdesk-departments/${id}`);
+  return response.data;
+};
+
+export const toggleDepartmentStatus = async (id: string, isActive: boolean) => {
+  const response = await apiClient.patch(`/helpdesk-departments/${id}/status`, {
+    isActive,
+  });
+  return response.data;
+};
+
+export const removeEmployeeFromDepartment = async (
+  departmentId: string,
+  employeeId: number
+) => {
+  const response = await apiClient.delete(
+    `/helpdesk-departments/${departmentId}/employees/${employeeId}`
+  );
+  return response.data;
+};
+
+export const toggleEmployeeStatus = async (
+  departmentId: string,
+  employeeId: number,
+  isActive: boolean
+) => {
+  const response = await apiClient.patch(
+    `/helpdesk-departments/${departmentId}/employees/${employeeId}/status`,
+    { isActive }
+  );
   return response.data;
 };

@@ -14,7 +14,6 @@ import {
   Paper,
   Typography,
 } from "@mui/material";
-import Grid from "@mui/material/Grid";
 import { Add, Remove } from "@mui/icons-material";
 import EmployeeAutocomplete from "./EmployeeAutocomplete";
 import type { EmployeeSearchResult } from "../../../hooks/useEmployeeSearch";
@@ -76,8 +75,8 @@ const EmployeeListEditor: React.FC<Props> = ({
       <Stack spacing={2}>
         {employees.map((emp, idx) => (
           <Paper key={idx} elevation={2} sx={{ p: 2, borderRadius: 2 }}>
-            <Grid container spacing={2} alignItems="center">
-              <Grid item xs={7}>
+            <Box display="flex" alignItems="center" gap={2}>
+              <Box flex="1" minWidth={0}>
                 <EmployeeAutocomplete
                   value={emp.employeeObj || null}
                   onChange={(newValue) =>
@@ -85,8 +84,8 @@ const EmployeeListEditor: React.FC<Props> = ({
                   }
                   disabled={loading}
                 />
-              </Grid>
-              <Grid item xs={3}>
+              </Box>
+              <Box sx={{ minWidth: 120 }}>
                 <FormControlLabel
                   control={
                     <Switch
@@ -103,8 +102,8 @@ const EmployeeListEditor: React.FC<Props> = ({
                   }
                   label={<Typography variant="body2">Active</Typography>}
                 />
-              </Grid>
-              <Grid item xs={2} sx={{ display: "flex", alignItems: "center" }}>
+              </Box>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
                 <Tooltip title="Remove Employee">
                   <span>
                     <IconButton
@@ -118,8 +117,8 @@ const EmployeeListEditor: React.FC<Props> = ({
                     </IconButton>
                   </span>
                 </Tooltip>
-              </Grid>
-            </Grid>
+              </Box>
+            </Box>
           </Paper>
         ))}
         <Box>

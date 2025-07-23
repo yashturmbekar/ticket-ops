@@ -1,0 +1,838 @@
+/* Modern Dashboard Styles */
+.modern-dashboard {
+  padding: 0;
+  max-width: none;
+}
+
+.modern-dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-8);
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+}
+
+.modern-dashboard-title {
+  margin: 0;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.modern-dashboard-subtitle {
+  margin: var(--spacing-2) 0 0 0;
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-normal);
+}
+
+.modern-dashboard-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+}
+
+.modern-dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+}
+
+/* Compact Stats Bar */
+.compact-stats-bar {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: var(--border-radius-xl);
+  padding: var(--spacing-6);
+  margin-bottom: var(--spacing-8);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.compact-stats-bar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: none;
+  z-index: 0;
+}
+
+.compact-stat-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex: 1;
+  position: relative;
+  z-index: 1;
+  padding: var(--spacing-2);
+  border-radius: var(--border-radius-lg);
+  transition: all var(--transition-normal);
+  cursor: pointer;
+}
+
+.compact-stat-item:hover {
+  background: #f8f9fa;
+  transform: none;
+}
+
+.compact-stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: white;
+  transition: all var(--transition-normal);
+}
+
+.compact-stat-icon.primary {
+  background: #007bff;
+}
+
+.compact-stat-icon.warning {
+  background: #ffc107;
+}
+
+.compact-stat-icon.success {
+  background: #28a745;
+}
+
+.compact-stat-icon.info {
+  background: #17a2b8;
+}
+
+.compact-stat-item:hover .compact-stat-icon {
+  transform: scale(1.05);
+}
+
+.compact-stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.compact-stat-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: #1a1a1a;
+  line-height: 1;
+}
+
+.compact-stat-label {
+  font-size: var(--font-size-xs);
+  color: #6c757d;
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.compact-stat-divider {
+  width: 1px;
+  height: 40px;
+  background: #e9ecef;
+  margin: 0 var(--spacing-3);
+}
+
+/* Original Stats Grid (keeping for backward compatibility) */
+.modern-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-6);
+  margin-bottom: var(--spacing-8);
+}
+
+.modern-stat-card {
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-xl);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.modern-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
+}
+
+.modern-stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--color-primary);
+  border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
+}
+
+.modern-stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-4);
+}
+
+.modern-stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--border-radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: white;
+}
+
+.modern-stat-icon.primary {
+  background: var(--color-primary);
+}
+.modern-stat-icon.success {
+  background: var(--color-success);
+}
+.modern-stat-icon.warning {
+  background: var(--color-warning);
+}
+.modern-stat-icon.error {
+  background: var(--color-error);
+}
+.modern-stat-icon.info {
+  background: var(--color-info);
+}
+
+.modern-stat-value {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: 1;
+  margin-bottom: var(--spacing-1);
+}
+
+.modern-stat-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-3);
+}
+
+.modern-stat-change {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.modern-stat-change.positive {
+  color: var(--color-success);
+}
+
+.modern-stat-change.negative {
+  color: var(--color-error);
+}
+
+.modern-stat-change.neutral {
+  color: var(--color-text-muted);
+}
+
+/* Tickets Grid */
+.modern-tickets-section {
+  margin-bottom: var(--spacing-8);
+}
+
+.modern-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-6);
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+}
+
+.modern-section-title {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.modern-section-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.modern-tickets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--spacing-6);
+}
+
+.modern-ticket-tile {
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-xl);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow);
+  transition: all var(--transition-normal);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.modern-ticket-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
+}
+
+.modern-ticket-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-4);
+  gap: var(--spacing-3);
+}
+
+.modern-ticket-id {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+  background: var(--color-surface-secondary);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--border-radius);
+}
+
+.modern-ticket-priority {
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+}
+
+.modern-ticket-priority.high {
+  background: var(--color-error-lightest);
+  color: var(--color-error-dark);
+}
+
+.modern-ticket-priority.medium {
+  background: var(--color-warning-lightest);
+  color: var(--color-warning-dark);
+}
+
+.modern-ticket-priority.low {
+  background: var(--color-success-lightest);
+  color: var(--color-success-dark);
+}
+
+.modern-ticket-title {
+  margin: 0 0 var(--spacing-2) 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.modern-ticket-description {
+  margin: 0 0 var(--spacing-4) 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.modern-ticket-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-4);
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+}
+
+.modern-ticket-assignee {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.modern-ticket-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--border-radius-full);
+  background: var(--color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+}
+
+.modern-ticket-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.modern-ticket-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+}
+
+.modern-ticket-status {
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.modern-ticket-status.RAISED {
+  background: var(--color-info-lightest);
+  color: var(--color-info-dark);
+}
+
+.modern-ticket-status.IN_PROGRESS {
+  background: var(--color-warning-lightest);
+  color: var(--color-warning-dark);
+}
+
+.modern-ticket-status.RESOLVED {
+  background: var(--color-success-lightest);
+  color: var(--color-success-dark);
+}
+
+.modern-ticket-status.APPROVED {
+  background: var(--color-success-lightest);
+  color: var(--color-success-dark);
+}
+
+.modern-ticket-status.PENDING_APPROVAL {
+  background: var(--color-warning-lightest);
+  color: var(--color-warning-dark);
+}
+
+.modern-ticket-status.REJECTED {
+  background: var(--color-error-lightest);
+  color: var(--color-error-dark);
+}
+
+.modern-ticket-sla {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.modern-sla-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--border-radius-full);
+}
+
+.modern-sla-indicator.good {
+  background: var(--color-success);
+}
+
+.modern-sla-indicator.warning {
+  background: var(--color-warning);
+}
+
+.modern-sla-indicator.critical {
+  background: var(--color-error);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .modern-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+
+  .modern-tickets-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .modern-dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .modern-dashboard-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .modern-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .compact-stats-bar {
+    flex-direction: column;
+    gap: var(--spacing-4);
+    padding: var(--spacing-4);
+  }
+
+  .compact-stat-item {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .compact-stat-divider {
+    width: 100%;
+    height: 1px;
+    margin: 0;
+  }
+
+  .modern-tickets-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modern-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Operations Dashboard Specific Styles */
+.modern-system-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--spacing-4);
+}
+
+.modern-system-card {
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-5);
+  transition: all 0.2s ease;
+}
+
+.modern-system-card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.modern-system-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+}
+
+.modern-system-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--color-primary);
+  border-radius: var(--border-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: var(--font-size-lg);
+}
+
+.modern-system-info h4 {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.modern-system-type {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-transform: capitalize;
+}
+
+.modern-system-status {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.modern-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.modern-system-status.healthy {
+  color: var(--color-success);
+}
+
+.modern-system-status.healthy .modern-status-dot {
+  background: var(--color-success);
+}
+
+.modern-system-status.warning {
+  color: var(--color-warning);
+}
+
+.modern-system-status.warning .modern-status-dot {
+  background: var(--color-warning);
+}
+
+.modern-system-status.critical {
+  color: var(--color-danger);
+}
+
+.modern-system-status.critical .modern-status-dot {
+  background: var(--color-danger);
+}
+
+.modern-system-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: var(--spacing-4);
+}
+
+.modern-system-metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.metric-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.critical-incident {
+  border: 2px solid var(--color-danger);
+  background: rgba(255, 93, 93, 0.05);
+}
+
+.modern-ticket-urgency {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font-size: var(--font-size-xs);
+  color: var(--color-warning);
+}
+
+.urgency-icon {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.modern-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-4);
+}
+
+.modern-quick-action {
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.modern-quick-action:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.modern-quick-action svg {
+  font-size: var(--font-size-xl);
+}
+
+/* Team Performance Styles */
+.modern-team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-4);
+}
+
+.modern-team-card {
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-5);
+  transition: all 0.2s ease;
+}
+
+.modern-team-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.modern-team-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+}
+
+.modern-team-avatar {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+}
+
+.modern-status-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.modern-status-indicator.online {
+  background: var(--color-success);
+}
+
+.modern-status-indicator.away {
+  background: var(--color-warning);
+}
+
+.modern-status-indicator.offline {
+  background: var(--color-text-tertiary);
+}
+
+.modern-team-info h4 {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.modern-team-info p {
+  margin: var(--spacing-1) 0 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.modern-team-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modern-team-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.modern-team-stat .value {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.modern-team-stat .label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 480px) {
+  .modern-stat-card,
+  .modern-ticket-tile {
+    padding: var(--spacing-4);
+  }
+
+  .compact-stats-bar {
+    padding: var(--spacing-3);
+    gap: var(--spacing-3);
+  }
+
+  .compact-stat-item {
+    gap: var(--spacing-2);
+  }
+
+  .compact-stat-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .compact-stat-value {
+    font-size: var(--font-size-lg);
+  }
+
+  .modern-dashboard-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .modern-section-title {
+    font-size: var(--font-size-xl);
+  }
+}

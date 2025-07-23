@@ -129,25 +129,26 @@
 /* Action Buttons */
 .action-buttons {
   display: flex;
-  gap: var(--spacing-1);
+  gap: var(--spacing-2);
 }
 
 .action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border: none;
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--border-radius-md);
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: var(--font-size-sm);
   text-decoration: none;
+  box-shadow: var(--shadow-sm);
 }
 
 .action-btn.edit-btn {
-  background: var(--color-warning-bg);
+  background: linear-gradient(135deg, var(--color-warning-bg), rgba(245, 158, 11, 0.1));
   color: var(--color-warning);
   border: 1px solid var(--color-warning-border);
 }
@@ -155,21 +156,12 @@
 .action-btn.edit-btn:hover {
   background: var(--color-warning);
   color: white;
-}
-
-.action-btn.toggle-btn {
-  background: var(--color-info-bg);
-  color: var(--color-info);
-  border: 1px solid var(--color-info-border);
-}
-
-.action-btn.toggle-btn:hover {
-  background: var(--color-info);
-  color: white;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .action-btn.delete-btn {
-  background: var(--color-error-bg);
+  background: linear-gradient(135deg, var(--color-error-bg), rgba(239, 68, 68, 0.1));
   color: var(--color-error);
   border: 1px solid var(--color-error-border);
 }
@@ -177,6 +169,8 @@
 .action-btn.delete-btn:hover {
   background: var(--color-error);
   color: white;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 /* Employee Expansion Row */
@@ -274,28 +268,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border: none;
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--border-radius-md);
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: var(--font-size-xs);
-}
-
-.employee-action-btn.toggle-btn {
-  background: var(--color-info-bg);
-  color: var(--color-info);
-  border: 1px solid var(--color-info-border);
-}
-
-.employee-action-btn.toggle-btn:hover {
-  background: var(--color-info);
-  color: white;
+  font-size: var(--font-size-sm);
+  box-shadow: var(--shadow-sm);
 }
 
 .employee-action-btn.remove-btn {
-  background: var(--color-error-bg);
+  background: linear-gradient(135deg, var(--color-error-bg), rgba(239, 68, 68, 0.1));
   color: var(--color-error);
   border: 1px solid var(--color-error-border);
 }
@@ -303,6 +287,8 @@
 .employee-action-btn.remove-btn:hover {
   background: var(--color-error);
   color: white;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 /* Responsive Design */

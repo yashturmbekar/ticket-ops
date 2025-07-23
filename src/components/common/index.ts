@@ -9,3 +9,4 @@ export * from "./NotificationContainer";
 export * from "./PageLayout";
 export * from "./Sidebar";
 export * from "./Table";
+export * from "./TicketTile";

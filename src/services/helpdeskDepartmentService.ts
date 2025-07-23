@@ -22,11 +22,30 @@ export interface HelpdeskDepartment {
 }
 
 export interface Employee {
-  id: number;
-  employeeName: string;
-  email: string;
-  designation: string;
+  id: string;
+  helpdeskDepartmentId: string;
+  employeeId: number;
+  employeeProfilePicNameDTO: {
+    employeeName: string;
+    id: number;
+    profilePic: string;
+    profilePicContentType: string;
+    designation: string;
+  };
   isActive: boolean;
+  createdDate: string;
+  lastModifiedDate: string;
+}
+
+export interface DepartmentWithEmployeesResponse {
+  department: {
+    id: string;
+    name: string;
+    isActive: boolean;
+    createdDate: string;
+    lastModifiedDate: string;
+  };
+  employees: Employee[];
 }
 
 export const createHelpdeskDepartment = async (
@@ -44,6 +63,15 @@ export const getAllHelpdeskDepartments = async (query?: string) => {
   const response = await apiClient.get("/helpdesk-departments/all", {
     params,
   });
+  return response;
+};
+
+export const getHelpdeskDepartmentWithEmployees = async (
+  id: string
+): Promise<DepartmentWithEmployeesResponse> => {
+  const response = await apiClient.get(
+    `/helpdesk-departments/${id}/with-employees`
+  );
   return response;
 };
 

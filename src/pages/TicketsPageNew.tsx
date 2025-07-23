@@ -12,7 +12,7 @@ import {
   FaSpinner,
   FaBan,
 } from "react-icons/fa";
-import { Loader } from "../components/common";
+import { Loader, TicketTile } from "../components/common";
 import type { Ticket, TicketStatus, Priority } from "../types";
 
 // Extended ticket type for displaying API data
@@ -311,92 +311,29 @@ export const TicketsPage: React.FC = () => {
         {viewMode === "tiles" ? (
           <div className="tickets-grid">
             {filteredTickets.map((ticket) => {
-              const slaStatus = getSLAStatus(ticket.slaDeadline);
-
               return (
-                <div
+                <TicketTile
                   key={ticket.id}
-                  className={`ticket-tile ${
-                    selectedTickets.includes(ticket.id) ? "selected" : ""
-                  }`}
-                  onClick={() => handleTicketClick(ticket.id)}
-                >
-                  <div className="ticket-tile-header">
-                    <input
-                      type="checkbox"
-                      checked={selectedTickets.includes(ticket.id)}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        handleSelectTicket(ticket.id);
-                      }}
-                      className="ticket-checkbox"
-                    />
-                    <span className="ticket-id">
-                      {(ticket as DisplayTicket).ticketCode ||
-                        ticket.id.slice(0, 8)}
-                    </span>
-                    <span
-                      className={`ticket-priority ${getPriorityClass(
-                        ticket.priority
-                      )}`}
-                    >
-                      {ticket.priority}
-                    </span>
-                  </div>
-
-                  <h3 className="ticket-title">{ticket.title}</h3>
-                  <p className="ticket-description">{ticket.description}</p>
-
-                  <div className="ticket-meta">
-                    <div className="ticket-assignee">
-                      <div className="ticket-avatar">
-                        {getInitials(ticket.assignedTo || "Unknown")}
-                      </div>
-                      <span>{ticket.assignedTo}</span>
-                    </div>
-                    <span className="ticket-date">
-                      {formatTimeAgo(ticket.createdAt)}
-                    </span>
-                  </div>
-
-                  <div className="ticket-tags">
-                    {ticket.tags.slice(0, 3).map((tag) => (
-                      <span key={tag} className="ticket-tag">
-                        {tag}
-                      </span>
-                    ))}
-                    {ticket.tags.length > 3 && (
-                      <span className="ticket-tag-more">
-                        +{ticket.tags.length - 3}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="ticket-footer">
-                    <div className="ticket-status-container">
-                      <div
-                        className={`ticket-status-icon ${getStatusClass(
-                          ticket.status
-                        )}`}
-                      >
-                        {getStatusIcon(ticket.status)}
-                      </div>
-                      <span
-                        className={`ticket-status ${getStatusClass(
-                          ticket.status
-                        )}`}
-                      >
-                        {ticket.status.replace("_", " ")}
-                      </span>
-                    </div>
-                    <div className="ticket-sla">
-                      <div
-                        className={`sla-indicator ${slaStatus.status}`}
-                      ></div>
-                      <span>{slaStatus.text}</span>
-                    </div>
-                  </div>
-                </div>
+                  ticket={{
+                    id: ticket.id,
+                    ticketCode: (ticket as DisplayTicket).ticketCode,
+                    title: ticket.title,
+                    description: ticket.description,
+                    status: ticket.status,
+                    priority: ticket.priority,
+                    assignedTo: ticket.assignedTo,
+                    department: "Unknown", // Will be enhanced with API data
+                    createdAt: ticket.createdAt.toISOString(),
+                    slaDeadline: ticket.slaDeadline?.toISOString(),
+                    commentCount: ticket.comments?.length || 0,
+                    attachmentCount: ticket.attachments?.length || 0,
+                    tags: ticket.tags,
+                  }}
+                  isSelected={selectedTickets.includes(ticket.id)}
+                  showCheckbox={true}
+                  onClick={handleTicketClick}
+                  onSelect={handleSelectTicket}
+                />
               );
             })}
           </div>

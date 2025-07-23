@@ -10,16 +10,13 @@ import {
   FaEye,
   FaEyeSlash,
   FaUserTimes,
-  FaToggleOn,
-  FaToggleOff,
 } from "react-icons/fa";
 import { Loader } from "../components/common";
 import {
   searchHelpdeskDepartments,
+  getHelpdeskDepartmentWithEmployees,
   deleteHelpdeskDepartment,
-  toggleDepartmentStatus,
   removeEmployeeFromDepartment,
-  toggleEmployeeStatus,
   type HelpdeskDepartment,
 } from "../services/helpdeskDepartmentService";
 import { useNotifications } from "../hooks/useNotifications";
@@ -48,7 +45,7 @@ export const DepartmentsPage: React.FC = () => {
         searchCriteria.search = searchQuery;
       }
 
-      // Call the new search API
+      // Call the search API to get departments list
       const response = await searchHelpdeskDepartments(
         searchCriteria,
         0,
@@ -56,12 +53,33 @@ export const DepartmentsPage: React.FC = () => {
         "id,desc"
       );
 
-      console.log("API Response:", response);
-
       // Extract departments from response - API returns 'items' array
       const departmentsList = response.data?.items || response.items || [];
-      console.log("Departments List:", departmentsList);
-      setDepartments(departmentsList);
+
+      // For each department, fetch detailed information with employees
+      const departmentsWithEmployees = await Promise.all(
+        departmentsList.map(async (dept: HelpdeskDepartment) => {
+          try {
+            const detailedResponse = await getHelpdeskDepartmentWithEmployees(
+              dept.id
+            );
+            // Merge the basic department info with the detailed response
+            return {
+              ...dept,
+              employees: detailedResponse.employees,
+            };
+          } catch (error) {
+            console.error(
+              `Error loading employees for department ${dept.id}:`,
+              error
+            );
+            // Return the basic department info if detailed fetch fails
+            return dept;
+          }
+        })
+      );
+
+      setDepartments(departmentsWithEmployees);
     } catch (error) {
       console.error("Error loading departments:", error);
       addNotification({
@@ -103,31 +121,6 @@ export const DepartmentsPage: React.FC = () => {
     }
   };
 
-  const handleToggleDepartmentStatus = async (
-    id: string,
-    name: string,
-    currentStatus: boolean
-  ) => {
-    try {
-      await toggleDepartmentStatus(id, !currentStatus);
-      addNotification({
-        type: "success",
-        title: "Status Updated",
-        message: `Department "${name}" has been ${
-          !currentStatus ? "activated" : "deactivated"
-        }.`,
-      });
-      loadDepartments();
-    } catch (error) {
-      console.error("Error updating department status:", error);
-      addNotification({
-        type: "error",
-        title: "Update Failed",
-        message: "Could not update department status. Please try again.",
-      });
-    }
-  };
-
   const handleRemoveEmployee = async (
     departmentId: string,
     employeeId: number,
@@ -155,32 +148,6 @@ export const DepartmentsPage: React.FC = () => {
         type: "error",
         title: "Remove Failed",
         message: "Could not remove employee. Please try again.",
-      });
-    }
-  };
-
-  const handleToggleEmployeeStatus = async (
-    departmentId: string,
-    employeeId: number,
-    employeeName: string,
-    currentStatus: boolean
-  ) => {
-    try {
-      await toggleEmployeeStatus(departmentId, employeeId, !currentStatus);
-      addNotification({
-        type: "success",
-        title: "Employee Status Updated",
-        message: `${employeeName} has been ${
-          !currentStatus ? "activated" : "deactivated"
-        }.`,
-      });
-      loadDepartments();
-    } catch (error) {
-      console.error("Error updating employee status:", error);
-      addNotification({
-        type: "error",
-        title: "Update Failed",
-        message: "Could not update employee status. Please try again.",
       });
     }
   };
@@ -342,27 +309,6 @@ export const DepartmentsPage: React.FC = () => {
                             <FaEdit />
                           </Link>
                           <button
-                            className="action-btn toggle-btn"
-                            onClick={() =>
-                              handleToggleDepartmentStatus(
-                                department.id,
-                                department.name,
-                                department.isActive
-                              )
-                            }
-                            title={
-                              department.isActive
-                                ? "Deactivate Department"
-                                : "Activate Department"
-                            }
-                          >
-                            {department.isActive ? (
-                              <FaToggleOff />
-                            ) : (
-                              <FaToggleOn />
-                            )}
-                          </button>
-                          <button
                             className="action-btn delete-btn"
                             onClick={() =>
                               handleDeleteDepartment(
@@ -394,13 +340,16 @@ export const DepartmentsPage: React.FC = () => {
                                   >
                                     <div className="employee-info">
                                       <div className="employee-name">
-                                        {employee.employeeName}
-                                      </div>
-                                      <div className="employee-email">
-                                        {employee.email}
+                                        {
+                                          employee.employeeProfilePicNameDTO
+                                            .employeeName
+                                        }
                                       </div>
                                       <div className="employee-designation">
-                                        {employee.designation}
+                                        {
+                                          employee.employeeProfilePicNameDTO
+                                            .designation
+                                        }
                                       </div>
                                       <span
                                         className={`employee-status ${
@@ -416,34 +365,13 @@ export const DepartmentsPage: React.FC = () => {
                                     </div>
                                     <div className="employee-actions">
                                       <button
-                                        className="employee-action-btn toggle-btn"
-                                        onClick={() =>
-                                          handleToggleEmployeeStatus(
-                                            department.id,
-                                            employee.id,
-                                            employee.employeeName,
-                                            employee.isActive
-                                          )
-                                        }
-                                        title={
-                                          employee.isActive
-                                            ? "Deactivate Employee"
-                                            : "Activate Employee"
-                                        }
-                                      >
-                                        {employee.isActive ? (
-                                          <FaToggleOff />
-                                        ) : (
-                                          <FaToggleOn />
-                                        )}
-                                      </button>
-                                      <button
                                         className="employee-action-btn remove-btn"
                                         onClick={() =>
                                           handleRemoveEmployee(
                                             department.id,
-                                            employee.id,
-                                            employee.employeeName
+                                            employee.employeeId,
+                                            employee.employeeProfilePicNameDTO
+                                              .employeeName
                                           )
                                         }
                                         title="Remove from Department"

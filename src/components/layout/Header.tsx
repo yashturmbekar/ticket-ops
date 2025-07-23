@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { FaBars, FaBell, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import { useAuth } from "../../hooks/useAuth";
+import { useEmployeeProfile } from "../../hooks/useEmployeeProfile";
 import { USER_ROLE_LABELS } from "../../constants/userRoles";
+import {
+  getProfileImageUrl,
+  getInitialsFromName,
+  getDisplayName,
+  getDisplayRole,
+} from "../../utils/profileUtils";
 import "./HeaderModern.css";
 import { useNavigate } from "react-router-dom";
 
@@ -18,6 +25,7 @@ export const Header: React.FC<HeaderProps> = ({
   isCollapsed = false,
 }) => {
   const { user, logout } = useAuth();
+  const { profile } = useEmployeeProfile();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const navigate = useNavigate();
@@ -66,24 +74,17 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const getUserDisplayName = () => {
-    console.log("User data:", user); // Debug log
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName} ${user.lastName}`;
-    }
-    return user?.username || "User";
+    return getDisplayName(
+      profile?.employeeName,
+      user?.firstName,
+      user?.lastName,
+      user?.username
+    );
   };
 
   const getUserInitials = () => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName.charAt(0).toUpperCase()}${user.lastName
-        .charAt(0)
-        .toUpperCase()}`;
-    }
-    if (user?.username) {
-      const username = user.username.toUpperCase();
-      return username.length >= 2 ? username.substring(0, 2) : username;
-    }
-    return "U";
+    const displayName = getUserDisplayName();
+    return getInitialsFromName(displayName);
   };
 
   const toggleUserMenu = () => {
@@ -99,8 +100,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const getRoleLabel = () => {
-    if (!user?.role) return "User";
-    return USER_ROLE_LABELS[user.role] || "User";
+    return getDisplayRole(profile?.designation, user?.role, USER_ROLE_LABELS);
   };
 
   return (
@@ -201,11 +201,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* User Name */}
-        <span className="modern-user-name-display">
-          {user?.firstName && user?.lastName
-            ? `${user.firstName} ${user.lastName}`
-            : user?.username || "User"}
-        </span>
+        <span className="modern-user-name-display">{getUserDisplayName()}</span>
 
         {/* User Profile Photo */}
         <div className="modern-user-dropdown">
@@ -214,7 +210,27 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={toggleUserMenu}
             aria-expanded={isUserMenuOpen}
           >
-            <div className="modern-user-avatar">{getUserInitials()}</div>
+            <div className="modern-user-avatar">
+              {profile?.profilePic ? (
+                <img
+                  src={
+                    getProfileImageUrl(
+                      profile.profilePic,
+                      profile.profilePicContentType
+                    ) || ""
+                  }
+                  alt={profile.employeeName}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                getUserInitials()
+              )}
+            </div>
           </button>
 
           {isUserMenuOpen && (
@@ -230,7 +246,25 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="modern-dropdown-header">
                 <div className="modern-user-profile">
                   <div className="modern-user-avatar-large">
-                    {getUserInitials()}
+                    {profile?.profilePic ? (
+                      <img
+                        src={
+                          getProfileImageUrl(
+                            profile.profilePic,
+                            profile.profilePicContentType
+                          ) || ""
+                        }
+                        alt={profile.employeeName}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      getUserInitials()
+                    )}
                   </div>
                   <div>
                     <p className="modern-user-name">{getUserDisplayName()}</p>

@@ -17,10 +17,9 @@ import {
   type EmployeeSearchResult,
 } from "../hooks/useEmployeeSearch";
 import {
-  getAllHelpdeskDepartments,
+  getHelpdeskDepartmentWithEmployees,
   updateHelpdeskDepartment,
   type HelpdeskDepartmentPayload,
-  type HelpdeskDepartment,
   type Employee,
 } from "../services/helpdeskDepartmentService";
 import "../styles/createSimple.css";
@@ -72,28 +71,40 @@ export const DepartmentsEditPage: React.FC = () => {
 
   // Load department data for editing
   const loadDepartment = React.useCallback(async () => {
+    if (!id) {
+      addNotification({
+        type: "error",
+        title: "Invalid Department ID",
+        message: "No department ID provided.",
+      });
+      navigate("/departments");
+      return;
+    }
+
     try {
       setInitialLoading(true);
-      const departments = await getAllHelpdeskDepartments();
-      const foundDepartment = departments.find(
-        (dept: HelpdeskDepartment) => dept.id === id
-      );
 
-      if (foundDepartment) {
+      // Use the new API to get department with employees
+      const response = await getHelpdeskDepartmentWithEmployees(id);
+      console.log(response);
+
+      if (response && response.department) {
+        const { department, employees } = response;
+
         // Convert department data to form format
-        const employeesFormData = foundDepartment.employees?.length
-          ? foundDepartment.employees.map((emp: Employee) => ({
-              employeeId: emp.id.toString(),
+        const employeesFormData = employees?.length
+          ? employees.map((emp: Employee) => ({
+              employeeId: emp.employeeId.toString(),
               isActive: emp.isActive,
               employeeObj: {
-                id: emp.id,
-                employeeName: emp.employeeName,
-                employeeId: emp.id.toString(), // Add missing employeeId property
-                email: emp.email,
-                designation: emp.designation,
-                departmentName: foundDepartment.name, // Use current department name
+                id: emp.employeeId,
+                employeeName: emp.employeeProfilePicNameDTO.employeeName,
+                employeeId: emp.employeeId.toString(),
+                email: "", // Email not provided in new API response
+                designation: emp.employeeProfilePicNameDTO.designation,
+                departmentName: department.name,
               } as EmployeeSearchResult,
-              searchQuery: emp.employeeName,
+              searchQuery: emp.employeeProfilePicNameDTO.employeeName,
             }))
           : [
               {
@@ -105,8 +116,8 @@ export const DepartmentsEditPage: React.FC = () => {
             ];
 
         setFormData({
-          name: foundDepartment.name,
-          isActive: foundDepartment.isActive,
+          name: department.name,
+          isActive: department.isActive,
           employees: employeesFormData,
         });
       } else {

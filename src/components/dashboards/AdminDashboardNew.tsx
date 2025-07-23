@@ -12,10 +12,8 @@ import {
   FaChartLine,
   FaBolt,
   FaEye,
-  FaSpinner,
-  FaBan,
 } from "react-icons/fa";
-import { Loader } from "../common";
+import { Loader, TicketTile } from "../common";
 import type { Ticket, TicketStatus, Priority } from "../../types";
 import "../../styles/dashboardModern.css";
 import "../../styles/ticketsModern.css";
@@ -186,69 +184,6 @@ export const AdminDashboard: React.FC = () => {
     fetchDashboardData();
   }, []);
 
-  const getPriorityClass = (priority: Priority): string => {
-    return priority.toLowerCase();
-  };
-
-  const getStatusClass = (status: TicketStatus): string => {
-    return status;
-  };
-
-  const getStatusIcon = (status: TicketStatus) => {
-    switch (status) {
-      case "RAISED":
-        return <FaExclamationTriangle />;
-      case "IN_PROGRESS":
-        return <FaSpinner />;
-      case "PENDING_APPROVAL":
-        return <FaClock />;
-      case "RESOLVED":
-        return <FaCheckCircle />;
-      case "APPROVED":
-        return <FaCheckCircle />;
-      case "REJECTED":
-        return <FaBan />;
-      default:
-        return <FaTicketAlt />;
-    }
-  };
-
-  const getSLAStatus = (deadline: Date): { status: string; text: string } => {
-    const now = new Date();
-    const hoursUntilDeadline =
-      (deadline.getTime() - now.getTime()) / (1000 * 60 * 60);
-
-    if (hoursUntilDeadline < 0) {
-      return { status: "critical", text: "Overdue" };
-    } else if (hoursUntilDeadline < 2) {
-      return { status: "warning", text: "Due soon" };
-    } else {
-      return { status: "good", text: "On track" };
-    }
-  };
-
-  const formatTimeAgo = (date: Date): string => {
-    const now = new Date();
-    const diffInMinutes = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60)
-    );
-
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes}m ago`;
-    } else if (diffInMinutes < 1440) {
-      return `${Math.floor(diffInMinutes / 60)}h ago`;
-    } else {
-      return `${Math.floor(diffInMinutes / 1440)}d ago`;
-    }
-  };
-
-  const getInitials = (name: string): string => {
-    return name
-      .split(" ")
-      .map((word) => word.charAt(0))
-      .join("")
-      .toUpperCase();
-  };
 
   const handleTicketClick = (ticketId: string) => {
     navigate(`/tickets/${ticketId}`);
@@ -391,76 +326,27 @@ export const AdminDashboard: React.FC = () => {
 
         <div className="tickets-grid">
           {recentTickets.map((ticket) => {
-            const slaStatus = getSLAStatus(ticket.slaDeadline);
-
             return (
-              <div
+              <TicketTile
                 key={ticket.id}
-                className="ticket-tile"
-                onClick={() => handleTicketClick(ticket.id)}
-              >
-                <div className="ticket-tile-header">
-                  <span className="ticket-id">{ticket.id}</span>
-                  <span
-                    className={`ticket-priority ${getPriorityClass(
-                      ticket.priority
-                    )}`}
-                  >
-                    {ticket.priority}
-                  </span>
-                </div>
-
-                <h3 className="ticket-title">{ticket.title}</h3>
-                <p className="ticket-description">{ticket.description}</p>
-
-                <div className="ticket-meta">
-                  <div className="ticket-assignee">
-                    <div className="ticket-avatar">
-                      {getInitials(ticket.assignedTo || "Unknown")}
-                    </div>
-                    <span>{ticket.assignedTo}</span>
-                  </div>
-                  <span className="ticket-date">
-                    {formatTimeAgo(ticket.createdAt)}
-                  </span>
-                </div>
-
-                <div className="ticket-tags">
-                  {ticket.tags.slice(0, 3).map((tag) => (
-                    <span key={tag} className="ticket-tag">
-                      {tag}
-                    </span>
-                  ))}
-                  {ticket.tags.length > 3 && (
-                    <span className="ticket-tag-more">
-                      +{ticket.tags.length - 3}
-                    </span>
-                  )}
-                </div>
-
-                <div className="ticket-footer">
-                  <div className="ticket-status-container">
-                    <div
-                      className={`ticket-status-icon ${getStatusClass(
-                        ticket.status
-                      )}`}
-                    >
-                      {getStatusIcon(ticket.status)}
-                    </div>
-                    <span
-                      className={`ticket-status ${getStatusClass(
-                        ticket.status
-                      )}`}
-                    >
-                      {ticket.status.replace("_", " ")}
-                    </span>
-                  </div>
-                  <div className="ticket-sla">
-                    <div className={`sla-indicator ${slaStatus.status}`}></div>
-                    <span>{slaStatus.text}</span>
-                  </div>
-                </div>
-              </div>
+                ticket={{
+                  id: ticket.id,
+                  ticketCode: `TKT-${ticket.id.slice(0, 8)}`,
+                  title: ticket.title,
+                  description: ticket.description,
+                  status: ticket.status,
+                  priority: ticket.priority,
+                  assignedTo: ticket.assignedTo,
+                  department: "IT Department", // Default for dashboard
+                  createdAt: ticket.createdAt.toISOString(),
+                  slaDeadline: ticket.slaDeadline?.toISOString(),
+                  commentCount: ticket.comments?.length || 0,
+                  attachmentCount: ticket.attachments?.length || 0,
+                  tags: ticket.tags,
+                }}
+                onClick={handleTicketClick}
+                compact={true}
+              />
             );
           })}
         </div>

@@ -18,6 +18,8 @@ import type { Ticket, TicketStatus, Priority } from "../types";
 // Extended ticket type for displaying API data
 type DisplayTicket = Ticket & { ticketCode?: string };
 import { searchTickets } from "../services/ticketService";
+import { getAllHelpdeskDepartments } from "../services/helpdeskDepartmentService";
+import type { HelpdeskDepartment } from "../services/helpdeskDepartmentService";
 import { useNotifications } from "../hooks/useNotifications";
 import { transformApiTicketsToTickets } from "../utils/apiTransforms";
 import "../styles/ticketsModern.css";
@@ -25,7 +27,7 @@ import "../styles/ticketsModern.css";
 interface TicketsFilter {
   status: string;
   priority: string;
-  category: string;
+  department: string;
   assignee: string;
   search: string;
 }
@@ -34,6 +36,7 @@ export const TicketsPage: React.FC = () => {
   const navigate = useNavigate();
   const { addNotification } = useNotifications();
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [departments, setDepartments] = useState<HelpdeskDepartment[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"tiles" | "list">("tiles");
@@ -41,10 +44,29 @@ export const TicketsPage: React.FC = () => {
   const [filters, setFilters] = useState<TicketsFilter>({
     status: "",
     priority: "",
-    category: "",
+    department: "",
     assignee: "",
     search: "",
   });
+
+  // Fetch departments on component mount
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const departmentData = await getAllHelpdeskDepartments();
+        setDepartments(Array.isArray(departmentData) ? departmentData : []);
+      } catch (error) {
+        console.error("Error loading departments:", error);
+        addNotification({
+          type: "error",
+          title: "Failed to Load Departments",
+          message: "Failed to load departments for filtering",
+        });
+      }
+    };
+
+    fetchDepartments();
+  }, [addNotification]);
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -61,8 +83,8 @@ export const TicketsPage: React.FC = () => {
         if (filters.priority) {
           searchCriteria.priority = filters.priority;
         }
-        if (filters.category) {
-          searchCriteria.category = filters.category;
+        if (filters.department) {
+          searchCriteria.department = filters.department;
         }
         if (filters.assignee) {
           searchCriteria.assignedTo = filters.assignee;
@@ -255,20 +277,18 @@ export const TicketsPage: React.FC = () => {
           </select>
 
           <select
-            value={filters.category}
+            value={filters.department}
             onChange={(e) =>
-              setFilters((prev) => ({ ...prev, category: e.target.value }))
+              setFilters((prev) => ({ ...prev, department: e.target.value }))
             }
             className="filter-select"
           >
-            <option value="">All Categories</option>
-            <option value="software">Software</option>
-            <option value="hardware">Hardware</option>
-            <option value="network">Network</option>
-            <option value="email">Email</option>
-            <option value="printer">Printer</option>
-            <option value="access">Access</option>
-            <option value="other">Other</option>
+            <option value="">All Departments</option>
+            {departments.map((dept) => (
+              <option key={dept.id} value={dept.name}>
+                {dept.name}
+              </option>
+            ))}
           </select>
         </div>
 

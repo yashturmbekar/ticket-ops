@@ -16,7 +16,13 @@ import { Loader, TicketTile } from "../components/common";
 import type { Ticket, TicketStatus, Priority } from "../types";
 
 // Extended ticket type for displaying API data
-type DisplayTicket = Ticket & { ticketCode?: string };
+type DisplayTicket = Ticket & {
+  ticketCode?: string;
+  assignedToDetails?: {
+    employeeName: string;
+    designation: string;
+  };
+};
 import { searchTickets } from "../services/ticketService";
 import { searchHelpdeskDepartments } from "../services/helpdeskDepartmentService";
 import type { HelpdeskDepartment } from "../services/helpdeskDepartmentService";
@@ -202,6 +208,11 @@ export const TicketsPage: React.FC = () => {
       .toUpperCase();
   };
 
+  const getDepartmentName = (departmentId: string): string => {
+    const department = departments.find((dept) => dept.id === departmentId);
+    return department?.name || "Unknown Department";
+  };
+
   const handleTicketClick = (ticketId: string) => {
     navigate(`/tickets/${ticketId}`);
   };
@@ -361,7 +372,12 @@ export const TicketsPage: React.FC = () => {
                     status: ticket.status,
                     priority: ticket.priority,
                     assignedTo: ticket.assignedTo,
-                    department: "Unknown", // Will be enhanced with API data
+                    assignedToDetails: (ticket as DisplayTicket)
+                      .assignedToDetails,
+                    department: getDepartmentName(ticket.assignedDepartmentId),
+                    helpdeskDepartmentDetails: {
+                      name: getDepartmentName(ticket.assignedDepartmentId),
+                    },
                     createdAt: ticket.createdAt.toISOString(),
                     slaDeadline: ticket.slaDeadline?.toISOString(),
                     commentCount: ticket.comments?.length || 0,
@@ -443,9 +459,9 @@ export const TicketsPage: React.FC = () => {
                       <td>
                         <div className="table-assignee">
                           <div className="assignee-avatar">
-                            {getInitials(ticket.assignedTo || "Unknown")}
+                            {getInitials(ticket.assignedTo || "Unassigned")}
                           </div>
-                          <span>{ticket.assignedTo}</span>
+                          <span>{ticket.assignedTo || "Unassigned"}</span>
                         </div>
                       </td>
                       <td>{formatTimeAgo(ticket.createdAt)}</td>

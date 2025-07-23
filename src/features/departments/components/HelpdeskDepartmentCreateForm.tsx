@@ -1,17 +1,30 @@
 import React, { useState } from "react";
 import {
-  Paper,
   Typography,
   Box,
   Button,
-  Divider,
   Alert,
-  Container,
   Stack,
 } from "@mui/material";
 import type { EmployeeSearchResult } from "../../../hooks/useEmployeeSearch";
 import DepartmentDetailsForm from "./DepartmentDetailsForm";
 import EmployeeListEditor from "./EmployeeListEditor";
+import { styled } from '@mui/material/styles';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+
+const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialogContent-root': {
+    padding: theme.spacing(2),
+  },
+  '& .MuiDialogActions-root': {
+    padding: theme.spacing(1),
+  },
+}));
 
 interface Department {
   name: string;
@@ -32,15 +45,21 @@ interface Props {
   onSubmit: (payload: HelpdeskDepartmentPayload) => void;
   loading?: boolean;
   error?: string | null;
+  initialData?: {
+    name?: string;
+    isActive?: boolean;
+    // Add more fields as needed for editing
+  } | null;
 }
 
 const HelpdeskDepartmentCreateForm: React.FC<Props> = ({
   onSubmit,
   loading = false,
   error = null,
+  initialData = null,
 }) => {
-  const [departmentName, setDepartmentName] = useState("");
-  const [departmentActive, setDepartmentActive] = useState(true);
+  const [departmentName, setDepartmentName] = useState(initialData?.name || "");
+  const [departmentActive, setDepartmentActive] = useState(initialData?.isActive ?? true);
   const [employees, setEmployees] = useState<
     {
       employeeId: string;
@@ -49,6 +68,15 @@ const HelpdeskDepartmentCreateForm: React.FC<Props> = ({
     }[]
   >([{ employeeId: "", isActive: true, employeeObj: null }]);
   const [formError, setFormError] = useState<string | null>(null);
+
+  // Update form fields if initialData changes (for edit)
+  React.useEffect(() => {
+    if (initialData) {
+      setDepartmentName(initialData.name || "");
+      setDepartmentActive(initialData.isActive ?? true);
+      // Optionally set employees if available in initialData
+    }
+  }, [initialData]);
 
   const validate = () => {
     if (!departmentName.trim()) {
@@ -85,69 +113,95 @@ const HelpdeskDepartmentCreateForm: React.FC<Props> = ({
     onSubmit(payload);
   };
 
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   return (
-    <Container maxWidth="md" sx={{ mt: 6, mb: 6 }}>
-      <Paper
-        elevation={4}
-        sx={{ p: { xs: 2, sm: 4 }, maxWidth: 600, mx: "auto", borderRadius: 4 }}
+    <Box>
+      <Button variant="outlined" onClick={handleClickOpen}>
+        Create Helpdesk Department
+      </Button>
+      <BootstrapDialog
+        onClose={handleClose}
+        aria-labelledby="customized-dialog-title"
+        open={open}
       >
-        <Stack spacing={3}>
-          <Box>
-            <Typography
-              variant="h4"
-              fontWeight={700}
-              gutterBottom
-              align="center"
+        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+         Create Helpdesk Department
+        </DialogTitle>
+        <IconButton
+          aria-label="close"
+          onClick={handleClose}
+          sx={(theme) => ({
+            position: 'absolute',
+            right: 8,
+            top: 8,
+            color: theme.palette.grey[500],
+          })}
+        >
+          <CloseIcon />
+        </IconButton>
+        <DialogContent dividers>
+
+          <Stack spacing={3}>
+           
+            <form
+              onSubmit={handleSubmit}
+              aria-label="Create Helpdesk Department Form"
+              autoComplete="off"
             >
-              Create Helpdesk Department
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-          </Box>
-          <form
-            onSubmit={handleSubmit}
-            aria-label="Create Helpdesk Department Form"
-            autoComplete="off"
-          >
-            <Stack spacing={3}>
-              <DepartmentDetailsForm
-                name={departmentName}
-                setName={setDepartmentName}
-                active={departmentActive}
-                setActive={setDepartmentActive}
-                loading={loading}
-              />
-              <Box>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
-                  Employees
-                </Typography>
-                <EmployeeListEditor
-                  employees={employees}
-                  setEmployees={setEmployees}
+              <Stack spacing={3}>
+                <DepartmentDetailsForm
+                  name={departmentName}
+                  setName={setDepartmentName}
+                  active={departmentActive}
+                  setActive={setDepartmentActive}
                   loading={loading}
                 />
-              </Box>
-              {(formError || error) && (
-                <Alert severity="error" sx={{ mt: 1 }}>
-                  {formError || error}
-                </Alert>
-              )}
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                disabled={loading}
-                fullWidth
-                aria-label="Create Department"
-                size="large"
-                sx={{ mt: 2, py: 1.5, fontSize: 18, borderRadius: 2 }}
-              >
-                {loading ? "Creating..." : "Create Department"}
-              </Button>
-            </Stack>
-          </form>
-        </Stack>
-      </Paper>
-    </Container>
+                <Box>
+                  <Typography variant="h6" fontWeight={600} gutterBottom>
+                    Employees
+                  </Typography>
+                  <EmployeeListEditor
+                    employees={employees}
+                    setEmployees={setEmployees}
+                    loading={loading}
+                  />
+                </Box>
+                {(formError || error) && (
+                  <Alert severity="error" sx={{ mt: 1 }}>
+                    {formError || error}
+                  </Alert>
+                )}
+
+              </Stack>
+            </form>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={loading}
+            fullWidth
+            aria-label="Create Department"
+            size="large"
+            sx={{ mt: 2, py: 1.5, fontSize: 18, borderRadius: 2 }}
+          >
+            {loading ? "Creating..." : "Create Department"}
+          </Button>
+        </DialogActions>
+      </BootstrapDialog>
+
+
+    </Box >
   );
 };
 

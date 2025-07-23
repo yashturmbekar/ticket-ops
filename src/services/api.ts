@@ -50,6 +50,7 @@ class ApiService {
     };
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
+      headers["ngrok-skip-browser-warning"] = `true`;
     }
     return headers;
   }

@@ -88,7 +88,7 @@ const useTokenAuth = () => {
       if (currentToken) {
         try {
           const decodedToken: DecodedToken = jwtDecode(currentToken);
-
+          console.log("Decoded Token:", decodedToken);
           // Check if token is expired
           const currentTime = Date.now() / 1000;
           if (decodedToken.exp < currentTime) {

@@ -115,7 +115,6 @@ const mapRoleFromToken = (tokenRole: string): UserRole => {
     employee: UserRole.EMPLOYEE,
     manager: UserRole.MANAGER,
     org_admin: UserRole.ORG_ADMIN,
-    "org-admin": UserRole.ORG_ADMIN,
 
     // Variations and fallbacks
     executive: UserRole.CXO,

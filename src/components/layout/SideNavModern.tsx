@@ -28,13 +28,6 @@ const SideNavModern: React.FC<SideNavProps> = ({
   const { navigationItems, isLoading } = useNavigation();
   const location = useLocation();
 
-  // Debug logging
-  console.log("SideNavModern Debug:", {
-    navigationItems,
-    isLoading,
-    itemsLength: navigationItems?.length,
-  });
-
   // Icon mapping for navigation items
   const getIcon = (iconName: string): React.ReactNode => {
     const iconMap: Record<string, React.ReactNode> = {

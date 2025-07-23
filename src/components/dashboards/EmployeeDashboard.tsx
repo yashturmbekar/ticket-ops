@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   getMyTickets,
   createTicket,
-  searchHelpdeskDepartments,
   type HelpdeskDepartment,
 } from "../../services";
 import type { Ticket, Priority, TicketStatus } from "../../types";
 import "./EmployeeDashboard.css";
+import { getAllHelpdeskDepartments } from "../../services/helpdeskDepartmentService";
 
 interface TicketCounts {
   total: number;
@@ -105,7 +105,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
 
   const loadDepartments = useCallback(async () => {
     try {
-      const response = await searchHelpdeskDepartments();
+      const response = await getAllHelpdeskDepartments();
       console.log("Departments response:", response);
       if (response && Array.isArray(response)) {
         setDepartments(response);

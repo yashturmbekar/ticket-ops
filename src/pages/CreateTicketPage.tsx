@@ -7,6 +7,7 @@ import {
   FaTimes,
   FaExclamationTriangle,
 } from "react-icons/fa";
+import { ButtonLoader } from "../components/common";
 import { useAuth } from "../hooks/useAuth";
 import { useNotifications } from "../hooks/useNotifications";
 import { getAllHelpdeskDepartments } from "../services/helpdeskDepartmentService";
@@ -374,7 +375,7 @@ export const CreateTicketPage: React.FC = () => {
             >
               {loading ? (
                 <>
-                  <div className="create-spinner"></div>
+                  <ButtonLoader variant="white" />
                   <span>Creating...</span>
                 </>
               ) : (

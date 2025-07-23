@@ -10,6 +10,7 @@ import {
   FaUser,
   FaSearch,
 } from "react-icons/fa";
+import { ButtonLoader } from "../components/common";
 import { useNotifications } from "../hooks/useNotifications";
 import {
   useEmployeeSearch,
@@ -347,7 +348,7 @@ export const DepartmentsCreatePage: React.FC = () => {
 
                             {employeeLoading && (
                               <div className="employee-search-loading">
-                                <div className="create-spinner"></div>
+                                <ButtonLoader variant="primary" />
                                 <span>Searching...</span>
                               </div>
                             )}
@@ -452,7 +453,7 @@ export const DepartmentsCreatePage: React.FC = () => {
             >
               {loading ? (
                 <>
-                  <div className="create-spinner"></div>
+                  <ButtonLoader variant="white" />
                   <span>Creating...</span>
                 </>
               ) : (

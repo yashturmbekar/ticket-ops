@@ -12,6 +12,7 @@ import {
   FaSpinner,
   FaBan,
 } from "react-icons/fa";
+import { Loader } from "../components/common";
 import type { Ticket, TicketStatus, Priority } from "../types";
 
 // Extended ticket type for displaying API data
@@ -184,12 +185,7 @@ export const TicketsPage: React.FC = () => {
   const filteredTickets = tickets;
 
   if (loading) {
-    return (
-      <div className="tickets-loading">
-        <div className="loading-spinner"></div>
-        <p>Loading tickets...</p>
-      </div>
-    );
+    return <Loader centered text="Loading tickets..." minHeight="60vh" />;
   }
 
   return (

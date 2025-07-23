@@ -12,6 +12,7 @@ import {
   FaFilter,
   FaEye,
 } from "react-icons/fa";
+import { Loader } from "../common";
 import type { Ticket, TicketStatus, Priority } from "../../types";
 import "../../styles/dashboardModern.css";
 
@@ -114,8 +115,7 @@ export const ManagerDashboard: React.FC = () => {
             tags: [],
             attachments: [],
             comments: [],
-                        assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
-
+            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
           },
           {
             id: "T-202",
@@ -133,8 +133,7 @@ export const ManagerDashboard: React.FC = () => {
             tags: [],
             attachments: [],
             comments: [],
-                        assignedDepartmentId : "45c30b4a-52d2-4535-800b-d8fada23dcb6"
-
+            assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
           },
         ];
 
@@ -193,12 +192,7 @@ export const ManagerDashboard: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Loading dashboard...</p>
-      </div>
-    );
+    return <Loader centered text="Loading dashboard..." minHeight="60vh" />;
   }
 
   return (

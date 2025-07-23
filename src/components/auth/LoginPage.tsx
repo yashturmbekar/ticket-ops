@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { ButtonLoader } from "../common";
 import "./LoginPage.css";
 
 export const LoginPage: React.FC = () => {
@@ -74,7 +75,7 @@ export const LoginPage: React.FC = () => {
           <button type="submit" disabled={isLoading} className="login-button">
             {isLoading ? (
               <>
-                <span className="loading-spinner"></span>
+                <ButtonLoader variant="white" />
                 Signing in...
               </>
             ) : (

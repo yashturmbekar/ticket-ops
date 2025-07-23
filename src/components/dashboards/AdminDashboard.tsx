@@ -14,6 +14,7 @@ import {
   FaBolt,
   FaEye,
 } from "react-icons/fa";
+import { Loader } from "../common";
 import type { Ticket, TicketStatus, Priority } from "../../types";
 import { getTicketStats, searchTickets } from "../../services";
 import { useNotifications } from "../../hooks";
@@ -147,12 +148,7 @@ export const AdminDashboard: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Loading dashboard...</p>
-      </div>
-    );
+    return <Loader centered text="Loading dashboard..." minHeight="60vh" />;
   }
 
   return (

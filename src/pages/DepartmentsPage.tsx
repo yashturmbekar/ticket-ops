@@ -13,6 +13,7 @@ import {
   FaToggleOn,
   FaToggleOff,
 } from "react-icons/fa";
+import { Loader } from "../components/common";
 import {
   searchHelpdeskDepartments,
   deleteHelpdeskDepartment,
@@ -203,12 +204,7 @@ export const DepartmentsPage: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="tickets-loading">
-        <div className="loading-spinner"></div>
-        <p>Loading departments...</p>
-      </div>
-    );
+    return <Loader centered text="Loading departments..." minHeight="60vh" />;
   }
 
   return (

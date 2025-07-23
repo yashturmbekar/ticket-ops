@@ -10,6 +10,7 @@ import {
   FaUser,
   FaSearch,
 } from "react-icons/fa";
+import { Loader, ButtonLoader } from "../components/common";
 import { useNotifications } from "../hooks/useNotifications";
 import {
   useEmployeeSearch,
@@ -254,10 +255,7 @@ export const DepartmentsEditPage: React.FC = () => {
 
   if (initialLoading) {
     return (
-      <div className="tickets-loading">
-        <div className="loading-spinner"></div>
-        <p>Loading department details...</p>
-      </div>
+      <Loader centered text="Loading department details..." minHeight="60vh" />
     );
   }
 
@@ -411,7 +409,7 @@ export const DepartmentsEditPage: React.FC = () => {
 
                             {employeeLoading && (
                               <div className="employee-search-loading">
-                                <div className="create-spinner"></div>
+                                <ButtonLoader variant="primary" />
                                 <span>Searching...</span>
                               </div>
                             )}
@@ -516,7 +514,7 @@ export const DepartmentsEditPage: React.FC = () => {
             >
               {loading ? (
                 <>
-                  <div className="create-spinner"></div>
+                  <ButtonLoader variant="white" />
                   <span>Updating...</span>
                 </>
               ) : (

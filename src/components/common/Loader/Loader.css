@@ -1,0 +1,188 @@
+/* Professional Loader Component Styles */
+
+.professional-loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--spacing-4, 1rem);
+}
+
+.professional-loader-container--centered {
+  justify-content: center;
+  width: 100%;
+}
+
+.professional-loader {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.professional-loader__spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.professional-loader__dot {
+  border-radius: 50%;
+  animation: professional-loader-bounce 1.4s ease-in-out infinite both;
+}
+
+.professional-loader__dot--1 {
+  animation-delay: -0.32s;
+}
+
+.professional-loader__dot--2 {
+  animation-delay: -0.16s;
+}
+
+.professional-loader__dot--3 {
+  animation-delay: 0s;
+}
+
+/* Size Variants */
+.professional-loader--small .professional-loader__dot {
+  width: 6px;
+  height: 6px;
+}
+
+.professional-loader--medium .professional-loader__dot {
+  width: 8px;
+  height: 8px;
+}
+
+.professional-loader--large .professional-loader__dot {
+  width: 12px;
+  height: 12px;
+}
+
+/* Color Variants */
+.professional-loader--primary .professional-loader__dot {
+  background-color: var(--color-primary, #ff5d5d);
+}
+
+.professional-loader--secondary .professional-loader__dot {
+  background-color: var(--color-text-secondary, #6b7280);
+}
+
+.professional-loader--white .professional-loader__dot {
+  background-color: #ffffff;
+}
+
+/* Loading Text */
+.professional-loader__text {
+  margin: 0;
+  color: var(--color-text-secondary, #6b7280);
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: var(--font-weight-medium, 500);
+  text-align: center;
+  line-height: var(--line-height-normal, 1.5);
+}
+
+/* Bounce Animation */
+@keyframes professional-loader-bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Alternative Spinner Animation for Buttons */
+.professional-loader--spinner .professional-loader__spinner {
+  gap: 0;
+}
+
+.professional-loader--spinner .professional-loader__dot {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: professional-loader-spin 1s linear infinite;
+}
+
+.professional-loader--spinner .professional-loader__dot--2,
+.professional-loader--spinner .professional-loader__dot--3 {
+  display: none;
+}
+
+@keyframes professional-loader-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Button Loader Variant */
+.professional-loader--button {
+  width: 16px;
+  height: 16px;
+}
+
+.professional-loader--button .professional-loader__spinner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.professional-loader--button .professional-loader__dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: professional-loader-spin 1s linear infinite;
+}
+
+.professional-loader--button .professional-loader__dot--2,
+.professional-loader--button .professional-loader__dot--3 {
+  display: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .professional-loader--large .professional-loader__dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  .professional-loader--medium .professional-loader__dot {
+    width: 7px;
+    height: 7px;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .professional-loader__dot {
+    animation-duration: 2s;
+  }
+}
+
+/* Theme Support */
+.professional-loader-container {
+  color: var(--color-text-primary, #1e293b);
+}
+
+[data-theme="dark"] .professional-loader--primary .professional-loader__dot {
+  background-color: var(--color-primary-light, #ff7979);
+}
+
+[data-theme="dark"] .professional-loader__text {
+  color: var(--color-text-secondary-dark, #9ca3af);
+}

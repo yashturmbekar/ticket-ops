@@ -10,6 +10,7 @@ import {
   FaSpinner,
   FaBan,
 } from "react-icons/fa";
+import { Loader } from "../common";
 import type { Ticket, TicketStatus, Priority } from "../../types";
 
 // Extended ticket type for displaying API data
@@ -167,12 +168,7 @@ export const EmployeeDashboard: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Loading dashboard...</p>
-      </div>
-    );
+    return <Loader centered text="Loading dashboard..." minHeight="60vh" />;
   }
 
   return (

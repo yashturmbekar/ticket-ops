@@ -20,9 +20,9 @@ import {
   FaFileWord,
   FaFilePowerpoint,
   FaFile,
-  FaSpinner,
   FaTicketAlt,
 } from "react-icons/fa";
+import { Loader, ButtonLoader } from "../components/common";
 import "../styles/ticketDetailsProfessional.css";
 import "../styles/createModern.css";
 
@@ -398,10 +398,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="ticket-details-loading">
-        <FaSpinner className="spinner" />
-        <span>Loading ticket details...</span>
-      </div>
+      <Loader centered text="Loading ticket details..." minHeight="60vh" />
     );
   }
 
@@ -734,7 +731,14 @@ const TicketDetailsPageProfessional: React.FC = () => {
                         disabled={!newComment.trim() || isAddingComment}
                         className="submit-button"
                       >
-                        {isAddingComment ? "Adding..." : "Add Comment"}
+                        {isAddingComment ? (
+                          <>
+                            <ButtonLoader variant="white" />
+                            <span>Adding...</span>
+                          </>
+                        ) : (
+                          "Add Comment"
+                        )}
                       </button>
                     </div>
                   </div>

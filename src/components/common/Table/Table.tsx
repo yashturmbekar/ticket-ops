@@ -1,5 +1,6 @@
 import React from "react";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
+import { Loader } from "../Loader";
 import "./Table.css";
 
 export interface TableColumn<T> {
@@ -84,10 +85,7 @@ export function Table<T>({
   if (loading) {
     return (
       <div className="table-container">
-        <div className="table-loading">
-          <div className="loading-spinner"></div>
-          <p>Loading...</p>
-        </div>
+        <Loader text="Loading..." />
       </div>
     );
   }

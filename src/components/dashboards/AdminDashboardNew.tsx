@@ -172,8 +172,14 @@ export const AdminDashboard: React.FC = () => {
           },
         ];
 
+        // Filter out resolved/closed tickets for dashboard display
+        const activeTickets = mockTickets.filter(
+          (ticket) =>
+            ticket.status !== "RESOLVED" && ticket.status !== "APPROVED"
+        );
+
         setStats(mockStats);
-        setRecentTickets(mockTickets);
+        setRecentTickets(activeTickets);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
@@ -183,7 +189,6 @@ export const AdminDashboard: React.FC = () => {
 
     fetchDashboardData();
   }, []);
-
 
   const handleTicketClick = (ticketId: string) => {
     navigate(`/tickets/${ticketId}`);
@@ -324,7 +329,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="tickets-grid">
+        <div className="dashboard-tickets-grid">
           {recentTickets.map((ticket) => {
             return (
               <TicketTile
@@ -337,7 +342,7 @@ export const AdminDashboard: React.FC = () => {
                   status: ticket.status,
                   priority: ticket.priority,
                   assignedTo: ticket.assignedTo,
-                  department: "IT Department", // Default for dashboard
+                  department: ticket.assignedDepartmentName,
                   createdAt: ticket.createdAt.toISOString(),
                   slaDeadline: ticket.slaDeadline?.toISOString(),
                   commentCount: ticket.comments?.length || 0,

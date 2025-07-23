@@ -152,9 +152,15 @@ export const OperationsDashboard: React.FC = () => {
           },
         ];
 
+        // Filter out resolved/closed tickets for dashboard display
+        const activeTickets = mockCriticalTickets.filter(
+          (ticket) =>
+            ticket.status !== "RESOLVED" && ticket.status !== "APPROVED"
+        );
+
         setStats(mockStats);
         setSystemStatuses(mockSystemStatuses);
-        setCriticalTickets(mockCriticalTickets);
+        setCriticalTickets(activeTickets);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
@@ -371,7 +377,7 @@ export const OperationsDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="modern-tickets-grid">
+          <div className="dashboard-tickets-grid">
             {criticalTickets.map((ticket) => (
               <TicketTile
                 key={ticket.id}

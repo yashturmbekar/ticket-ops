@@ -6,7 +6,6 @@ export * from "./Header";
 export * from "./Loader";
 export * from "./Modal";
 export * from "./NotificationContainer";
-export * from "./PageLayout";
-export * from "./Sidebar";
+export * from "./RoleWelcome";
 export * from "./Table";
 export * from "./TicketTile";

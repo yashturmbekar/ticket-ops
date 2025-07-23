@@ -11,18 +11,8 @@ import {
   FaCog,
   FaBuilding,
 } from "react-icons/fa";
-import { useAuth } from "../../hooks/useAuth";
-import { UserRole } from "../../types";
+import { useNavigation } from "../../hooks/useNavigation";
 import "./SideNavModern.css";
-
-interface NavItem {
-  id: string;
-  label: string;
-  path: string;
-  icon: React.ReactNode;
-  roles?: UserRole[];
-  badge?: string;
-}
 
 interface SideNavProps {
   isMobileMenuOpen?: boolean;
@@ -30,78 +20,28 @@ interface SideNavProps {
   onMobileMenuToggle?: () => void;
 }
 
-const SideNav: React.FC<SideNavProps> = ({
+const SideNavModern: React.FC<SideNavProps> = ({
   isMobileMenuOpen = false,
   isCollapsed = false,
   onMobileMenuToggle,
 }) => {
-  const { user } = useAuth();
+  const { navigationItems, isLoading } = useNavigation();
   const location = useLocation();
 
-  const navigationItems: NavItem[] = [
-    {
-      id: "dashboard",
-      label: "Dashboard",
-      path: "/",
-      icon: <FaTachometerAlt />,
-    },
-    {
-      id: "tickets",
-      label: "Tickets",
-      path: "/tickets",
-      icon: <FaTicketAlt />,
-      badge: "12",
-    },
-    {
-      id: "assets",
-      label: "Assets",
-      path: "/assets",
-      icon: <FaLaptop />,
-    },
-    {
-      id: "users",
-      label: "Users",
-      path: "/users",
-      icon: <FaUsers />,
-      roles: [UserRole.ADMIN, UserRole.MANAGER],
-    },
-    {
-      id: "departments",
-      label: "Departments",
-      path: "/departments",
-      icon: <FaBuilding />,
-    },
-    {
-      id: "knowledge",
-      label: "Knowledge Base",
-      path: "/knowledge",
-      icon: <FaBook />,
-    },
-    {
-      id: "reports",
-      label: "Reports",
-      path: "/reports",
-      icon: <FaChartBar />,
-      roles: [UserRole.ADMIN, UserRole.MANAGER],
-    },
-    {
-      id: "network",
-      label: "Network",
-      path: "/network",
-      icon: <FaNetworkWired />,
-      roles: [UserRole.ADMIN, UserRole.IT_STAFF],
-    },
-    {
-      id: "settings",
-      label: "Settings",
-      path: "/settings",
-      icon: <FaCog />,
-    },
-  ];
-
-  const hasAccess = (item: NavItem): boolean => {
-    if (!item.roles || !user?.role) return true;
-    return item.roles.includes(user.role);
+  // Icon mapping for navigation items
+  const getIcon = (iconName: string): React.ReactNode => {
+    const iconMap: Record<string, React.ReactNode> = {
+      dashboard: <FaTachometerAlt />,
+      tickets: <FaTicketAlt />,
+      assets: <FaLaptop />,
+      users: <FaUsers />,
+      departments: <FaBuilding />,
+      knowledge: <FaBook />,
+      reports: <FaChartBar />,
+      network: <FaNetworkWired />,
+      settings: <FaCog />,
+    };
+    return iconMap[iconName] || <FaCog />;
   };
 
   const isActive = (path: string): boolean => {
@@ -111,7 +51,28 @@ const SideNav: React.FC<SideNavProps> = ({
     return location.pathname.startsWith(path);
   };
 
-  const filteredItems = navigationItems.filter(hasAccess);
+  // Filter for main navigation items (not admin tools)
+  const filteredItems = navigationItems;
+
+  // Temporary fallback for testing when no items are loaded
+  const fallbackItems = [
+    { path: "/", label: "Dashboard", icon: "dashboard" },
+    { path: "/tickets", label: "Tickets", icon: "tickets" },
+    { path: "/assets", label: "Assets", icon: "assets" },
+  ];
+
+  const itemsToRender =
+    filteredItems.length > 0 ? filteredItems : fallbackItems;
+
+  if (isLoading) {
+    return (
+      <nav className="modern-sidebar">
+        <div className="modern-sidebar-content">
+          <div className="loading-state">Loading navigation...</div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <>
@@ -126,12 +87,19 @@ const SideNav: React.FC<SideNavProps> = ({
           isMobileMenuOpen ? "mobile-open" : ""
         }`}
       >
-
         {/* Navigation List */}
         <div className="modern-sidebar-content">
+          {/* Debug info */}
+          {!isLoading && (
+            <div style={{ color: "white", padding: "10px", fontSize: "12px" }}>
+              Debug: {filteredItems.length} items, using {itemsToRender.length}{" "}
+              items
+            </div>
+          )}
+
           <ul className="modern-nav-list">
-            {filteredItems.map((item) => (
-              <li key={item.id} className="modern-nav-item">
+            {itemsToRender.map((item) => (
+              <li key={item.path} className="modern-nav-item">
                 <Link
                   to={item.path}
                   className={`modern-nav-link ${
@@ -144,21 +112,14 @@ const SideNav: React.FC<SideNavProps> = ({
                   }}
                   title={isCollapsed ? item.label : undefined}
                 >
-                  <div className="modern-nav-icon">{item.icon}</div>
+                  <div className="modern-nav-icon">
+                    {getIcon(item.icon || "settings")}
+                  </div>
 
                   {!isCollapsed && (
                     <>
                       <span className="modern-nav-label">{item.label}</span>
-                      {item.badge && (
-                        <span className="modern-nav-badge">{item.badge}</span>
-                      )}
                     </>
-                  )}
-
-                  {isCollapsed && item.badge && (
-                    <span className="modern-nav-badge-collapsed">
-                      {item.badge}
-                    </span>
                   )}
                 </Link>
               </li>
@@ -184,4 +145,4 @@ const SideNav: React.FC<SideNavProps> = ({
   );
 };
 
-export default SideNav;
+export default SideNavModern;

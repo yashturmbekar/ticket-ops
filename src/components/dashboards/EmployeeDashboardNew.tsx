@@ -13,11 +13,10 @@ import type { Ticket } from "../../types";
 
 // Extended ticket type for displaying API data
 type DisplayTicket = Ticket & { ticketCode?: string };
-import { searchTickets } from "../../services";
+import { searchMyTickets } from "../../services";
 import { useNotifications } from "../../hooks";
 import { transformApiTicketsToTickets } from "../../utils/apiTransforms";
 import "../../styles/dashboardModern.css";
-import "../../styles/ticketsModern.css";
 
 interface EmployeeStats {
   myTickets: number;
@@ -45,7 +44,7 @@ export const EmployeeDashboard: React.FC = () => {
 
         // Fetch real data from APIs
         const [myTicketsResponse] = await Promise.all([
-          searchTickets({}, 0, 50, "createdDate,desc"), // Get user's tickets
+          searchMyTickets({}, 0, 20, "createdDate,desc"), // Get user's recent tickets (increased limit)
           //getTicketStats(),
         ]);
 
@@ -59,12 +58,20 @@ export const EmployeeDashboard: React.FC = () => {
           const transformedTickets = transformApiTicketsToTickets(apiTickets);
           console.log("Transformed Tickets:", transformedTickets); // Debug log
 
-          setMyTickets(transformedTickets);
+          // Filter out closed/resolved tickets for dashboard display
+          const openTickets = transformedTickets.filter(
+            (ticket) => ticket.status !== "RESOLVED"
+          );
+
+          setMyTickets(openTickets);
 
           // Calculate stats from actual ticket data
           const totalTickets = transformedTickets.length;
-          const openTickets = transformedTickets.filter(
-            (t: Ticket) => t.status === "RAISED" || t.status === "IN_PROGRESS"
+          const activeTicketsCount = transformedTickets.filter(
+            (t: Ticket) =>
+              t.status === "RAISED" ||
+              t.status === "IN_PROGRESS" ||
+              t.status === "PENDING_APPROVAL"
           ).length;
           const resolvedTickets = transformedTickets.filter(
             (t: Ticket) => t.status === "RESOLVED"
@@ -72,7 +79,7 @@ export const EmployeeDashboard: React.FC = () => {
 
           setStats({
             myTickets: totalTickets,
-            openTickets: openTickets,
+            openTickets: activeTicketsCount,
             resolvedTickets: resolvedTickets,
             avgResponseTime: 0,
           });
@@ -183,7 +190,7 @@ export const EmployeeDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="tickets-grid">
+        <div className="dashboard-tickets-grid">
           {myTickets.map((ticket) => {
             return (
               <TicketTile
@@ -198,10 +205,10 @@ export const EmployeeDashboard: React.FC = () => {
                   status: ticket.status,
                   priority: ticket.priority,
                   assignedTo: ticket.assignedTo,
-                  department: "IT Department",
+                  department: ticket.assignedDepartmentName,
                   createdAt: ticket.createdAt.toISOString(),
                   slaDeadline: ticket.slaDeadline?.toISOString(),
-                  commentCount: ticket.comments?.length || 0,
+                  commentCount: ticket.totalCommentsCount,
                   attachmentCount: ticket.attachments?.length || 0,
                   tags: ticket.tags,
                 }}

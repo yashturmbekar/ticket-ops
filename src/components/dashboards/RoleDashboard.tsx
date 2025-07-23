@@ -2,7 +2,6 @@ import React from "react";
 import { AdminDashboard } from "./AdminDashboardNew";
 import { ManagerDashboard } from "./ManagerDashboardNew";
 import { EmployeeDashboard } from "./EmployeeDashboardNew";
-import { OperationsDashboard } from "./OperationsDashboardNew";
 import { useAuth } from "../../hooks/useAuth";
 import { UserRole } from "../../types";
 
@@ -14,13 +13,15 @@ export const RoleDashboard: React.FC = () => {
   }
 
   switch (user.role) {
-    case UserRole.ADMIN:
+    case UserRole.ORG_ADMIN:
+      return <AdminDashboard />;
+    case UserRole.CXO:
       return <AdminDashboard />;
     case UserRole.MANAGER:
       return <ManagerDashboard />;
-    case UserRole.IT_STAFF:
-      return <OperationsDashboard />;
-    case UserRole.USER:
+    case UserRole.HR:
+      return <EmployeeDashboard />;
+    case UserRole.EMPLOYEE:
       return <EmployeeDashboard />;
     default:
       return <EmployeeDashboard />;

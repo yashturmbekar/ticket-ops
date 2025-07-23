@@ -10,6 +10,12 @@ export {
   updateProfile,
 } from "./authService";
 
+
+export {
+  // Navigation
+  NavigationService,
+} from "./navigationService";
+
 export {
   // User
   getUsers,
@@ -51,6 +57,7 @@ export {
   exportTickets,
   getTicketStats,
   searchTickets,
+  searchMyTickets,
 } from "./ticketService";
 
 export {

@@ -23,7 +23,7 @@ type DisplayTicket = Ticket & {
     designation: string;
   };
 };
-import { searchTickets } from "../services/ticketService";
+import { searchMyTickets } from "../services/ticketService";
 import { searchHelpdeskDepartments } from "../services/helpdeskDepartmentService";
 import type { HelpdeskDepartment } from "../services/helpdeskDepartmentService";
 import { useNotifications } from "../hooks/useNotifications";
@@ -48,7 +48,8 @@ export const TicketsPage: React.FC = () => {
   const { addNotification } = useNotifications();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [departments, setDepartments] = useState<HelpdeskDepartment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Initial page load
+  const [searchLoading, setSearchLoading] = useState(false); // Search/filter operations
   const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"tiles" | "list">("tiles");
 
@@ -59,6 +60,16 @@ export const TicketsPage: React.FC = () => {
     assignee: "",
     search: "",
   });
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(filters.search);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [filters.search]);
 
   // Fetch departments on component mount
   useEffect(() => {
@@ -96,30 +107,51 @@ export const TicketsPage: React.FC = () => {
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        setLoading(true);
+        // Use searchLoading for subsequent searches, loading only for initial load
+        if (loading) {
+          // This is the initial load
+        } else {
+          setSearchLoading(true);
+        }
 
         // Prepare search criteria for real API
         const searchCriteria: Record<string, unknown> = {};
 
-        // Add filters to search criteria
+        // Add filters to search criteria - use correct field names from API interface
         if (filters.status) {
           searchCriteria.status = filters.status;
         }
         if (filters.priority) {
-          searchCriteria.priority = filters.priority;
+          searchCriteria.priority = filters.priority.toUpperCase();
         }
         if (filters.department) {
-          searchCriteria.department = filters.department;
+          // Find department ID by name
+          const selectedDept = departments.find(
+            (dept) => dept.name === filters.department
+          );
+          if (selectedDept) {
+            searchCriteria.assignedDepartmentId = selectedDept.id;
+          }
         }
         if (filters.assignee) {
           searchCriteria.assignedTo = filters.assignee;
         }
-        if (filters.search) {
-          searchCriteria.search = filters.search;
+        if (debouncedSearch.trim()) {
+          // Try simple title search first
+          searchCriteria.title = debouncedSearch.trim();
         }
 
+        console.log("Search criteria:", searchCriteria);
+
         // Call the actual API
-        const response = await searchTickets(searchCriteria, 0, 50, "id,desc");
+        const response = await searchMyTickets(
+          searchCriteria,
+          0,
+          50,
+          "createdDate,desc"
+        );
+
+        console.log("API Response:", response);
 
         // Extract tickets from response - API returns 'items' array
         const apiTickets = response.data?.items || response.items || [];
@@ -137,12 +169,24 @@ export const TicketsPage: React.FC = () => {
           message: `Failed to load tickets: ${errorMessage}`,
         });
       } finally {
-        setLoading(false);
+        if (loading) {
+          setLoading(false); // Only set main loading to false after initial load
+        }
+        setSearchLoading(false);
       }
     };
 
     fetchTickets();
-  }, [filters, addNotification]);
+  }, [
+    filters.status,
+    filters.priority,
+    filters.department,
+    filters.assignee,
+    debouncedSearch,
+    departments,
+    addNotification,
+    loading,
+  ]);
 
   const getStatusIcon = (status: TicketStatus) => {
     switch (status) {
@@ -206,11 +250,6 @@ export const TicketsPage: React.FC = () => {
       .map((word) => word.charAt(0))
       .join("")
       .toUpperCase();
-  };
-
-  const getDepartmentName = (departmentId: string): string => {
-    const department = departments.find((dept) => dept.id === departmentId);
-    return department?.name || "Unknown Department";
   };
 
   const handleTicketClick = (ticketId: string) => {
@@ -300,10 +339,10 @@ export const TicketsPage: React.FC = () => {
             className="filter-select"
           >
             <option value="">All Priority</option>
-            <option value="LOW">Low</option>
-            <option value="MEDIUM">Medium</option>
-            <option value="HIGH">High</option>
-            <option value="CRITICAL">Critical</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
           </select>
 
           <select
@@ -344,6 +383,9 @@ export const TicketsPage: React.FC = () => {
       <div className="tickets-results-info">
         <div className="results-count">
           Showing {filteredTickets.length} of {tickets.length} tickets
+          {searchLoading && (
+            <span className="search-indicator"> (searching...)</span>
+          )}
         </div>
 
         {selectedTickets.length > 0 && (
@@ -374,10 +416,7 @@ export const TicketsPage: React.FC = () => {
                     assignedTo: ticket.assignedTo,
                     assignedToDetails: (ticket as DisplayTicket)
                       .assignedToDetails,
-                    department: getDepartmentName(ticket.assignedDepartmentId),
-                    helpdeskDepartmentDetails: {
-                      name: getDepartmentName(ticket.assignedDepartmentId),
-                    },
+                    department: ticket.assignedDepartmentName,
                     createdAt: ticket.createdAt.toISOString(),
                     slaDeadline: ticket.slaDeadline?.toISOString(),
                     commentCount: ticket.comments?.length || 0,

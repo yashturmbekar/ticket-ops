@@ -18,6 +18,7 @@ import { Modal } from "../common/Modal";
 import { Card } from "../common/Card";
 import { Form, FormField, Input, Select, Textarea } from "../common/Form";
 import { useAuth } from "../../hooks/useAuth";
+import { UserRole } from "../../types";
 import { useNotifications } from "../../hooks/useNotifications";
 import {
   getNotes,
@@ -371,8 +372,8 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
   const canUpdateStatus = () => {
     // Logic to determine if user can update status
     return (
-      user?.role === "admin" ||
-      user?.role === "it_staff" ||
+      user?.role === UserRole.ORG_ADMIN ||
+      user?.role === UserRole.MANAGER ||
       ticket.assignedTo === user?.id
     );
   };
@@ -380,17 +381,17 @@ export const TicketActions: React.FC<TicketActionsProps> = ({
   const canAssign = () => {
     // Logic to determine if user can assign tickets
     return (
-      user?.role === "admin" ||
-      user?.role === "manager" ||
-      user?.role === "it_staff"
+      user?.role === UserRole.ORG_ADMIN ||
+      user?.role === UserRole.MANAGER ||
+      user?.role === UserRole.HR
     );
   };
 
   const canEscalate = () => {
     // Logic to determine if user can escalate tickets
     return (
-      user?.role === "admin" ||
-      user?.role === "it_staff" ||
+      user?.role === UserRole.ORG_ADMIN ||
+      user?.role === UserRole.MANAGER ||
       ticket.assignedTo === user?.id
     );
   };

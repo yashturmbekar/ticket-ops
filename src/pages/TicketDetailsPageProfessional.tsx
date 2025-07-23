@@ -381,7 +381,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
     }
   };
 
-  const handleAddComment = async () => {
+ const handleAddComment = async () => {
     if (!newComment.trim() || !id) return;
 
     setIsAddingComment(true);
@@ -392,7 +392,8 @@ const TicketDetailsPageProfessional: React.FC = () => {
       if (commentAttachments.length > 0) {
         for (const file of commentAttachments) {
           try {
-            const uploadResponse = await uploadAttachment(id, file);
+            // Fixed API call - remove ticketId from URL path since API doesn't use it
+            const uploadResponse = await uploadAttachment(file, id);
             console.log("File uploaded successfully:", uploadResponse);
             uploadedAttachments.push({
               filename: file.name,
@@ -450,11 +451,15 @@ const TicketDetailsPageProfessional: React.FC = () => {
     }
   };
 
-  const handleCommentAttachment = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const files = Array.from(event.target.files || []);
-    setCommentAttachments((prev) => [...prev, ...files]);
+  const handleCommentAttachment = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const newFiles = Array.from(files);
+      setCommentAttachments(prev => [...prev, ...newFiles]);
+      console.log("Files selected:", newFiles);
+    }
+    // Reset the input value so the same file can be selected again if needed
+    event.target.value = '';
   };
 
   const removeCommentAttachment = (index: number) => {

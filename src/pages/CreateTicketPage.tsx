@@ -27,7 +27,7 @@ interface CategoryOption {
   name: string;
   isActive: boolean;
 }
-const fileToByteArray = (file: File): Promise<number[]> => {
+export const fileToByteArray = (file: File): Promise<number[]> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 

@@ -120,14 +120,35 @@ export async function deleteComment(ticketId: string, commentId: string) {
   return apiClient.delete(`${endpoint}/${ticketId}/comments/${commentId}`);
 }
 
-export async function uploadAttachment(ticketId: string, file: File) {
-  // For file upload, use FormData directly with axios
-  const formData = new FormData();
-  formData.append("file", file);
-  return apiClient.post(`${endpoint}/${ticketId}/attachments`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
+
+export async function uploadAttachment(file: File, commentId: string) {
+  // Convert File to byte array
+  const fileData = await new Promise<number[]>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const arrayBuffer = reader.result as ArrayBuffer;
+      const uint8Array = new Uint8Array(arrayBuffer);
+      resolve(Array.from(uint8Array)); // convert Uint8Array to number[]
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+
+  const payload = {
+    id: null,
+    commentId,
+    fileName: file.name,
+    fileType: file.type,
+    fileSize: file.size,
+    fileData, // byte array (number[])
+  };
+
+  return apiClient.post(`/helpdesk/ticket-attachments`, payload, {
+    headers: { "Content-Type": "application/json" },
   });
 }
+
+
 
 export async function deleteAttachment(ticketId: string, attachmentId: string) {
   return apiClient.delete(

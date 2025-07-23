@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { jwtDecode } from "jwt-decode";
-import { getRoleAndPermissions } from "../services/rolePermissionService";
 import { Permission, UserRole } from "../types";
 import { AUTH_TOKEN_KEY } from "../constants";
 
@@ -65,34 +64,6 @@ export const usePermissions = (): UsePermissionsReturn => {
       setUserRole(role);
       setIsSubscriptionActive(!!decodedToken?.isPaid);
 
-      // 3. Retrieve role and permissions from API
-      const responseData = await getRoleAndPermissions();
-      const { status, body } = responseData;
-
-      // 4. Handle successful response (status 200)
-      if (status === 200) {
-        // 5. Find matching role permissions
-        const rolePermissions = body?.items.find(
-          (item) => item?.roleName === role
-        );
-
-        if (rolePermissions) {
-          setPermissions(rolePermissions.permissionsList || []);
-        } else {
-          console.warn("No matching role permissions found for role:", role);
-          setPermissions([]);
-        }
-      } else {
-        console.warn("API request failed with status:", status);
-        setError(`Failed to fetch permissions: ${responseData.message}`);
-      }
-    } catch (error) {
-      console.error("Error fetching role and permissions:", error);
-      setError(
-        error instanceof Error ? error.message : "Unknown error occurred"
-      );
-
-      // Fallback: try to get permissions from token if API fails
       try {
         const token = localStorage.getItem(AUTH_TOKEN_KEY);
         if (token) {

@@ -10,13 +10,6 @@ export {
   updateProfile,
 } from "./authService";
 
-export {
-  // Role and Permissions
-  getRoleAndPermissions,
-  createRoleWithPermissions,
-  updateRolePermissions,
-  deleteRole,
-} from "./rolePermissionService";
 
 export {
   // Navigation

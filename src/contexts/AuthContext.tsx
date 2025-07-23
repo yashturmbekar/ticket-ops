@@ -102,12 +102,9 @@ export { AuthContext };
 
 // Helper function to map token roles to our UserRole enum
 const mapRoleFromToken = (tokenRole: string): UserRole => {
+  console.log("Mapping role from token:", tokenRole);
+
   const roleMap: Record<string, UserRole> = {
-    // Legacy IT roles mapped to organizational roles
-    admin: UserRole.ORG_ADMIN,
-    it_staff: UserRole.ORG_ADMIN,
-    helpdesk_admin: UserRole.ORG_ADMIN,
-    user: UserRole.EMPLOYEE,
 
     // Organizational roles
     cxo: UserRole.CXO,
@@ -115,16 +112,11 @@ const mapRoleFromToken = (tokenRole: string): UserRole => {
     employee: UserRole.EMPLOYEE,
     manager: UserRole.MANAGER,
     org_admin: UserRole.ORG_ADMIN,
-
-    // Variations and fallbacks
-    executive: UserRole.CXO,
-    human_resources: UserRole.HR,
-    staff: UserRole.EMPLOYEE,
-    supervisor: UserRole.MANAGER,
-    administrator: UserRole.ORG_ADMIN,
+    "org-admin": UserRole.ORG_ADMIN,
   };
 
-  const normalizedRole = tokenRole.toLowerCase().trim();
+  // Normalize role: lowercase, trim, and replace underscores with hyphens for consistent lookup
+  const normalizedRole = tokenRole.toLowerCase().trim().replace(/_/g, "-");
   return roleMap[normalizedRole] || UserRole.EMPLOYEE;
 };
 
@@ -162,6 +154,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const token = response.id_token;
         // Decode user info from JWT
         const decoded: any = jwtDecode(token);
+        // Extract role from rolePermissions.role field
+        const tokenRole = decoded.rolePermissions?.role;
         // You may need to map the decoded fields to your User type
         const user = {
           id: decoded.employeeId || decoded.sub || "",
@@ -169,7 +163,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           email: decoded.sub || "",
           firstName: decoded.firstName || "",
           lastName: decoded.lastName || "",
-          role: mapRoleFromToken(decoded.auth || decoded.role || "employee"),
+          role: mapRoleFromToken(tokenRole),
           department: decoded.department || "",
           manager: decoded.manager || "",
           phone: decoded.phone || "",
@@ -183,6 +177,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         };
         localStorage.setItem(AUTH_TOKEN_KEY, token);
         localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
+        console.log("User data:", user);
         dispatch({
           type: "LOGIN_SUCCESS",
           payload: { user, token },

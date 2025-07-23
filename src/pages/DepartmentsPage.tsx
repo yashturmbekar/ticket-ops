@@ -60,14 +60,19 @@ export const DepartmentsPage: React.FC = () => {
       const departmentsWithEmployees = await Promise.all(
         departmentsList.map(async (dept: HelpdeskDepartment) => {
           try {
-            const detailedResponse = await getHelpdeskDepartmentWithEmployees(dept.id);
+            const detailedResponse = await getHelpdeskDepartmentWithEmployees(
+              dept.id
+            );
             // Merge the basic department info with the detailed response
             return {
               ...dept,
-              employees: detailedResponse.employees
+              employees: detailedResponse.employees,
             };
           } catch (error) {
-            console.error(`Error loading employees for department ${dept.id}:`, error);
+            console.error(
+              `Error loading employees for department ${dept.id}:`,
+              error
+            );
             // Return the basic department info if detailed fetch fails
             return dept;
           }
@@ -335,10 +340,16 @@ export const DepartmentsPage: React.FC = () => {
                                   >
                                     <div className="employee-info">
                                       <div className="employee-name">
-                                        {employee.employeeProfilePicNameDTO.employeeName}
+                                        {
+                                          employee.employeeProfilePicNameDTO
+                                            .employeeName
+                                        }
                                       </div>
                                       <div className="employee-designation">
-                                        {employee.employeeProfilePicNameDTO.designation}
+                                        {
+                                          employee.employeeProfilePicNameDTO
+                                            .designation
+                                        }
                                       </div>
                                       <span
                                         className={`employee-status ${
@@ -359,7 +370,8 @@ export const DepartmentsPage: React.FC = () => {
                                           handleRemoveEmployee(
                                             department.id,
                                             employee.employeeId,
-                                            employee.employeeProfilePicNameDTO.employeeName
+                                            employee.employeeProfilePicNameDTO
+                                              .employeeName
                                           )
                                         }
                                         title="Remove from Department"

@@ -12,7 +12,7 @@ import {
   FaFilter,
   FaEye,
 } from "react-icons/fa";
-import { Loader } from "../common";
+import { Loader, TicketTile } from "../common";
 import type { Ticket, TicketStatus, Priority } from "../../types";
 import "../../styles/dashboardModern.css";
 
@@ -150,33 +150,10 @@ export const ManagerDashboard: React.FC = () => {
     fetchDashboardData();
   }, []);
 
-  const getTicketPriorityClass = (priority: Priority): string => {
-    return priority;
-  };
-
-  const getTicketStatusClass = (status: TicketStatus): string => {
-    return status;
-  };
-
   const getStatusIndicator = (
     status: "online" | "away" | "offline"
   ): string => {
     return status;
-  };
-
-  const formatTimeAgo = (date: Date): string => {
-    const now = new Date();
-    const diffInMinutes = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60)
-    );
-
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes}m ago`;
-    } else if (diffInMinutes < 1440) {
-      return `${Math.floor(diffInMinutes / 60)}h ago`;
-    } else {
-      return `${Math.floor(diffInMinutes / 1440)}d ago`;
-    }
   };
 
   const getInitials = (name: string): string => {
@@ -336,52 +313,26 @@ export const ManagerDashboard: React.FC = () => {
 
           <div className="modern-tickets-grid">
             {teamTickets.map((ticket) => (
-              <div
+              <TicketTile
                 key={ticket.id}
-                className="modern-ticket-tile"
-                onClick={() => handleTicketClick(ticket.id)}
-              >
-                <div className="modern-ticket-header">
-                  <span className="modern-ticket-id">{ticket.id}</span>
-                  <span
-                    className={`modern-ticket-priority ${getTicketPriorityClass(
-                      ticket.priority
-                    )}`}
-                  >
-                    {ticket.priority}
-                  </span>
-                </div>
-
-                <h3 className="modern-ticket-title">{ticket.title}</h3>
-                <p className="modern-ticket-description">
-                  {ticket.description}
-                </p>
-
-                <div className="modern-ticket-meta">
-                  <div className="modern-ticket-assignee">
-                    <div className="modern-ticket-avatar">
-                      {getInitials(ticket.assignedTo || "Unknown")}
-                    </div>
-                    <span>{ticket.assignedTo}</span>
-                  </div>
-                  <span className="modern-ticket-date">
-                    {formatTimeAgo(ticket.createdAt)}
-                  </span>
-                </div>
-
-                <div className="modern-ticket-footer">
-                  <span
-                    className={`modern-ticket-status ${getTicketStatusClass(
-                      ticket.status
-                    )}`}
-                  >
-                    {ticket.status.replace("_", " ")}
-                  </span>
-                  {ticket.status === "PENDING_APPROVAL" && (
-                    <button className="btn btn-primary btn-xs">Review</button>
-                  )}
-                </div>
-              </div>
+                ticket={{
+                  id: ticket.id,
+                  ticketCode: `TKT-${ticket.id.slice(0, 8)}`,
+                  title: ticket.title,
+                  description: ticket.description,
+                  status: ticket.status,
+                  priority: ticket.priority,
+                  assignedTo: ticket.assignedTo,
+                  department: "IT Department",
+                  createdAt: ticket.createdAt.toISOString(),
+                  slaDeadline: ticket.slaDeadline?.toISOString(),
+                  commentCount: ticket.comments?.length || 0,
+                  attachmentCount: ticket.attachments?.length || 0,
+                  tags: ticket.tags,
+                }}
+                onClick={handleTicketClick}
+                compact={true}
+              />
             ))}
           </div>
 

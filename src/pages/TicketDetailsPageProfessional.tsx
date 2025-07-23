@@ -286,22 +286,10 @@ const TicketDetailsPageProfessional: React.FC = () => {
           );
 
           // Transform and set comments from ticket response
-          let transformedComments = transformComments(foundTicket.comments);
           
           // If no comments exist, add a system comment
-          if (transformedComments.length === 0) {
-            transformedComments = [
-              {
-                id: "system-1",
-                author: "System",
-                content: `Ticket ${transformedTicket.ticketCode} has been created and assigned.`,
-                timestamp: transformedTicket.dateCreated,
-                isInternal: false,
-              },
-            ];
-          }
+
           
-          setComments(transformedComments);
         } else {
           console.error("Ticket not found");
           setTicket(null);
@@ -876,7 +864,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
                           handleAddComment();
                         }
                       }}
-                      placeholder="Add a comment... (Ctrl+Enter to submit)"
+                      placeholder="Add a comment..."
                       rows={4}
                     />
                   </div>

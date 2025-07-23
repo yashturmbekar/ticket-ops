@@ -6,7 +6,11 @@ import {
   FaPaperclip,
   FaClock,
   FaExclamationTriangle,
-  FaCircle,
+  FaCheckCircle,
+  FaPlayCircle,
+  FaTimesCircle,
+  FaPauseCircle,
+  FaExclamationCircle,
 } from "react-icons/fa";
 import "./TicketTile.css";
 
@@ -83,6 +87,32 @@ export const TicketTile: React.FC<TicketTileProps> = ({
       default:
         return "#6b7280"; // Gray
     }
+  };
+
+  const getStatusIcon = (status: string) => {
+    const normalizedStatus = status.toLowerCase().replace(/[_\s]/g, "");
+    switch (normalizedStatus) {
+      case "open":
+      case "raised":
+        return <FaExclamationCircle />;
+      case "inprogress":
+        return <FaPlayCircle />;
+      case "resolved":
+        return <FaCheckCircle />;
+      case "closed":
+        return <FaTimesCircle />;
+      case "onhold":
+      case "pendingapproval":
+        return <FaPauseCircle />;
+      default:
+        return <FaExclamationCircle />;
+    }
+  };
+
+  const formatStatusText = (status: string): string => {
+    return status
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
   const formatTimeAgo = (dateString: string): string => {
@@ -234,11 +264,15 @@ export const TicketTile: React.FC<TicketTileProps> = ({
       {/* Status and Metadata */}
       <div className="tile-metadata">
         <div className="status-info">
-          <FaCircle
-            className="status-indicator"
-            style={{ color: statusColor }}
-          />
-          <span className="status-text">{ticket.status}</span>
+          <div
+            className="status-badge"
+            style={{ backgroundColor: statusColor }}
+          >
+            {getStatusIcon(ticket.status)}
+            <span className="status-text">
+              {formatStatusText(ticket.status)}
+            </span>
+          </div>
         </div>
         <div className="time-info">
           <FaClock />
@@ -249,18 +283,14 @@ export const TicketTile: React.FC<TicketTileProps> = ({
       {/* Counts and SLA */}
       <div className="tile-footer">
         <div className="counts">
-          {(ticket.commentCount || 0) > 0 && (
-            <div className="count-item">
-              <FaComments />
-              <span>{ticket.commentCount}</span>
-            </div>
-          )}
-          {(ticket.attachmentCount || 0) > 0 && (
-            <div className="count-item">
-              <FaPaperclip />
-              <span>{ticket.attachmentCount}</span>
-            </div>
-          )}
+          <div className="count-item">
+            <FaComments />
+            <span>{ticket.commentCount || 0}</span>
+          </div>
+          <div className="count-item">
+            <FaPaperclip />
+            <span>{ticket.attachmentCount || 0}</span>
+          </div>
         </div>
 
         {slaStatus && (

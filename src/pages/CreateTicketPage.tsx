@@ -27,7 +27,20 @@ interface CategoryOption {
   name: string;
   isActive: boolean;
 }
+const fileToByteArray = (file: File): Promise<number[]> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
 
+    reader.onload = () => {
+      const result = reader.result as ArrayBuffer;
+      const byteArray = Array.from(new Uint8Array(result));
+      resolve(byteArray);
+    };
+
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+};
 export const CreateTicketPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -85,85 +98,66 @@ export const CreateTicketPage: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!validateForm()) {
-      addNotification({
-        type: "warning",
-        title: "⚠️ Form Validation Failed",
-        message:
-          "Please fill in all required fields before submitting your ticket.",
-      });
-      return;
-    }
+  if (!validateForm()) {
+    addNotification({
+      type: "warning",
+      title: "⚠️ Form Validation Failed",
+      message: "Please fill in all required fields before submitting your ticket.",
+    });
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      // Create ticket with simplified data
-      const ticketData = {
-        title: formData.title,
-        description: formData.description,
-        assignedDepartmentId: formData.category,
-        requestedBy: user?.email || "",
-        status: TicketStatus.RAISED,
-        priority: "LOW", // Default priority
-      };
+  try {
+    // Convert files to byte arrays
+    const byteArrays = await Promise.all(
+      formData.attachments.map(async (file) => ({
+        fileName: file.name,
+        fileData: await fileToByteArray(file),
+        fileSize: file.size,
+        fileType: file.type,
+      }))
+    );
 
-      // Call the actual API to create ticket
-      const response = await createTicket(ticketData);
-      console.log("Ticket created successfully:", response);
+    // Construct ticket data
+    const ticketData = {
+      title: formData.title,
+      description: formData.description,
+      assignedDepartmentId: formData.category,
+      requestedBy: user?.email || "",
+      status: TicketStatus.RAISED,
+      priority: "LOW",
+      attachments: byteArrays,
+    };
 
-      // If there are attachments, upload them
-      if (formData.attachments.length > 0 && response.data?.id) {
-        const ticketId = response.data.id;
+    // Call API
+    const response = await createTicket(ticketData);
+    console.log("Ticket created successfully:", response);
 
-        // Upload each attachment
-        for (const file of formData.attachments) {
-          try {
-            await uploadAttachment(ticketId, file);
-            console.log(`Attachment ${file.name} uploaded successfully`);
-          } catch (attachmentError) {
-            console.error(
-              `Failed to upload attachment ${file.name}:`,
-              attachmentError
-            );
-            addNotification({
-              type: "warning",
-              title: "⚠️ Attachment Upload Warning",
-              message: `Failed to upload "${file.name}". Your ticket was created successfully, but you may need to attach this file later.`,
-            });
-          }
-        }
-      }
+    addNotification({
+      type: "success",
+      title: "🎫 Ticket Created Successfully!",
+      message: `Your support ticket "${formData.title}" has been created and assigned to the ${
+        categories.find((c) => c.id === formData.category)?.name || "selected"
+      } department.`,
+    });
 
-      // Show success notification
-      addNotification({
-        type: "success",
-        title: "🎫 Ticket Created Successfully!",
-        message: `Your support ticket "${
-          formData.title
-        }" has been created and assigned to the ${
-          categories.find((c) => c.id === formData.category)?.name || "selected"
-        } department.`,
-      });
+    navigate("/tickets");
+  } catch (error) {
+    console.error("Error creating ticket:", error);
+    addNotification({
+      type: "error",
+      title: "❌ Failed to Create Ticket",
+      message: "There was an error creating your support ticket. Please try again.",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
-      // Navigate to tickets page on success
-      navigate("/tickets");
-    } catch (error) {
-      console.error("Error creating ticket:", error);
-
-      // Show error notification
-      addNotification({
-        type: "error",
-        title: "❌ Failed to Create Ticket",
-        message:
-          "There was an error creating your support ticket. Please check your internet connection and try again.",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleCancel = () => {
     navigate(-1);
@@ -318,7 +312,7 @@ export const CreateTicketPage: React.FC = () => {
                 type="file"
                 id="file-upload"
                 multiple
-                onChange={handleFileChange}
+                onChange={(e: any) => handleFileChange(e)}
                 className="create-file-input"
                 accept=".jpg,.jpeg,.png,.pdf,.txt,.log,.docx,.xlsx"
               />

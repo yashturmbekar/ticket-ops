@@ -26,7 +26,6 @@ import {
 } from "react-icons/fa";
 import { Loader, ButtonLoader } from "../components/common";
 import "../styles/ticketDetailsProfessional.css";
-import "../styles/createModern.css";
 
 // API Response interface matching the backend structure
 interface ApiTicketResponse {
@@ -242,7 +241,14 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
         // Get the single ticket from API response - guaranteed to have exactly one ticket
         const foundTicket: ApiTicketResponse = ticketResponse;
-        const mappedAttachments = foundTicket?.attachments?.map((att: any) => ({
+        const mappedAttachments = foundTicket?.attachments?.map((att: {
+          filename: string;
+          size: number;
+          fileType?: string;
+          fileData?: string;
+          fileSize?: number;
+          fileName?: string;
+        }) => ({
           fileType: att.fileType || "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // or detect from filename
           fileData: att.fileData || "", // base64 or blob string if you have it
           fileSize: att.fileSize || att.size,

@@ -7,13 +7,12 @@ import {
   FaTimes,
   FaExclamationTriangle,
 } from "react-icons/fa";
-import { ButtonLoader } from "../components/common";
 import { useAuth } from "../hooks/useAuth";
 import { useNotifications } from "../hooks/useNotifications";
 import { getAllHelpdeskDepartments } from "../services/helpdeskDepartmentService";
 import { createTicket } from "../services/ticketService";
 import { TicketStatus } from "../types";
-import "../styles/createModern.css";
+import "../styles/createTicket.css";
 
 interface TicketFormData {
   title: string;
@@ -46,6 +45,7 @@ export const CreateTicketPage: React.FC = () => {
   const { user } = useAuth();
   const { addNotification } = useNotifications();
   const [loading, setLoading] = useState(false);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
   const [categories, setCategories] = useState<CategoryOption[]>([]);
 
   const [formData, setFormData] = useState<TicketFormData>({
@@ -113,7 +113,8 @@ export const CreateTicketPage: React.FC = () => {
       addNotification({
         type: "warning",
         title: "⚠️ Form Validation Failed",
-        message: "Please fill in all required fields before submitting your ticket.",
+        message:
+          "Please fill in all required fields before submitting your ticket.",
       });
       return;
     }
@@ -149,8 +150,11 @@ export const CreateTicketPage: React.FC = () => {
       addNotification({
         type: "success",
         title: "🎫 Ticket Created Successfully!",
-        message: `Your support ticket "${formData.title}" has been created and assigned to the ${categories.find((c) => c.id === formData.category)?.name || "selected"
-          } department.`,
+        message: `Your support ticket "${
+          formData.title
+        }" has been created and assigned to the ${
+          categories.find((c) => c.id === formData.category)?.name || "selected"
+        } department.`,
       });
 
       navigate("/tickets");
@@ -159,47 +163,70 @@ export const CreateTicketPage: React.FC = () => {
       addNotification({
         type: "error",
         title: "❌ Failed to Create Ticket",
-        message: "There was an error creating your support ticket. Please try again.",
+        message:
+          "There was an error creating your support ticket. Please try again.",
       });
     } finally {
       setLoading(false);
     }
   };
 
-
   const handleCancel = () => {
     navigate(-1);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const files = Array.from(e.target.files);
-      const currentCount = formData.attachments.length;
-      const availableSlots = 3 - currentCount;
+      setUploadingFiles(true);
 
-      if (availableSlots <= 0) {
+      try {
+        const files = Array.from(e.target.files);
+        const currentCount = formData.attachments.length;
+        const availableSlots = 3 - currentCount;
+
+        if (availableSlots <= 0) {
+          addNotification({
+            type: "warning",
+            title: "⚠️ Attachment Limit Reached",
+            message: "You can only attach up to 3 files per ticket.",
+          });
+          return;
+        }
+
+        const filesToAdd = files.slice(0, availableSlots);
+
+        if (files.length > availableSlots) {
+          addNotification({
+            type: "warning",
+            title: "⚠️ Some Files Not Added",
+            message: `Only ${availableSlots} file(s) could be added. Maximum of 3 attachments allowed.`,
+          });
+        }
+
+        // Simulate file processing delay for better UX
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        setFormData((prev) => ({
+          ...prev,
+          attachments: [...prev.attachments, ...filesToAdd],
+        }));
+
         addNotification({
-          type: "warning",
-          title: "⚠️ Attachment Limit Reached",
-          message: "You can only attach up to 3 files per ticket.",
+          type: "success",
+          title: "📎 Files Added",
+          message: `${filesToAdd.length} file(s) successfully attached.`,
         });
-        return;
-      }
-
-      const filesToAdd = files.slice(0, availableSlots);
-
-      if (files.length > availableSlots) {
+      } catch {
         addNotification({
-          type: "warning",
-          title: "⚠️ Some Files Not Added",
-          message: `Only ${availableSlots} file(s) could be added. Maximum of 3 attachments allowed.`,
+          type: "error",
+          title: "❌ Upload Failed",
+          message: "Failed to process selected files. Please try again.",
         });
+      } finally {
+        setUploadingFiles(false);
+        // Reset the input value so the same file can be selected again
+        e.target.value = "";
       }
-
-      setFormData((prev) => ({
-        ...prev,
-        attachments: [...prev.attachments, ...filesToAdd],
-      }));
     }
   };
 
@@ -267,6 +294,22 @@ export const CreateTicketPage: React.FC = () => {
 
   return (
     <div className="create-page">
+      {/* Clean Ticket Loading Animation */}
+      {loading && (
+        <div className="ticket-loading-backdrop">
+          <div className="ticket-loading-content">
+            <div className="ticket-loading-icon">
+              <FaTicketAlt />
+            </div>
+            <h3 className="ticket-loading-title">Creating Ticket</h3>
+            <p className="ticket-loading-message">
+              Please wait while we process your request...
+            </p>
+            <div className="ticket-loading-spinner"></div>
+          </div>
+        </div>
+      )}
+
       {/* Page Title */}
       <div className="create-page-header">
         <div className="create-page-title-section">
@@ -282,7 +325,10 @@ export const CreateTicketPage: React.FC = () => {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="create-form-simple">
+      <form
+        onSubmit={handleSubmit}
+        className={`create-form-simple ${loading ? "form-disabled" : ""}`}
+      >
         <div className="create-form-grid-simple">
           {/* Title */}
           <div className="create-form-group">
@@ -319,8 +365,9 @@ export const CreateTicketPage: React.FC = () => {
               </span>
             </label>
             <textarea
-              className={`create-form-textarea ${errors.description ? "error" : ""
-                }`}
+              className={`create-form-textarea ${
+                errors.description ? "error" : ""
+              }`}
               value={formData.description}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -391,7 +438,11 @@ export const CreateTicketPage: React.FC = () => {
                 </span>
               </label>
 
-              <div className="create-attachment-container">
+              <div
+                className={`create-attachment-container ${
+                  uploadingFiles ? "create-file-upload-loading" : ""
+                }`}
+              >
                 {/* File Upload Input */}
                 <div className="create-file-upload">
                   <input
@@ -401,23 +452,32 @@ export const CreateTicketPage: React.FC = () => {
                     onChange={handleFileChange}
                     className="create-file-input"
                     accept=".jpg,.jpeg,.png,.pdf,.txt,.log,.docx,.xlsx"
-                    disabled={formData.attachments.length >= 3}
+                    disabled={
+                      formData.attachments.length >= 3 || uploadingFiles
+                    }
                   />
 
                   {/* Label for Upload */}
                   <label
                     htmlFor="file-upload"
-                    className={`create-file-label ${formData.attachments.length >= 3 ? "disabled" : ""
-                      }`}
+                    className={`create-file-label ${
+                      formData.attachments.length >= 3 || uploadingFiles
+                        ? "disabled"
+                        : ""
+                    }`}
                   >
                     <FaPaperclip />
                     <span>
-                      {formData.attachments.length >= 3
+                      {uploadingFiles
+                        ? "Processing files..."
+                        : formData.attachments.length >= 3
                         ? "Maximum 3 files reached"
                         : "Choose files or drag here"}
                     </span>
                     <small>
-                      {formData.attachments.length >= 3
+                      {uploadingFiles
+                        ? "Please wait..."
+                        : formData.attachments.length >= 3
                         ? `${formData.attachments.length}/3 files attached`
                         : "Max 10MB per file (3 files max)"}
                     </small>
@@ -425,7 +485,11 @@ export const CreateTicketPage: React.FC = () => {
                 </div>
 
                 {/* File Preview List */}
-                <div className="create-file-preview">
+                <div
+                  className={`create-file-preview ${
+                    uploadingFiles ? "uploading" : ""
+                  }`}
+                >
                   {formData.attachments.length > 0 ? (
                     <div className="create-file-list">
                       {formData.attachments.map((file, index) => (
@@ -434,7 +498,9 @@ export const CreateTicketPage: React.FC = () => {
                     </div>
                   ) : (
                     <div className="create-file-preview-empty">
-                      No files selected
+                      {uploadingFiles
+                        ? "Processing files..."
+                        : "No files selected"}
                     </div>
                   )}
                 </div>
@@ -450,7 +516,7 @@ export const CreateTicketPage: React.FC = () => {
               type="button"
               onClick={handleCancel}
               className="btn btn-secondary"
-              disabled={loading}
+              disabled={loading || uploadingFiles}
             >
               <FaTimes />
               <span>Cancel</span>
@@ -459,11 +525,11 @@ export const CreateTicketPage: React.FC = () => {
             <button
               type="submit"
               className="btn btn-primary"
-              disabled={loading}
+              disabled={loading || uploadingFiles}
             >
               {loading ? (
                 <>
-                  <ButtonLoader variant="white" />
+                  <div className="create-spinner"></div>
                   <span>Creating...</span>
                 </>
               ) : (

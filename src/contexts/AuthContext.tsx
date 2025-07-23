@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { createContext, useReducer, useEffect } from "react";
 import type { ReactNode } from "react";
-import type { User, UserRole, Permission } from "../types";
+import type { User, Permission } from "../types";
+import { UserRole } from "../types";
 import { AUTH_TOKEN_KEY, USER_DATA_KEY } from "../constants";
 import { login as loginApi } from "../services/authService";
 import { jwtDecode } from "jwt-decode";
@@ -99,6 +100,35 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export { AuthContext };
 
+// Helper function to map token roles to our UserRole enum
+const mapRoleFromToken = (tokenRole: string): UserRole => {
+  const roleMap: Record<string, UserRole> = {
+    // Legacy IT roles mapped to organizational roles
+    admin: UserRole.ORG_ADMIN,
+    it_staff: UserRole.ORG_ADMIN,
+    helpdesk_admin: UserRole.ORG_ADMIN,
+    user: UserRole.EMPLOYEE,
+
+    // Organizational roles
+    cxo: UserRole.CXO,
+    hr: UserRole.HR,
+    employee: UserRole.EMPLOYEE,
+    manager: UserRole.MANAGER,
+    org_admin: UserRole.ORG_ADMIN,
+    "org-admin": UserRole.ORG_ADMIN,
+
+    // Variations and fallbacks
+    executive: UserRole.CXO,
+    human_resources: UserRole.HR,
+    staff: UserRole.EMPLOYEE,
+    supervisor: UserRole.MANAGER,
+    administrator: UserRole.ORG_ADMIN,
+  };
+
+  const normalizedRole = tokenRole.toLowerCase().trim();
+  return roleMap[normalizedRole] || UserRole.EMPLOYEE;
+};
+
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -140,7 +170,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           email: decoded.sub || "",
           firstName: decoded.firstName || "",
           lastName: decoded.lastName || "",
-          role: decoded.auth || "user",
+          role: mapRoleFromToken(decoded.auth || decoded.role || "employee"),
           department: decoded.department || "",
           manager: decoded.manager || "",
           phone: decoded.phone || "",

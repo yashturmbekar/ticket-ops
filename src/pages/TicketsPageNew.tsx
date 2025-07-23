@@ -23,7 +23,7 @@ type DisplayTicket = Ticket & {
     designation: string;
   };
 };
-import { searchTickets } from "../services/ticketService";
+import { searchMyTickets } from "../services/ticketService";
 import { searchHelpdeskDepartments } from "../services/helpdeskDepartmentService";
 import type { HelpdeskDepartment } from "../services/helpdeskDepartmentService";
 import { useNotifications } from "../hooks/useNotifications";
@@ -119,7 +119,7 @@ export const TicketsPage: React.FC = () => {
         }
 
         // Call the actual API
-        const response = await searchTickets(searchCriteria, 0, 50, "id,desc");
+        const response = await searchMyTickets(searchCriteria, 0, 50, "id,desc");
 
         // Extract tickets from response - API returns 'items' array
         const apiTickets = response.data?.items || response.items || [];

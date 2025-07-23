@@ -13,11 +13,10 @@ import type { Ticket } from "../../types";
 
 // Extended ticket type for displaying API data
 type DisplayTicket = Ticket & { ticketCode?: string };
-import { searchTickets } from "../../services";
+import { searchMyTickets } from "../../services";
 import { useNotifications } from "../../hooks";
 import { transformApiTicketsToTickets } from "../../utils/apiTransforms";
 import "../../styles/dashboardModern.css";
-import "../../styles/ticketsModern.css";
 
 interface EmployeeStats {
   myTickets: number;
@@ -45,7 +44,7 @@ export const EmployeeDashboard: React.FC = () => {
 
         // Fetch real data from APIs
         const [myTicketsResponse] = await Promise.all([
-          searchTickets({}, 0, 50, "createdDate,desc"), // Get user's tickets
+          searchMyTickets({}, 0, 50, "createdDate,desc"), // Get user's tickets
           //getTicketStats(),
         ]);
 

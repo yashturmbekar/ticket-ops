@@ -5,12 +5,10 @@ import { Loader } from "../components/common";
 import { RoleWelcome } from "../components/common/RoleWelcome";
 import { AdminDashboard } from "../components/dashboards/AdminDashboard";
 import { ManagerDashboard } from "../components/dashboards/ManagerDashboard";
-import { EmployeeDashboard } from "../components/dashboards/EmployeeDashboard";
+import { EmployeeDashboard } from "../components/dashboards/EmployeeDashboardNew";
 import "../styles/dashboard.css";
-import { useLocation } from "react-router-dom";
 
 export const DashboardPage: React.FC = () => {
-  const location = useLocation();
   const { user } = useAuth();
 
   if (!user) {
@@ -44,7 +42,7 @@ export const DashboardPage: React.FC = () => {
     case UserRole.HR:
       return (
         <DashboardLayout>
-          <EmployeeDashboard initialTab={location.state?.activeTab} />
+          <EmployeeDashboard />
         </DashboardLayout>
       );
     case UserRole.CXO:
@@ -56,13 +54,13 @@ export const DashboardPage: React.FC = () => {
     case UserRole.EMPLOYEE:
       return (
         <DashboardLayout>
-          <EmployeeDashboard initialTab={location.state?.activeTab} />
+          <EmployeeDashboard  />
         </DashboardLayout>
       );
     default:
       return (
         <DashboardLayout>
-          <EmployeeDashboard initialTab={location.state?.activeTab} />
+          <EmployeeDashboard/>
         </DashboardLayout>
       );
   }

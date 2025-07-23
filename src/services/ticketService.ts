@@ -80,6 +80,18 @@ export async function searchTickets(
   );
 }
 
+export async function searchMyTickets(
+  searchData: Record<string, unknown>,
+  page = 0,
+  size = 10,
+  sort = "id,desc"
+) {
+  return apiClient.post(
+    `${endpoint}/my-tickets/search?page=${page}&size=${size}&sort=${sort}`,
+    searchData
+  );
+}
+
 export async function reopenTicket(id: string, reason?: string) {
   return apiClient.patch(`${endpoint}/${id}/reopen`, { reason });
 }
@@ -148,7 +160,7 @@ export async function getTicketHistory(id: string) {
 }
 
 export async function getMyTickets() {
-  return apiClient.get(`${endpoint}`);
+  return apiClient.get(`${endpoint}/my-tickets/search`);
 }
 
 export async function getAssignedTickets() {

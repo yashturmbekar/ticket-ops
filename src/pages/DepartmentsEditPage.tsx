@@ -10,7 +10,7 @@ import {
   FaUser,
   FaSearch,
 } from "react-icons/fa";
-import { Loader, ButtonLoader } from "../components/common";
+import { Loader, ButtonLoader, Modal, Button } from "../components/common";
 import { useNotifications } from "../hooks/useNotifications";
 import {
   useEmployeeSearch,
@@ -49,6 +49,13 @@ export const DepartmentsEditPage: React.FC = () => {
   const [showDropdowns, setShowDropdowns] = useState<{
     [key: number]: boolean;
   }>({});
+  
+  // Confirmation modal state
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState<{
+    index: number;
+    name: string;
+  } | null>(null);
 
   const [formData, setFormData] = useState<DepartmentFormData>({
     name: "",
@@ -253,10 +260,32 @@ export const DepartmentsEditPage: React.FC = () => {
   };
 
   const removeEmployee = (index: number) => {
+    const employeeName = formData.employees[index].employeeObj?.employeeName || "this employee";
+    setEmployeeToDelete({ index, name: employeeName });
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmRemoveEmployee = () => {
+    if (!employeeToDelete) return;
+    
     setFormData((prev) => ({
       ...prev,
-      employees: prev.employees.filter((_, i) => i !== index),
+      employees: prev.employees.filter((_, i) => i !== employeeToDelete.index),
     }));
+    
+    addNotification({
+      type: "success",
+      title: "✅ Employee Removed",
+      message: `Employee "${employeeToDelete.name}" has been removed from the department.`,
+    });
+    
+    setShowDeleteConfirmation(false);
+    setEmployeeToDelete(null);
+  };
+
+  const cancelRemoveEmployee = () => {
+    setShowDeleteConfirmation(false);
+    setEmployeeToDelete(null);
   };
 
   const updateEmployee = (
@@ -546,6 +575,45 @@ export const DepartmentsEditPage: React.FC = () => {
           </div>
         </div>
       </form>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={showDeleteConfirmation}
+        onClose={cancelRemoveEmployee}
+        title="Confirm Employee Removal"
+        size="small"
+        className="modal-confirm"
+        footer={
+          <div className="modal-footer">
+            <Button
+              variant="secondary"
+              onClick={cancelRemoveEmployee}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="error"
+              onClick={confirmRemoveEmployee}
+              disabled={loading}
+              className="btn-delete-confirm"
+            >
+              Remove Employee
+            </Button>
+          </div>
+        }
+      >
+        <div className="modal-confirm-icon warning">
+          <FaExclamationTriangle />
+        </div>
+        <div className="modal-confirm-title">
+          Remove Employee from Department
+        </div>
+        <div className="modal-confirm-message">
+          Are you sure you want to remove <strong>"{employeeToDelete?.name}"</strong> from this department? 
+          This action will remove the employee from the department but will not delete their account.
+        </div>
+      </Modal>
     </div>
   );
 };

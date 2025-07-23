@@ -436,14 +436,24 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
     setIsAddingComment(true);
     try {
-      // Upload attachments first if any
+      // 1. Add the comment first and get the new comment ID
+      const response = await addComment(id, newComment.trim());
+
+      console.log("Comment added successfully:", response);
+
+      const newCommentId = response?.id; // adjust this based on your actual API response structure
+      if (!newCommentId) {
+        throw new Error("Comment ID not returned from addComment API");
+      }
+
+      // 2. Upload attachments if any
       const uploadedAttachments: Array<{ filename: string; size: number }> = [];
 
       if (commentAttachments.length > 0) {
         for (const file of commentAttachments) {
           try {
-            // Fixed API call - remove ticketId from URL path since API doesn't use it
-            const uploadResponse = await uploadAttachment(file, id);
+            // ✅ Now passing correct commentId instead of ticketId
+            const uploadResponse = await uploadAttachment(file, newCommentId);
             console.log("File uploaded successfully:", uploadResponse);
             uploadedAttachments.push({
               filename: file.name,
@@ -461,12 +471,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
         }
       }
 
-      // Call the actual API to add comment
-      const response = await addComment(id, newComment.trim());
-
-      console.log("Comment added successfully:", response);
-
-      // Refresh ticket data to get updated comments
+      // 3. Refresh ticket data to get updated comments
       const updatedTicketResponse = await getTicketById(id);
       const updatedTicket: ApiTicketResponse = updatedTicketResponse;
 
@@ -479,7 +484,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
       setNewComment("");
       setCommentAttachments([]);
 
-      // Show success notification
+      // Success notification
       if (notificationContext) {
         const message =
           uploadedAttachments.length > 0
@@ -489,8 +494,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
       }
     } catch (error) {
       console.error("Error adding comment:", error);
-
-      // Show error notification
       if (notificationContext) {
         notificationContext.error(
           "Error Adding Comment",
@@ -955,25 +958,45 @@ const TicketDetailsPageProfessional: React.FC = () => {
                           ) : (
                             <p>{comment.content}</p>
                           )}
-                          {comment.attachments &&
-                            comment.attachments.length > 0 && (
-                              <div className="comment-attachments">
-                                {comment.attachments.map(
-                                  (attachment, index) => (
-                                    <div
-                                      key={index}
-                                      className="comment-attachment"
-                                    >
-                                      {getFileIcon(attachment.filename)}
-                                      <span>{attachment.filename}</span>
-                                      <span className="file-size">
-                                        ({formatFileSize(attachment.size)})
-                                      </span>
+                          {comment.attachments && comment.attachments.length > 0 && (
+                            <div className="attachments-section card-section">
+                              <h4>Attachments ({comment.attachments.length})</h4>
+                              <div className="attachments-grid">
+                                {comment.attachments.map((attachment: any, index) => (
+                                  <div key={index} className="attachment-card">
+                                    <div className="attachment-preview">
+                                      <img
+                                        src={`data:${attachment.fileType};base64,${attachment.fileData}`}
+                                        alt={attachment.fileName}
+                                        style={{ maxWidth: "100px" }}
+                                      />
                                     </div>
-                                  )
-                                )}
+                                    <div className="attachment-info">
+                                      <div className="attachment-name" title={attachment.fileName}>
+                                        {attachment.fileName}
+                                      </div>
+                                      <div className="attachment-size">
+                                        {formatFileSize(attachment.fileSize)}
+                                      </div>
+                                      <button
+                                        onClick={() =>
+                                          downloadAttachment(
+                                            attachment.fileName,
+                                            attachment.fileData,
+                                            attachment.fileType
+                                          )
+                                        }
+                                        className="download-btn"
+                                      >
+                                        <FaDownload />
+                                        Download
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
-                            )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1033,7 +1056,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
                       </button>
                     </div>
                   </div>
-
                   {commentAttachments.length > 0 && (
                     <div className="selected-files">
                       {commentAttachments.map((file, index) => (

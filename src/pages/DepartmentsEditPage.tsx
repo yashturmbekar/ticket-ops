@@ -73,8 +73,7 @@ export const DepartmentsEditPage: React.FC = () => {
   const loadDepartment = React.useCallback(async () => {
     try {
       setInitialLoading(true);
-      const response = await getAllHelpdeskDepartments();
-      const departments = response.data?.items || response.data || [];
+      const departments = await getAllHelpdeskDepartments();
       const foundDepartment = departments.find(
         (dept: HelpdeskDepartment) => dept.id === id
       );

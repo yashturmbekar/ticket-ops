@@ -9,7 +9,7 @@ import {
 } from "react-icons/fa";
 import { useAuth } from "../hooks/useAuth";
 import { useNotifications } from "../hooks/useNotifications";
-import { searchHelpdeskDepartments } from "../services/helpdeskDepartmentService";
+import { getAllHelpdeskDepartments } from "../services/helpdeskDepartmentService";
 import { createTicket, uploadAttachment } from "../services/ticketService";
 import { TicketStatus } from "../types";
 import "../styles/createModern.css";
@@ -47,7 +47,7 @@ export const CreateTicketPage: React.FC = () => {
     // Load categories from API
     const loadCategories = async () => {
       try {
-        const response = await searchHelpdeskDepartments();
+        const response = await getAllHelpdeskDepartments();
         setCategories(response || []);
       } catch (error) {
         console.error("Failed to load categories:", error);

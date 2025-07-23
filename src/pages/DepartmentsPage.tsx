@@ -38,11 +38,28 @@ export const DepartmentsPage: React.FC = () => {
   const loadDepartments = React.useCallback(async () => {
     try {
       setLoading(true);
-      const departmentsList = await searchHelpdeskDepartments(
-        searchQuery || undefined
+
+      // Prepare search criteria for real API
+      const searchCriteria: Record<string, unknown> = {};
+
+      // Add search query if provided
+      if (searchQuery) {
+        searchCriteria.search = searchQuery;
+      }
+
+      // Call the new search API
+      const response = await searchHelpdeskDepartments(
+        searchCriteria,
+        0,
+        50,
+        "id,desc"
       );
 
+      console.log("API Response:", response);
 
+      // Extract departments from response - API returns 'items' array
+      const departmentsList = response.data?.items || response.items || [];
+      console.log("Departments List:", departmentsList);
       setDepartments(departmentsList);
     } catch (error) {
       console.error("Error loading departments:", error);

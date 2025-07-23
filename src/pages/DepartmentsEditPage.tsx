@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaBuilding, FaSave, FaTimes } from "react-icons/fa";
 import {
-  searchHelpdeskDepartments,
+  getAllHelpdeskDepartments,
   updateHelpdeskDepartment,
   type HelpdeskDepartmentPayload,
   type HelpdeskDepartment,
@@ -25,8 +25,7 @@ export const DepartmentsEditPage: React.FC = () => {
   const loadDepartment = React.useCallback(async () => {
     try {
       setLoading(true);
-      const response = await searchHelpdeskDepartments();
-      const departments = response.data?.items || response.items || [];
+      const departments = await getAllHelpdeskDepartments();
       const foundDepartment = departments.find(
         (dept: HelpdeskDepartment) => dept.id === id
       );

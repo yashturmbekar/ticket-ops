@@ -39,12 +39,24 @@ export const createHelpdeskDepartment = async (
   return response.data;
 };
 
-export const searchHelpdeskDepartments = async (query?: string) => {
+export const getAllHelpdeskDepartments = async (query?: string) => {
   const params = query ? { search: query } : {};
   const response = await apiClient.get("/helpdesk-departments/all", {
     params,
   });
   return response;
+};
+
+export const searchHelpdeskDepartments = async (
+  searchData: Record<string, unknown>,
+  page = 0,
+  size = 10,
+  sort = "id,desc"
+) => {
+  return apiClient.post(
+    `/helpdesk-departments/search?page=${page}&size=${size}&sort=${sort}`,
+    searchData
+  );
 };
 
 export const updateHelpdeskDepartment = async (

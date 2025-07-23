@@ -63,7 +63,7 @@ const SideNav: React.FC<SideNavProps> = ({
       label: "Users",
       path: "/users",
       icon: <FaUsers />,
-      roles: [UserRole.ADMIN, UserRole.MANAGER],
+      roles: [UserRole.ORG_ADMIN, UserRole.HR],
     },
     {
       id: "departments",
@@ -82,14 +82,14 @@ const SideNav: React.FC<SideNavProps> = ({
       label: "Reports",
       path: "/reports",
       icon: <FaChartBar />,
-      roles: [UserRole.ADMIN, UserRole.MANAGER],
+      roles: [UserRole.ORG_ADMIN, UserRole.MANAGER, UserRole.CXO],
     },
     {
       id: "network",
       label: "Network",
       path: "/network",
       icon: <FaNetworkWired />,
-      roles: [UserRole.ADMIN, UserRole.IT_STAFF],
+      roles: [UserRole.ORG_ADMIN],
     },
     {
       id: "settings",
@@ -126,7 +126,6 @@ const SideNav: React.FC<SideNavProps> = ({
           isMobileMenuOpen ? "mobile-open" : ""
         }`}
       >
-
         {/* Navigation List */}
         <div className="modern-sidebar-content">
           <ul className="modern-nav-list">

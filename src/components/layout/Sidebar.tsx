@@ -58,7 +58,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             </ul>
           </div>
 
-          {user?.role === UserRole.ADMIN && (
+          {user?.role === UserRole.ORG_ADMIN && (
             <div className="nav-section">
               <h3 className="nav-title">Administration</h3>
               <ul className="nav-list">

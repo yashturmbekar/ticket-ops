@@ -55,7 +55,7 @@ export const useDepartmentEdit = (options: DepartmentEditHookOptions = {}) => {
         setLoading(true);
         setError(null);
 
-        const updatedDepartment = await updateHelpdeskDepartment(id, payload);
+        const updatedDepartment = await updateHelpdeskDepartment(payload);
 
         addNotification({
           type: "success",

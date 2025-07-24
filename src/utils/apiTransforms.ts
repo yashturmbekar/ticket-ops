@@ -32,6 +32,8 @@ export function transformApiTicketToTicket(
     category: "other" as Category, // Default category
     // Add ticketCode as a custom property that can be displayed
     ticketCode: apiTicket.ticketCode,
+    // Map totalCommentsCount for comment count display
+    totalCommentsCount: apiTicket.totalCommentsCount,
     // Add assigned employee details for TicketTile component
     assignedToDetails: apiTicket.assignedToEmployeeDetails
       ? {

@@ -62,6 +62,7 @@ export interface ApiTicketResponse {
   comment?: string;
   ticketCommentDTO?: Record<string, unknown>;
   attachments?: Record<string, unknown>[];
+  totalCommentsCount?: number;
 }
 
 export interface Ticket {

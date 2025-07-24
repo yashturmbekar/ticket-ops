@@ -45,16 +45,16 @@ export async function createTicket(ticketData: Record<string, unknown>) {
     ticketData.attachments.length > 0
   ) {
     console.log("Creating ticket with attachments - using retry logic");
-    return apiClient.postWithRetry("/helpdesk-tickets", ticketData, 3);
+    return apiClient.postWithFiles("/helpdesk-tickets", ticketData, 3);
   }
   return apiClient.post("/helpdesk-tickets", ticketData);
 }
 
 export async function updateTicket(
-  id: string,
   ticketData: Record<string, unknown>
 ) {
-  return apiClient.put(`${endpoint}/${id}`, ticketData);
+  console.log("Updating ticket with full object:", ticketData);
+  return apiClient.put(`${endpoint}`, ticketData);
 }
 
 export async function deleteTicket(id: string) {
@@ -138,7 +138,6 @@ export async function deleteComment(ticketId: string, commentId: string) {
   return apiClient.delete(`${endpoint}/${ticketId}/comments/${commentId}`);
 }
 
-
 export async function uploadAttachment(file: File, commentId: string) {
   // Convert File to byte array
   const fileData = await new Promise<number[]>((resolve, reject) => {
@@ -165,8 +164,6 @@ export async function uploadAttachment(file: File, commentId: string) {
     headers: { "Content-Type": "application/json" },
   });
 }
-
-
 
 export async function deleteAttachment(ticketId: string, attachmentId: string) {
   return apiClient.delete(
@@ -204,13 +201,6 @@ export async function getTicketsByPriority(priority: string) {
 
 export async function getTicketsByCategory(category: string) {
   return apiClient.get(`${endpoint}/by-category/${category}`);
-}
-
-export async function bulkUpdateTickets(
-  ticketIds: string[],
-  updates: Record<string, unknown>
-) {
-  return apiClient.patch(`${endpoint}/bulk-update`, { ticketIds, updates });
 }
 
 export async function bulkAssignTickets(

@@ -50,7 +50,6 @@ export {
   getOverdueTickets,
   getTicketsByPriority,
   getTicketsByCategory,
-  bulkUpdateTickets,
   bulkAssignTickets,
   bulkCloseTickets,
   exportTickets,
@@ -94,7 +93,6 @@ export {
   uploadAssetAttachment,
   deleteAssetAttachment,
   getAssetHistory,
-  bulkUpdateAssets,
   exportAssets,
 } from "./assetService";
 
@@ -125,7 +123,6 @@ export {
   uploadDeviceAttachment,
   deleteDeviceAttachment,
   getDeviceHistory,
-  bulkUpdateDevices,
   exportDevices,
 } from "./networkService";
 

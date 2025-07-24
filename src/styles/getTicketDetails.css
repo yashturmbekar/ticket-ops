@@ -2519,3 +2519,1184 @@ textarea:focus-visible {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ==================== ROLE-BASED EDITING STYLES ==================== */
+
+/* Edit Controls in Section Headers */
+.info-section h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-4);
+}
+
+.edit-controls {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.edit-controls .btn {
+  padding: var(--spacing-1) var(--spacing-3);
+  font-size: var(--font-size-sm);
+  border-radius: var(--border-radius);
+  transition: all var(--transition-speed);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.edit-controls .btn-outline {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.edit-controls .btn-outline:hover {
+  background: var(--color-background-secondary);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.edit-controls .btn-primary {
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  color: white;
+}
+
+.edit-controls .btn-primary:hover {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.edit-controls .btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.edit-controls .btn-secondary {
+  background: var(--color-background-tertiary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.edit-controls .btn-secondary:hover {
+  background: var(--color-background-secondary);
+}
+
+/* Edit Fields */
+.edit-field {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+}
+
+.edit-select,
+.edit-input {
+  flex: 1;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background: var(--color-background-secondary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-speed);
+}
+
+.edit-select:focus,
+.edit-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.1);
+}
+
+/* Assignee Search */
+.assignee-search {
+  position: relative;
+  width: 100%;
+}
+
+.search-container {
+  position: relative;
+  flex: 1;
+}
+
+.search-icon {
+  position: absolute;
+  right: var(--spacing-2);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  pointer-events: none;
+}
+
+.employee-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-top: 2px;
+}
+
+.dropdown-item {
+  padding: var(--spacing-3);
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-border);
+  transition: all var(--transition-speed);
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background: var(--color-background-tertiary);
+}
+
+.dropdown-item.loading,
+.dropdown-item.no-results {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--color-text-secondary);
+  cursor: default;
+}
+
+.dropdown-item.loading:hover,
+.dropdown-item.no-results:hover {
+  background: transparent;
+}
+
+.employee-item {
+  padding: var(--spacing-3);
+}
+
+.employee-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.employee-name {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.employee-dept {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* Button Loader Compatibility */
+.edit-controls .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive Design for Edit Controls */
+@media (max-width: 768px) {
+  .edit-controls {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .edit-controls .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .info-section h3 {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-3);
+  }
+
+  .assignee-search .search-container {
+    width: 100%;
+  }
+}
+
+/* Ensure proper spacing with existing styles */
+.info-item .edit-field {
+  margin-left: 0;
+}
+
+.info-value .edit-field {
+  width: 100%;
+}
+
+/* Priority and status badge adjustments for editing mode */
+.edit-field .edit-select {
+  min-width: 150px;
+}
+
+/* Loading state for save button */
+.save-btn .button-loader {
+  margin-right: var(--spacing-1);
+}
+
+/* ==================== ENHANCED PROFESSIONAL INLINE EDITING STYLES ==================== */
+
+/* Professional Edit Field Styling */
+.professional-edit-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #ffffff;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  min-height: 64px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.professional-edit-field:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  transform: translateY(-1px);
+}
+
+.professional-edit-field:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Field Icons */
+.field-icon {
+  color: #3b82f6;
+  font-size: 18px;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.field-icon.unassigned-icon {
+  color: #9ca3af;
+}
+
+/* Professional Select Styling */
+.professional-select {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  color: #1f2937;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%233b82f6' d='M4.427 9.573l3.396-3.396a.25.25 0 01.354 0l3.396 3.396a.25.25 0 01-.177.427H4.604a.25.25 0 01-.177-.427z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px;
+  padding-right: 48px;
+}
+
+.professional-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%239ca3af' d='M4.427 9.573l3.396-3.396a.25.25 0 01.354 0l3.396 3.396a.25.25 0 01-.177.427H4.604a.25.25 0 01-.177-.427z'/></svg>");
+}
+
+.professional-select option {
+  background: #ffffff;
+  color: #1f2937;
+  padding: 12px;
+  font-size: 16px;
+}
+
+/* Professional Input Styling */
+.professional-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  color: #1f2937;
+  font-size: 16px;
+  font-weight: 500;
+  outline: none;
+}
+
+.professional-input::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.professional-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Assignee field specific overrides */
+.assignee-field .professional-input {
+  padding: 12px 40px 12px 16px;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.assignee-field .professional-input:focus {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* Readonly Field Styling */
+.readonly-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  min-height: 64px;
+  background: #f9fafb;
+  border: 2px solid #f3f4f6;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.readonly-field:hover {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+}
+
+.field-text {
+  color: #1f2937;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.field-text.unassigned {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Assignee Field Specific Styling */
+.assignee-field {
+  position: relative;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border: 2px solid #10b981;
+}
+
+.assignee-field:hover {
+  border-color: #059669;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+.assignee-field:focus-within {
+  border-color: #059669;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+.assignee-search-container {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.assignee-search-container .professional-input {
+  width: 100%;
+  padding-right: 40px;
+  background: rgba(255, 255, 255, 0.7);
+  border: none;
+  border-radius: 6px;
+  padding: 10px 40px 10px 14px;
+  font-size: 14px;
+  font-weight: 400;
+  color: #1f2937;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.assignee-search-container .professional-input:focus {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.assignee-search-container .professional-input::placeholder {
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.search-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #10b981;
+  font-size: 14px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Professional Dropdown Styling */
+.professional-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  border-top: 2px solid #3b82f6;
+}
+
+.professional-dropdown .dropdown-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f4f6;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.professional-dropdown .dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.professional-dropdown .dropdown-item:hover {
+  background: #f8fafc;
+  transform: translateX(2px);
+}
+
+.professional-dropdown .dropdown-item.loading,
+.professional-dropdown .dropdown-item.no-results {
+  color: #9ca3af;
+  cursor: default;
+  justify-content: center;
+  font-style: italic;
+  padding: 16px;
+}
+
+.professional-dropdown .dropdown-item.loading:hover,
+.professional-dropdown .dropdown-item.no-results:hover {
+  background: transparent;
+  transform: none;
+}
+
+/* Employee Option Styling */
+.employee-option {
+  padding: 12px 16px !important;
+}
+
+.employee-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+.employee-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.employee-meta {
+  font-size: 12px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.2;
+}
+
+/* Saving Indicator */
+.saving-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #3b82f6;
+  font-size: 12px;
+  font-weight: 500;
+  position: absolute;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.95);
+  padding: 4px 8px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  z-index: 2;
+}
+
+/* Assignee Info Styling for readonly */
+.assignee-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.assignee-info .primary-text {
+  color: #1f2937;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.assignee-info .secondary-text {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Professional Badge Styling */
+.professional-badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  min-width: 80px;
+  justify-content: center;
+}
+
+/* Priority Select Specific Styling */
+.priority-select {
+  background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%23f59e0b' d='M4.427 9.573l3.396-3.396a.25.25 0 01.354 0l3.396 3.396a.25.25 0 01-.177.427H4.604a.25.25 0 01-.177-.427z'/></svg>");
+}
+
+/* Enhanced focus states */
+.professional-edit-field .professional-select:focus,
+.professional-edit-field .professional-input:focus {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+/* Loading state for entire field */
+.professional-edit-field:has(.saving-indicator) {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* ==================== ENHANCED INFO SECTIONS ==================== */
+
+.info-section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.info-section:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.info-section h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.info-items {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.info-item {
+  margin-bottom: 0;
+}
+
+.info-item label {
+  font-weight: 600;
+  color: #6b7280;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.info-value {
+  width: 100%;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .info-section {
+    background: #1f2937;
+    border-color: #374151;
+  }
+
+  .info-section h3 {
+    color: #f9fafb;
+    border-bottom-color: #374151;
+  }
+
+  .info-item label {
+    color: #9ca3af;
+  }
+
+  .professional-edit-field {
+    background: #374151;
+    border-color: #4b5563;
+  }
+
+  .readonly-field {
+    background: #374151;
+    border-color: #4b5563;
+  }
+
+  .field-text {
+    color: #f9fafb;
+  }
+
+  .professional-input,
+  .professional-select {
+    color: #f9fafb;
+  }
+
+  .professional-dropdown {
+    background: #374151;
+    border-color: #4b5563;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .professional-edit-field {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .field-icon {
+    align-self: flex-start;
+  }
+
+  .saving-indicator {
+    position: static;
+    transform: none;
+    align-self: center;
+    margin-top: 12px;
+  }
+
+  .assignee-search-container {
+    width: 100%;
+  }
+
+  .professional-dropdown {
+    left: 8px;
+    right: 8px;
+  }
+}
+
+/* ==================== COMPACT ASSIGNMENT & STATUS SECTION ==================== */
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+    border-color: #e2e8f0;
+  }
+  50% {
+    transform: scale(1.01);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+    border-color: #3b82f6;
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+    border-color: #e2e8f0;
+  }
+}
+
+.assignment-status-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Only show heartbeat animation when editable */
+.assignment-status-section.editable {
+  animation: heartbeat 3s ease-in-out infinite;
+}
+
+.assignment-status-section:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Remove the "Click to Edit" badge */
+
+.assignment-status-section h3 {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #1e293b !important;
+  margin-bottom: 12px !important;
+  padding-bottom: 6px !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  position: relative;
+}
+
+.assignment-status-section .info-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.assignment-status-section .info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.assignment-status-section .info-item label {
+  font-weight: 500 !important;
+  color: #6b7280 !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  margin-bottom: 0 !important;
+}
+
+/* Compact field styling */
+.assignment-status-section .professional-edit-field {
+  min-height: 36px !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  border: 1px solid #d1d5db !important;
+  background: #ffffff !important;
+  transition: all 0.2s ease !important;
+  position: relative;
+  box-shadow: none !important;
+}
+
+.assignment-status-section .professional-edit-field:hover {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+}
+
+.assignment-status-section .professional-edit-field:focus-within {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+}
+
+.assignment-status-section .professional-select,
+.assignment-status-section .professional-input {
+  flex: 1 !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  color: #1f2937 !important;
+  min-height: 20px !important;
+}
+
+.assignment-status-section .professional-input::placeholder {
+  color: #9ca3af !important;
+  font-weight: 400 !important;
+}
+
+.assignment-status-section .field-icon {
+  color: #6b7280 !important;
+  font-size: 14px !important;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Field-specific compact styling */
+.assignment-status-section .department-field {
+  border-color: #3b82f6 !important;
+  background: #f8fafc !important;
+}
+
+.assignment-status-section .assignee-field {
+  border-color: #10b981 !important;
+  background: #f0fdf4 !important;
+  position: relative;
+}
+
+.assignment-status-section .assignee-field .assignee-search-container {
+  flex: 1;
+  position: relative;
+}
+
+.assignment-status-section .assignee-field .professional-input {
+  width: 100% !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  padding: 0 32px 0 0 !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  color: #1f2937 !important;
+  min-height: 20px !important;
+}
+
+.assignment-status-section .assignee-field .search-icon {
+  position: absolute !important;
+  right: 8px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: #9ca3af !important;
+  font-size: 12px !important;
+  pointer-events: none !important;
+  z-index: 1;
+}
+
+.assignment-status-section .priority-field {
+  border-color: #f59e0b !important;
+  background: #fefbf3 !important;
+}
+
+/* Compact readonly fields */
+.assignment-status-section .readonly-field {
+  min-height: 36px !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  border: 1px solid #e5e7eb !important;
+  background: #f9fafb !important;
+  transition: none !important;
+}
+
+.assignment-status-section .status-field,
+.assignment-status-section .asset-field {
+  border-color: #d1d5db !important;
+  background: #f9fafb !important;
+}
+
+/* Compact badges */
+.assignment-status-section .professional-badge {
+  font-weight: 500 !important;
+  font-size: 11px !important;
+  padding: 4px 8px !important;
+  border-radius: 12px !important;
+  color: white !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.3px !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Compact saving indicator */
+.assignment-status-section .saving-indicator {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 4px;
+  font-size: 10px;
+  color: #10b981;
+  font-weight: 500;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  z-index: 3;
+}
+
+/* Professional dropdown enhancements */
+.assignment-status-section .professional-dropdown {
+  max-height: 200px !important;
+  border-radius: 6px !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid #d1d5db !important;
+  background: #ffffff !important;
+  border-top: 2px solid #10b981 !important;
+  top: calc(100% + 2px) !important;
+}
+
+.assignment-status-section .dropdown-item {
+  padding: 10px 12px !important;
+  font-size: 13px !important;
+  transition: all 0.15s ease !important;
+  border-bottom: 1px solid #f9fafb !important;
+}
+
+.assignment-status-section .dropdown-item:hover {
+  background: #f0fdf4 !important;
+  transform: translateX(2px) !important;
+}
+
+.assignment-status-section .dropdown-item.loading,
+.assignment-status-section .dropdown-item.no-results {
+  color: #9ca3af !important;
+  justify-content: center !important;
+  font-style: italic !important;
+  padding: 12px !important;
+}
+
+.assignment-status-section .dropdown-item.loading:hover,
+.assignment-status-section .dropdown-item.no-results:hover {
+  background: transparent !important;
+  transform: none !important;
+}
+
+.assignment-status-section .employee-details {
+  gap: 2px !important;
+}
+
+.assignment-status-section .employee-name {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #1f2937 !important;
+  line-height: 1.3 !important;
+}
+
+.assignment-status-section .employee-meta {
+  font-size: 11px !important;
+  color: #6b7280 !important;
+  gap: 4px !important;
+  line-height: 1.2 !important;
+}
+
+/* Search icon styling */
+.assignment-status-section .search-icon {
+  color: #9ca3af !important;
+  font-size: 14px !important;
+  position: absolute !important;
+  right: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  pointer-events: none !important;
+}
+
+/* Priority icon styling */
+.priority-icon {
+  color: #f59e0b !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* Enhanced assignee info */
+.assignee-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.assignee-info .primary-text {
+  font-weight: 600 !important;
+  color: #1e293b !important;
+  font-size: 16px !important;
+}
+
+.assignee-info .secondary-text {
+  font-size: 14px !important;
+  color: #64748b !important;
+  font-weight: 500 !important;
+}
+
+/* Unassigned state */
+.unassigned-icon {
+  color: #94a3b8 !important;
+}
+
+.field-text.unassigned {
+  color: #94a3b8 !important;
+  font-style: italic;
+  font-weight: 500 !important;
+}
+
+/* Enhanced saving indicator */
+.saving-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 8px;
+  font-size: 14px;
+  color: #3b82f6;
+  font-weight: 500;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  animation: fadeInPulse 0.3s ease-in-out;
+}
+
+@keyframes fadeInPulse {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+.saving-indicator span {
+  font-weight: 600;
+  color: #3b82f6;
+}
+
+/* Enhanced readonly states */
+.priority-readonly,
+.status-field {
+  justify-content: flex-start !important;
+  padding: 16px 20px !important;
+}
+
+.professional-badge {
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  padding: 8px 16px !important;
+  border-radius: 20px !important;
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  transition: all 0.2s ease !important;
+}
+
+.professional-badge:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Mobile responsive enhancements */
+@media (max-width: 768px) {
+  .assignment-status-section {
+    padding: 24px 20px;
+    margin-bottom: 24px;
+    border-radius: 12px;
+  }
+
+  .assignment-status-section h3 {
+    font-size: 20px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .assignment-status-section .info-items {
+    gap: 20px;
+  }
+
+  .assignment-status-section .info-item label {
+    font-size: 15px !important;
+  }
+
+  .professional-edit-field {
+    min-height: 56px !important;
+    padding: 14px 16px !important;
+  }
+
+  .saving-indicator {
+    position: static !important;
+    transform: none !important;
+    align-self: center;
+    margin-top: 12px;
+  }
+}
+
+/* ==================== COMPACT OVERRIDES ==================== */
+.assignment-status-section .assignee-info .primary-text {
+  font-weight: 500 !important;
+  color: #1e293b !important;
+  font-size: 14px !important;
+}
+
+.assignment-status-section .assignee-info .secondary-text {
+  font-size: 12px !important;
+  color: #64748b !important;
+  font-weight: 400 !important;
+}
+
+.assignment-status-section .priority-icon {
+  color: #f59e0b !important;
+}
+
+.assignment-status-section .professional-dropdown {
+  max-height: 200px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.assignment-status-section .dropdown-item {
+  padding: 8px 12px !important;
+  font-size: 14px !important;
+}
+
+/* Mobile responsive compact design */
+@media (max-width: 768px) {
+  .assignment-status-section {
+    padding: 12px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .assignment-status-section h3 {
+    font-size: 15px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .assignment-status-section .info-items {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .assignment-status-section .professional-edit-field,
+  .assignment-status-section .readonly-field {
+    min-height: 32px !important;
+    padding: 6px 10px !important;
+  }
+
+  .assignment-status-section .saving-indicator {
+    position: static !important;
+    transform: none !important;
+    margin-top: 6px !important;
+    align-self: flex-start !important;
+  }
+
+  .assignment-status-section .professional-dropdown {
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 4px !important;
+  }
+}

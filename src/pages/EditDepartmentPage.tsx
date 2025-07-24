@@ -192,9 +192,14 @@ export const DepartmentsEditPage: React.FC = () => {
             id: emp.originalId ?? "",
             helpdeskDepartmentId: id,
             employeeId: parseInt(emp.employeeId),
-            isActive: emp.isActive,
+            isActive: emp.isActive, // This will now include both true and false values
           })),
       };
+
+      console.log(
+        "Sending department update payload:",
+        JSON.stringify(payload, null, 2)
+      );
 
       await updateHelpdeskDepartment(payload);
 
@@ -272,25 +277,23 @@ export const DepartmentsEditPage: React.FC = () => {
   };
 
   const removeEmployee = (index: number) => {
-    const employeeName = formData.employees[index].employeeObj?.employeeName || "this employee";
+    const employeeName =
+      formData.employees[index].employeeObj?.employeeName || "this employee";
     setEmployeeToDelete({ index, name: employeeName });
     setShowDeleteConfirmation(true);
   };
 
   const confirmRemoveEmployee = () => {
     if (!employeeToDelete) return;
-    
+
+    // Instead of removing the employee, mark them as inactive
     setFormData((prev) => ({
       ...prev,
-      employees: prev.employees.filter((_, i) => i !== employeeToDelete.index),
+      employees: prev.employees.map((emp, i) =>
+        i === employeeToDelete.index ? { ...emp, isActive: false } : emp
+      ),
     }));
-    
-    addNotification({
-      type: "success",
-      title: "✅ Employee Removed",
-      message: `Employee "${employeeToDelete.name}" has been removed from the department.`,
-    });
-    
+
     setShowDeleteConfirmation(false);
     setEmployeeToDelete(null);
   };
@@ -442,17 +445,21 @@ export const DepartmentsEditPage: React.FC = () => {
           {/* Employee List Section */}
           <div className="create-form-group">
             <label className="create-form-label">
-              Department Employees ({formData.employees.length})
+              Department Employees (
+              {formData.employees.filter((emp) => emp.isActive).length})
               <span className="create-form-hint">
                 Employees assigned to this department
               </span>
             </label>
 
             <div className="employee-list-section">
-              {formData.employees.length === 0 ? (
+              {formData.employees.filter((emp) => emp.isActive).length === 0 ? (
                 <div className="employee-list-empty">
                   <FaUser className="empty-icon" />
-                  <p>No employees assigned to this department. Search above to add employees.</p>
+                  <p>
+                    No employees assigned to this department. Search above to
+                    add employees.
+                  </p>
                 </div>
               ) : (
                 <div className="employee-list-table">
@@ -462,47 +469,55 @@ export const DepartmentsEditPage: React.FC = () => {
                     <div className="employee-header-actions">Actions</div>
                   </div>
                   <div className="employee-list-body">
-                    {formData.employees.map((employee, index) => (
-                      <div key={index} className="employee-list-row">
-                        <div className="employee-info">
-                          <FaUser className="employee-icon" />
-                          <div className="employee-details">
-                            <div className="employee-name">
-                              {employee.employeeObj?.employeeName}
+                    {formData.employees
+                      .filter((employee) => employee.isActive) // Only show active employees
+                      .map((employee) => {
+                        // Find the actual index in the full array for actions
+                        const actualIndex = formData.employees.findIndex(
+                          (emp) => emp === employee
+                        );
+                        return (
+                          <div key={actualIndex} className="employee-list-row">
+                            <div className="employee-info">
+                              <FaUser className="employee-icon" />
+                              <div className="employee-details">
+                                <div className="employee-name">
+                                  {employee.employeeObj?.employeeName}
+                                </div>
+                                <div className="employee-meta">
+                                  {employee.employeeObj?.departmentName} •{" "}
+                                  {employee.employeeObj?.designation}
+                                </div>
+                              </div>
                             </div>
-                            <div className="employee-meta">
-                              {employee.employeeObj?.departmentName} •{" "}
-                              {employee.employeeObj?.designation}
+                            <div className="employee-status">
+                              <select
+                                className="create-form-select"
+                                value={employee.isActive ? "true" : "false"}
+                                onChange={(e) =>
+                                  updateEmployeeStatus(
+                                    actualIndex,
+                                    e.target.value === "true"
+                                  )
+                                }
+                              >
+                                <option value="true">Active</option>
+                                <option value="false">Inactive</option>
+                              </select>
+                            </div>
+                            <div className="employee-actions">
+                              <button
+                                type="button"
+                                onClick={() => removeEmployee(actualIndex)}
+                                className="btn-icon btn-danger"
+                                title="Remove Employee"
+                              >
+                                <FaTrash />
+                              </button>
                             </div>
                           </div>
-                        </div>
-                        <div className="employee-status">
-                          <select
-                            className="create-form-select"
-                            value={employee.isActive ? "true" : "false"}
-                            onChange={(e) =>
-                              updateEmployeeStatus(
-                                index,
-                                e.target.value === "true"
-                              )
-                            }
-                          >
-                            <option value="true">Active</option>
-                            <option value="false">Inactive</option>
-                          </select>
-                        </div>
-                        <div className="employee-actions">
-                          <button
-                            type="button"
-                            onClick={() => removeEmployee(index)}
-                            className="btn-icon btn-danger"
-                            title="Remove Employee"
-                          >
-                            <FaTrash />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                        );
+                      })}
                   </div>
                 </div>
               )}
@@ -585,8 +600,10 @@ export const DepartmentsEditPage: React.FC = () => {
           Remove Employee from Department
         </div>
         <div className="modal-confirm-message">
-          Are you sure you want to remove <strong>"{employeeToDelete?.name}"</strong> from this department? 
-          This action will remove the employee from the department but will not delete their account.
+          Are you sure you want to remove{" "}
+          <strong>"{employeeToDelete?.name}"</strong> from this department? This
+          action will remove the employee from the department but will not
+          delete their account.
         </div>
       </Modal>
     </div>
@@ -594,4 +611,3 @@ export const DepartmentsEditPage: React.FC = () => {
 };
 
 export default DepartmentsEditPage;
-

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   FaTicketAlt,
@@ -26,7 +26,7 @@ type DisplayTicket = Ticket & {
     designation: string;
   };
 };
-import { searchMyTickets } from "../services/ticketService";
+import { searchTickets, searchMyTickets } from "../services/ticketService";
 import { searchHelpdeskDepartments } from "../services/helpdeskDepartmentService";
 import type { HelpdeskDepartment } from "../services/helpdeskDepartmentService";
 import { useNotifications } from "../hooks/useNotifications";
@@ -111,7 +111,10 @@ export const TicketsPage: React.FC = () => {
     }
   };
 
-  const availableTabs = getAvailableTabs(user?.role || "EMPLOYEE");
+  const availableTabs = useMemo(
+    () => getAvailableTabs(user?.role || "EMPLOYEE"),
+    [user?.role]
+  );
 
   const [filters, setFilters] = useState<TicketsFilter>({
     status: "",
@@ -121,7 +124,16 @@ export const TicketsPage: React.FC = () => {
     search: "",
   });
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [ticketCounts, setTicketCounts] = useState<Record<string, number>>({});
+  const [departmentsLoaded, setDepartmentsLoaded] = useState(false);
+  const [totalTicketCount, setTotalTicketCount] = useState(0);
+  const [tabCounts, setTabCounts] = useState<Record<string, number>>({});
+
+  // Refs to prevent duplicate API calls
+  const departmentsFetching = useRef(false);
+  const ticketsFetching = useRef(false);
+  const lastTicketSearchParams = useRef<string>("");
+  const ticketsFetchTimeout = useRef<number | null>(null);
+  const tabCountsLoaded = useRef<Set<string>>(new Set());
 
   // Update active tab when user role changes
   useEffect(() => {
@@ -138,13 +150,61 @@ export const TicketsPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, [filters.search]);
 
-  // Fetch ticket counts for all available tabs
+  // Fetch departments on component mount - only once
   useEffect(() => {
-    const fetchTicketCounts = async () => {
-      try {
-        const counts: Record<string, number> = {};
+    const fetchDepartments = async () => {
+      // Prevent duplicate calls
+      if (departmentsFetching.current || departmentsLoaded) {
+        return;
+      }
 
+      departmentsFetching.current = true;
+
+      try {
+        console.log("Fetching departments (one time only)");
+        // Use search endpoint with empty criteria to get all active departments
+        const response = await searchHelpdeskDepartments({}, 0, 50, "id,desc");
+
+        // Extract departments from the response structure
+        const departmentItems = response.data?.items || response.items || [];
+        const departmentList = departmentItems
+          .map((item: DepartmentSearchItem) => item.department)
+          .filter((dept: HelpdeskDepartment) => dept && dept.isActive);
+
+        setDepartments(departmentList);
+        setDepartmentsLoaded(true);
+        console.log(
+          "Departments loaded successfully:",
+          departmentList.length,
+          "departments"
+        );
+      } catch (error) {
+        console.error("Error loading departments:", error);
+        addNotification({
+          type: "error",
+          title: "Failed to Load Departments",
+          message: "Failed to load departments for filtering",
+        });
+      } finally {
+        departmentsFetching.current = false;
+      }
+    };
+
+    fetchDepartments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array - only run once on mount
+
+  // Preload counts for all tabs
+  useEffect(() => {
+    const preloadTabCounts = async () => {
+      if (!user || availableTabs.length === 0) return;
+
+      try {
         for (const tab of availableTabs) {
+          // Skip if we already have count for this tab
+          if (tabCountsLoaded.current.has(tab.id)) continue;
+
+          // Use base criteria without any filters for accurate total counts
           const searchCriteria: Record<string, unknown> = {};
 
           switch (tab.id) {
@@ -159,68 +219,59 @@ export const TicketsPage: React.FC = () => {
               break;
           }
 
-          const response = await searchMyTickets(
-            searchCriteria,
-            0,
-            1,
-            "createdDate,desc"
-          );
-          counts[tab.id] =
-            response.data?.totalElements || response.totalElements || 0;
-        }
+          // Use appropriate search function based on tab type with minimal results
+          const response =
+            tab.id === "all-tickets"
+              ? await searchTickets(searchCriteria, 0, 1, "createdDate,desc")
+              : await searchMyTickets(searchCriteria, 0, 1, "createdDate,desc");
 
-        setTicketCounts(counts);
+          const count =
+            response.meta?.totalItems || response.data?.meta?.totalItems || 0;
+
+          console.log(
+            `Preloaded count for ${tab.id}:`,
+            count,
+            "with criteria:",
+            searchCriteria
+          );
+
+          setTabCounts((prev) => ({
+            ...prev,
+            [tab.id]: count,
+          }));
+
+          // Mark this tab as loaded
+          tabCountsLoaded.current.add(tab.id);
+        }
       } catch (error) {
-        console.error("Error fetching ticket counts:", error);
+        console.error("Error preloading tab counts:", error);
       }
     };
 
-    if (user && availableTabs.length > 0) {
-      fetchTicketCounts();
-    }
+    preloadTabCounts();
   }, [user, availableTabs]);
 
-  // Fetch departments on component mount
   useEffect(() => {
-    const fetchDepartments = async () => {
-      try {
-        // Use search endpoint with empty criteria to get all active departments
-        const response = await searchHelpdeskDepartments({}, 0, 50, "id,desc");
+    // Clear any existing timeout
+    if (ticketsFetchTimeout.current) {
+      clearTimeout(ticketsFetchTimeout.current);
+    }
 
-        console.log("Department API Response:", response);
-        console.log("Response data:", response.data);
-
-        // Extract departments from the response structure
-        const departmentItems = response.data?.items || response.items || [];
-        console.log("Department items:", departmentItems);
-
-        const departmentList = departmentItems
-          .map((item: DepartmentSearchItem) => item.department)
-          .filter((dept: HelpdeskDepartment) => dept && dept.isActive);
-
-        console.log("Filtered department list:", departmentList);
-        setDepartments(departmentList);
-      } catch (error) {
-        console.error("Error loading departments:", error);
-        addNotification({
-          type: "error",
-          title: "Failed to Load Departments",
-          message: "Failed to load departments for filtering",
-        });
-      }
-    };
-
-    fetchDepartments();
-  }, [addNotification]);
-
-  useEffect(() => {
     const fetchTickets = async () => {
+      // Prevent concurrent calls
+      if (ticketsFetching.current) {
+        return;
+      }
+
+      ticketsFetching.current = true;
+
       try {
         // Use searchLoading for subsequent searches, loading only for initial load
         if (loading) {
-          // This is the initial load
+          console.log("Initial tickets load");
         } else {
           setSearchLoading(true);
+          console.log("Filtering/searching tickets");
         }
 
         // Prepare search criteria for real API
@@ -249,8 +300,8 @@ export const TicketsPage: React.FC = () => {
         if (filters.priority) {
           searchCriteria.priority = filters.priority.toUpperCase();
         }
-        if (filters.department) {
-          // Find department ID by name
+        if (filters.department && departments.length > 0) {
+          // Find department ID by name - use current departments state
           const selectedDept = departments.find(
             (dept) => dept.name === filters.department
           );
@@ -266,24 +317,59 @@ export const TicketsPage: React.FC = () => {
           searchCriteria.title = debouncedSearch.trim();
         }
 
-        console.log("Search criteria:", searchCriteria);
+        console.log("Tickets search criteria:", searchCriteria);
 
-        // Call the actual API
-        const response = await searchMyTickets(
-          searchCriteria,
-          0,
-          50,
-          "createdDate,desc"
-        );
+        // Create a unique string to track if parameters have changed
+        const searchParamsKey = JSON.stringify({
+          activeTab,
+          criteria: searchCriteria,
+          loading,
+        });
 
-        console.log("API Response:", response);
+        // Skip API call if same parameters as last call
+        if (lastTicketSearchParams.current === searchParamsKey) {
+          console.log("Skipping duplicate tickets API call - same parameters");
+          return;
+        }
+
+        lastTicketSearchParams.current = searchParamsKey;
+
+        // Call the appropriate API based on the active tab
+        const response =
+          activeTab === "all-tickets"
+            ? await searchTickets(searchCriteria, 0, 50, "createdDate,desc")
+            : await searchMyTickets(searchCriteria, 0, 50, "createdDate,desc");
 
         // Extract tickets from response - API returns 'items' array
         const apiTickets = response.data?.items || response.items || [];
 
+        // Extract total count from response.meta.totalItems
+        const totalCount =
+          response.meta?.totalItems || response.data?.meta?.totalItems || 0;
+        setTotalTicketCount(totalCount);
+
+        console.log(
+          `Main fetch count for ${activeTab}:`,
+          totalCount,
+          "with criteria:",
+          searchCriteria
+        );
+
+        // Store count for the current tab
+        setTabCounts((prev) => ({
+          ...prev,
+          [activeTab]: totalCount,
+        }));
+
         // Transform API response to internal format
         const transformedTickets = transformApiTicketsToTickets(apiTickets);
         setTickets(transformedTickets);
+        console.log(
+          "Tickets loaded:",
+          transformedTickets.length,
+          "Total count:",
+          totalCount
+        );
       } catch (error: unknown) {
         console.error("Error loading tickets:", error);
         const errorMessage =
@@ -298,10 +384,30 @@ export const TicketsPage: React.FC = () => {
           setLoading(false); // Only set main loading to false after initial load
         }
         setSearchLoading(false);
+        ticketsFetching.current = false;
       }
     };
 
-    fetchTickets();
+    // Only fetch if user is available, with debouncing for non-initial loads
+    if (user && activeTab) {
+      if (loading) {
+        // Immediate load for initial render
+        fetchTickets();
+      } else {
+        // Debounce for subsequent calls
+        ticketsFetchTimeout.current = setTimeout(() => {
+          fetchTickets();
+        }, 100); // 100ms debounce
+      }
+    }
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (ticketsFetchTimeout.current) {
+        clearTimeout(ticketsFetchTimeout.current);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     activeTab,
     filters.status,
@@ -309,11 +415,9 @@ export const TicketsPage: React.FC = () => {
     filters.department,
     filters.assignee,
     debouncedSearch,
+    user,
     departments,
-    addNotification,
     loading,
-    user?.email,
-    user?.username,
   ]);
 
   const getStatusIcon = (status: TicketStatus) => {
@@ -476,7 +580,9 @@ export const TicketsPage: React.FC = () => {
         <div className="tickets-page-title-section">
           <div className="title-with-badge">
             <h1 className="tickets-page-title">{pageInfo.title}</h1>
-            <span className={`role-badge ${roleInfo.color}`}></span>
+            <span className={`role-badge ${roleInfo.color}`}>
+              {roleInfo.badge}
+            </span>
           </div>
           <p className="tickets-page-subtitle">{pageInfo.subtitle}</p>
           <p className="role-description">{roleInfo.description}</p>
@@ -501,8 +607,8 @@ export const TicketsPage: React.FC = () => {
               >
                 {tab.icon}
                 <span>{tab.label}</span>
-                {ticketCounts[tab.id] !== undefined && (
-                  <span className="tab-count">{ticketCounts[tab.id]}</span>
+                {tabCounts[tab.id] !== undefined && tabCounts[tab.id] > 0 && (
+                  <span className="tab-count">{tabCounts[tab.id]}</span>
                 )}
               </button>
             ))}
@@ -595,7 +701,7 @@ export const TicketsPage: React.FC = () => {
       {/* Results Info */}
       <div className="tickets-results-info">
         <div className="results-count">
-          Showing {filteredTickets.length} of {tickets.length} tickets
+          Showing {filteredTickets.length} of {totalTicketCount} tickets
           {searchLoading && (
             <span className="search-indicator"> (searching...)</span>
           )}

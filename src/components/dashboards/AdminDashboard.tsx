@@ -6,7 +6,6 @@ import {
   FaExclamationTriangle,
   FaClock,
   FaArrowUp,
-  FaFilter,
   FaChartLine,
   FaBolt,
   FaEye,
@@ -15,12 +14,15 @@ import {
   FaTasks,
   FaBusinessTime,
   FaCalendarCheck,
+  FaBuilding,
+  FaUser,
 } from "react-icons/fa";
 import { Loader, TicketTile } from "../common";
 import type { Ticket } from "../../types";
-import { searchTickets } from "../../services";
+import { searchTickets, searchMyTickets } from "../../services";
 import { transformApiTicketsToTickets } from "../../utils/apiTransforms";
 import { useNotifications } from "../../hooks";
+import { useAuth } from "../../hooks/useAuth";
 import "../../styles/dashboardShared.css";
 
 interface AdminDashboardStats {
@@ -41,6 +43,7 @@ interface AdminDashboardStats {
 export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { addNotification } = useNotifications();
+  const { user } = useAuth();
   const [stats, setStats] = useState<AdminDashboardStats>({
     totalTickets: 0,
     openTickets: 0,
@@ -56,6 +59,10 @@ export const AdminDashboard: React.FC = () => {
     userSatisfaction: 0,
   });
   const [recentTickets, setRecentTickets] = useState<Ticket[]>([]);
+  const [myTickets, setMyTickets] = useState<Ticket[]>([]);
+  const [activeTab, setActiveTab] = useState<"organization" | "my">(
+    "organization"
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -64,14 +71,17 @@ export const AdminDashboard: React.FC = () => {
         setLoading(true);
 
         // Fetch real tickets from API
-        const [allTicketsResponse, recentTicketsResponse] = await Promise.all([
-          searchTickets({}, 0, 100, "createdDate,desc"), // Get more tickets for comprehensive stats
-          searchTickets({}, 0, 12, "createdDate,desc"), // Get recent tickets for display
-        ]);
+        const [allTicketsResponse, recentTicketsResponse, myTicketsResponse] =
+          await Promise.all([
+            searchTickets({}, 0, 100, "createdDate,desc"), // Get more tickets for comprehensive stats
+            searchTickets({}, 0, 12, "createdDate,desc"), // Get recent tickets for display
+            searchMyTickets({ createdBy: user?.id }, 0, 12, "createdDate,desc"), // Get user's tickets
+          ]);
 
         // Extract tickets from API response
         const allApiTickets = allTicketsResponse.items || [];
         const recentApiTickets = recentTicketsResponse.items || [];
+        const myApiTickets = myTicketsResponse.items || [];
 
         if (allApiTickets.length > 0) {
           // Transform API tickets to internal format
@@ -79,6 +89,8 @@ export const AdminDashboard: React.FC = () => {
             transformApiTicketsToTickets(allApiTickets);
           const recentTransformedTickets =
             transformApiTicketsToTickets(recentApiTickets);
+          const myTransformedTickets =
+            transformApiTicketsToTickets(myApiTickets);
 
           // Calculate comprehensive admin statistics
           const totalTickets = allTransformedTickets.length;
@@ -161,7 +173,14 @@ export const AdminDashboard: React.FC = () => {
               ticket.status !== "RESOLVED" && ticket.status !== "APPROVED"
           );
 
+          // Filter active user tickets
+          const activeMyTickets = myTransformedTickets.filter(
+            (ticket) =>
+              ticket.status !== "RESOLVED" && ticket.status !== "APPROVED"
+          );
+
           setRecentTickets(activeTickets);
+          setMyTickets(activeMyTickets);
         }
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -176,7 +195,7 @@ export const AdminDashboard: React.FC = () => {
     };
 
     fetchDashboardData();
-  }, [addNotification]);
+  }, [addNotification, user?.id]);
 
   const handleTicketClick = (ticketId: string) => {
     navigate(`/tickets/${ticketId}`);
@@ -368,12 +387,8 @@ export const AdminDashboard: React.FC = () => {
       {/* Recent Tickets Section */}
       <div className="modern-tickets-section">
         <div className="modern-section-header">
-          <h2 className="modern-section-title">Recent Active Tickets</h2>
+          <h2 className="modern-section-title">Active Tickets</h2>
           <div className="modern-section-actions">
-            <button className="btn btn-secondary btn-sm">
-              <FaFilter />
-              <span>Advanced Filters</span>
-            </button>
             <button
               className="btn btn-secondary btn-sm"
               onClick={() => navigate("/tickets")}
@@ -384,46 +399,114 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="dashboard-tickets-grid">
-          {recentTickets.length > 0 ? (
-            recentTickets.slice(0, 8).map((ticket) => (
-              <TicketTile
-                key={ticket.id}
-                ticket={{
-                  id: ticket.id,
-                  ticketCode: `TKT-${ticket.id.slice(0, 8)}`,
-                  title: ticket.title,
-                  description: ticket.description,
-                  status: ticket.status,
-                  priority: ticket.priority,
-                  assignedTo: ticket.assignedTo,
-                  department: ticket.assignedDepartmentName,
-                  createdAt: ticket.createdAt.toISOString(),
-                  slaDeadline: ticket.slaDeadline?.toISOString(),
-                  commentCount: ticket.comments?.length || 0,
-                  attachmentCount: ticket.attachments?.length || 0,
-                  tags: ticket.tags,
-                }}
-                onClick={handleTicketClick}
-                compact={true}
-              />
-            ))
-          ) : (
-            <div className="modern-empty-state-full">
-              <div className="modern-empty-icon">
-                <FaCalendarCheck />
+        {/* Tab Navigation */}
+        <div className="modern-tabs">
+          <button
+            className={`modern-tab ${
+              activeTab === "organization" ? "active" : ""
+            }`}
+            onClick={() => setActiveTab("organization")}
+          >
+            <FaBuilding />
+            <span>Organisation Tickets</span>
+            <span className="tab-count">{recentTickets.length}</span>
+          </button>
+          <button
+            className={`modern-tab ${activeTab === "my" ? "active" : ""}`}
+            onClick={() => setActiveTab("my")}
+          >
+            <FaUser />
+            <span>My Tickets</span>
+            <span className="tab-count">{myTickets.length}</span>
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        <div className="modern-tab-content">
+          <div className="dashboard-tickets-grid">
+            {activeTab === "organization" ? (
+              recentTickets.length > 0 ? (
+                recentTickets.slice(0, 8).map((ticket) => (
+                  <TicketTile
+                    key={ticket.id}
+                    ticket={{
+                      id: ticket.id,
+                      ticketCode: `TKT-${ticket.id.slice(0, 8)}`,
+                      title: ticket.title,
+                      description: ticket.description,
+                      status: ticket.status,
+                      priority: ticket.priority,
+                      assignedTo: ticket.assignedTo,
+                      department: ticket.assignedDepartmentName,
+                      createdAt: ticket.createdAt.toISOString(),
+                      slaDeadline: ticket.slaDeadline?.toISOString(),
+                      commentCount: ticket.comments?.length || 0,
+                      attachmentCount: ticket.attachments?.length || 0,
+                      tags: ticket.tags,
+                    }}
+                    onClick={handleTicketClick}
+                    compact={true}
+                  />
+                ))
+              ) : (
+                <div className="modern-empty-state-full">
+                  <div className="modern-empty-icon">
+                    <FaCalendarCheck />
+                  </div>
+                  <h3>All caught up!</h3>
+                  <p>
+                    No active organisation tickets at the moment. Your team is
+                    doing great!
+                  </p>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => navigate("/tickets")}
+                  >
+                    <FaEye />
+                    <span>View All Tickets</span>
+                  </button>
+                </div>
+              )
+            ) : myTickets.length > 0 ? (
+              myTickets.slice(0, 8).map((ticket) => (
+                <TicketTile
+                  key={ticket.id}
+                  ticket={{
+                    id: ticket.id,
+                    ticketCode: `TKT-${ticket.id.slice(0, 8)}`,
+                    title: ticket.title,
+                    description: ticket.description,
+                    status: ticket.status,
+                    priority: ticket.priority,
+                    assignedTo: ticket.assignedTo,
+                    department: ticket.assignedDepartmentName,
+                    createdAt: ticket.createdAt.toISOString(),
+                    slaDeadline: ticket.slaDeadline?.toISOString(),
+                    commentCount: ticket.comments?.length || 0,
+                    attachmentCount: ticket.attachments?.length || 0,
+                    tags: ticket.tags,
+                  }}
+                  onClick={handleTicketClick}
+                  compact={true}
+                />
+              ))
+            ) : (
+              <div className="modern-empty-state-full">
+                <div className="modern-empty-icon">
+                  <FaCalendarCheck />
+                </div>
+                <h3>No tickets found!</h3>
+                <p>You don't have any active tickets at the moment.</p>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => navigate("/create-ticket")}
+                >
+                  <FaTicketAlt />
+                  <span>Create New Ticket</span>
+                </button>
               </div>
-              <h3>All caught up!</h3>
-              <p>No active tickets at the moment. Your team is doing great!</p>
-              <button
-                className="btn btn-primary"
-                onClick={() => navigate("/tickets")}
-              >
-                <FaEye />
-                <span>View All Tickets</span>
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

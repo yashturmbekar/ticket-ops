@@ -2929,6 +2929,64 @@ textarea:focus-visible {
   font-weight: 400;
 }
 
+/* Assigned Employee Display */
+.assigned-employee-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+  transition: all 0.2s ease;
+}
+
+.assigned-employee-display:hover {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.assigned-employee-name {
+  flex: 1;
+  color: #059669;
+  font-weight: 500;
+}
+
+.clear-assignee-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  margin-left: 8px;
+}
+
+.clear-assignee-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.clear-assignee-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.clear-assignee-btn:disabled:hover {
+  background: transparent;
+  color: #6b7280;
+}
+
 /* Removed search icon - no longer needed
 .search-icon {
   position: absolute;

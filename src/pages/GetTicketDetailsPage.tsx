@@ -634,6 +634,36 @@ const TicketDetailsPageProfessional: React.FC = () => {
     }
   };
 
+  // ✅ Correct: hooks at the top level
+  const [commentAttachmentPreviews, setCommentAttachmentPreviews] = React.useState<string[]>([]);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    const loadPreviews = async () => {
+      const newPreviews: string[] = [];
+      await Promise.all(
+        commentAttachments.map((file, i) => {
+          return new Promise<void>((resolve) => {
+            if (file.type.startsWith("image/")) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                if (isMounted) newPreviews[i] = e.target?.result as string;
+                resolve();
+              };
+              reader.readAsDataURL(file);
+            } else {
+              newPreviews[i] = "";
+              resolve();
+            }
+          });
+        })
+      );
+      if (isMounted) setCommentAttachmentPreviews(newPreviews);
+    };
+    loadPreviews();
+    return () => { isMounted = false; };
+  }, [commentAttachments]);
+
   if (loading) {
     return (
       <Loader centered text="Loading ticket details..." minHeight="60vh" />
@@ -1115,25 +1145,65 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
                   {commentAttachments.length > 0 && (
                     <div className="selected-files">
-                      {commentAttachments.map((file, index) => (
-                        <div key={index} className="selected-file">
-                          <div className="file-preview">
-                            {getFileIcon(file.name)}
-                            <div className="file-info">
-                              <div className="file-name">{file.name}</div>
-                              <div className="file-size">
-                                {formatFileSize(file.size)}
+                      {commentAttachments.map((file, index) => {
+                        const isImage = file.type.startsWith("image/");
+                        const imagePreview = commentAttachmentPreviews[index];
+                        return (
+                          <div key={index} className="selected-file">
+                            <div
+                              className="file-preview"
+                              style={isImage && imagePreview ? { cursor: "pointer" } : {}}
+                              onClick={
+                                isImage && imagePreview
+                                  ? () =>
+                                      setSelectedImage({
+                                        src: imagePreview,
+                                        alt: file.name,
+                                      })
+                                  : undefined
+                              }
+                            >
+                              {isImage && imagePreview ? (
+                                <img
+                                  src={imagePreview}
+                                  alt={file.name}
+                                  style={{
+                                    maxWidth: "60px",
+                                    maxHeight: "60px",
+                                    borderRadius: "4px",
+                                    objectFit: "cover",
+                                  }}
+                                />
+                              ) : (
+                                getFileIcon(file.name)
+                              )}
+                              <div className="file-info">
+                                <div
+                                  className="file-name"
+                                  style={isImage && imagePreview ? { cursor: "pointer" } : {}}
+                                  onClick={
+                                    isImage && imagePreview
+                                      ? (e) => {
+                                          e.stopPropagation();
+                                          setSelectedImage({ src: imagePreview, alt: file.name });
+                                        }
+                                      : undefined
+                                  }
+                                >
+                                  {file.name}
+                                </div>
+                                <div className="file-size">{formatFileSize(file.size)}</div>
                               </div>
                             </div>
+                            <button
+                              onClick={() => removeCommentAttachment(index)}
+                              className="remove-file"
+                            >
+                              <FaTimes />
+                            </button>
                           </div>
-                          <button
-                            onClick={() => removeCommentAttachment(index)}
-                            className="remove-file"
-                          >
-                            <FaTimes />
-                          </button>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>

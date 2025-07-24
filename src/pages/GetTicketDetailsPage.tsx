@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -431,19 +432,29 @@ const TicketDetailsPageProfessional: React.FC = () => {
     }
   };
 
-  const handleAddComment = async () => {
+   const handleAddComment = async () => {
     if (!newComment.trim() || !id) return;
 
     setIsAddingComment(true);
     try {
-      // Upload attachments first if any
+      // 1. Add the comment first and get the new comment ID
+      const response = await addComment(id, newComment.trim());
+
+      console.log("Comment added successfully:", response);
+
+      const newCommentId = response?.id; // adjust this based on your actual API response structure
+      if (!newCommentId) {
+        throw new Error("Comment ID not returned from addComment API");
+      }
+
+      // 2. Upload attachments if any
       const uploadedAttachments: Array<{ filename: string; size: number }> = [];
 
       if (commentAttachments.length > 0) {
         for (const file of commentAttachments) {
           try {
-            // Fixed API call - remove ticketId from URL path since API doesn't use it
-            const uploadResponse = await uploadAttachment(file, id);
+            // ✅ Now passing correct commentId instead of ticketId
+            const uploadResponse = await uploadAttachment(file, newCommentId);
             console.log("File uploaded successfully:", uploadResponse);
             uploadedAttachments.push({
               filename: file.name,
@@ -461,12 +472,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
         }
       }
 
-      // Call the actual API to add comment
-      const response = await addComment(id, newComment.trim());
-
-      console.log("Comment added successfully:", response);
-
-      // Refresh ticket data to get updated comments
+      // 3. Refresh ticket data to get updated comments
       const updatedTicketResponse = await getTicketById(id);
       const updatedTicket: ApiTicketResponse = updatedTicketResponse;
 
@@ -479,7 +485,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
       setNewComment("");
       setCommentAttachments([]);
 
-      // Show success notification
+      // Success notification
       if (notificationContext) {
         const message =
           uploadedAttachments.length > 0
@@ -489,8 +495,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
       }
     } catch (error) {
       console.error("Error adding comment:", error);
-
-      // Show error notification
       if (notificationContext) {
         notificationContext.error(
           "Error Adding Comment",
@@ -502,7 +506,8 @@ const TicketDetailsPageProfessional: React.FC = () => {
     }
   };
 
-  const handleCommentAttachment = (
+
+ const handleCommentAttachment = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const files = event.target.files;
@@ -514,6 +519,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
     // Reset the input value so the same file can be selected again if needed
     event.target.value = "";
   };
+
 
   const removeCommentAttachment = (index: number) => {
     setCommentAttachments((prev) => prev.filter((_, i) => i !== index));
@@ -955,25 +961,63 @@ const TicketDetailsPageProfessional: React.FC = () => {
                           ) : (
                             <p>{comment.content}</p>
                           )}
-                          {comment.attachments &&
-                            comment.attachments.length > 0 && (
-                              <div className="comment-attachments">
-                                {comment.attachments.map(
-                                  (attachment, index) => (
-                                    <div
-                                      key={index}
-                                      className="comment-attachment"
+                          {/* Attachments for this comment, with preview and download */}
+                          {comment.attachments && comment.attachments.length > 0 && (
+                            <div className="comment-attachments">
+                              {comment.attachments.map((attachment: any, index) => {
+                                // Defensive: Only use fileName, fileType, fileSize, fileData if present
+                                const fileName = 'fileName' in attachment ? attachment.fileName : attachment.filename;
+                                const fileType = 'fileType' in attachment ? attachment.fileType : '';
+                                const fileSize = 'fileSize' in attachment ? attachment.fileSize : attachment.size || 0;
+                                const fileData = 'fileData' in attachment ? attachment.fileData : '';
+                                const ext = fileName?.split(".").pop()?.toLowerCase();
+                                const isImage = (fileType && fileType.startsWith("image/")) || ["jpg","jpeg","png","gif","bmp"].includes(ext || "");
+                                return (
+                                  <div key={index} className="comment-attachment">
+                                    {isImage && fileData && fileType ? (
+                                      <img
+                                        src={`data:${fileType};base64,${fileData}`}
+                                        alt={fileName}
+                                        style={{
+                                          maxWidth: "100px",
+                                          maxHeight: "100px",
+                                          borderRadius: "4px",
+                                          objectFit: "cover",
+                                          cursor: "pointer",
+                                        }}
+                                        onClick={() =>
+                                          setSelectedImage({
+                                            src: `data:${fileType};base64,${fileData}`,
+                                            alt: fileName,
+                                          })
+                                        }
+                                      />
+                                    ) : (
+                                      getFileIcon(fileName, 32)
+                                    )}
+                                    <span className="file-name">{fileName}</span>
+                                    <span className="file-size">({formatFileSize(fileSize)})</span>
+                                    <button
+                                      className="download-btn"
+                                      onClick={() => {
+                                        if (fileData && fileType) {
+                                          const link = document.createElement("a");
+                                          link.href = `data:${fileType};base64,${fileData}`;
+                                          link.download = fileName;
+                                          document.body.appendChild(link);
+                                          link.click();
+                                          document.body.removeChild(link);
+                                        }
+                                      }}
+                                      disabled={!fileData || !fileType}
                                     >
-                                      {getFileIcon(attachment.filename)}
-                                      <span>{attachment.filename}</span>
-                                      <span className="file-size">
-                                        ({formatFileSize(attachment.size)})
-                                      </span>
-                                    </div>
-                                  )
-                                )}
-                              </div>
-                            )}
+                                      <FaDownload />
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

@@ -86,58 +86,6 @@ const apiClient = {
     };
     return (await instance.post(url, data, uploadConfig)).data;
   },
-  // Method for long-running operations with retry logic
-  postWithRetry: async (
-    url: string,
-    data = {},
-    maxRetries = 3,
-    config = {}
-  ): Promise<any> => {
-    let lastError;
-
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        const retryConfig = {
-          ...config,
-          timeout: 300000, // 5 minutes per attempt
-          headers: {
-            "Content-Type": "application/json",
-            ...(config as any).headers,
-          },
-        };
-
-        console.log(`API attempt ${attempt}/${maxRetries} for ${url}`);
-        return (await instance.post(url, data, retryConfig)).data;
-      } catch (error: any) {
-        lastError = error;
-        console.warn(
-          `API attempt ${attempt}/${maxRetries} failed:`,
-          error?.message || error
-        );
-
-        // Don't retry on client errors (4xx), only on server errors or timeouts
-        if (
-          error?.response?.status &&
-          error.response.status >= 400 &&
-          error.response.status < 500
-        ) {
-          throw error; // Client error, don't retry
-        }
-
-        // If this was the last attempt, throw the error
-        if (attempt === maxRetries) {
-          throw error;
-        }
-
-        // Wait before retrying (exponential backoff)
-        const delay = Math.min(1000 * Math.pow(2, attempt - 1), 10000); // Cap at 10 seconds
-        console.log(`Retrying in ${delay}ms...`);
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      }
-    }
-
-    throw lastError;
-  },
   put: async (url: string, data = {}, config = {}): Promise<any> => {
     return (await instance.put(url, data, config)).data;
   },

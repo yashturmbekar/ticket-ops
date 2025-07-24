@@ -3,9 +3,7 @@ import {
   FaUser,
   FaBuilding,
   FaComments,
-  FaPaperclip,
   FaClock,
-  FaExclamationTriangle,
   FaCheckCircle,
   FaPlayCircle,
   FaTimesCircle,
@@ -151,17 +149,17 @@ export const TicketTile: React.FC<TicketTileProps> = ({
       return {
         status: "critical",
         color: "#fd7e14",
-        text: `${Math.round(diffHours)}h left`,
+        text: `${Math.round(diffHours)}h`,
       };
     } else if (diffHours < 48) {
       return {
         status: "warning",
         color: "#ffc107",
-        text: `${Math.round(diffHours / 24)}d left`,
+        text: `${Math.round(diffHours / 24)}d`,
       };
     }
 
-    return { status: "normal", color: "#28a745", text: "On track" };
+    return { status: "normal", color: "#28a745", text: "OK" };
   };
 
   const slaStatus = getSLAStatus(ticket.slaDeadline);
@@ -303,16 +301,21 @@ export const TicketTile: React.FC<TicketTileProps> = ({
             <FaComments />
             <span>{ticket.commentCount || 0}</span>
           </div>
-          <div className="count-item">
+          {/* <div className="count-item">
             <FaPaperclip />
             <span>{ticket.attachmentCount || 0}</span>
-          </div>
+          </div> */}
         </div>
 
         {slaStatus && (
-          <div className="sla-status">
-            <FaExclamationTriangle style={{ color: slaStatus.color }} />
-            <span style={{ color: slaStatus.color }}>{slaStatus.text}</span>
+          <div className="sla-indicator">
+            <div
+              className="sla-dot"
+              style={{ backgroundColor: slaStatus.color }}
+            />
+            <span className="sla-text" style={{ color: slaStatus.color }}>
+              {slaStatus.text}
+            </span>
           </div>
         )}
       </div>

@@ -1,16 +1,23 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  FaTachometerAlt,
-  FaTicketAlt,
-  FaLaptop,
-  FaUsers,
-  FaBook,
-  FaChartBar,
-  FaNetworkWired,
-  FaCog,
-  FaBuilding,
-} from "react-icons/fa";
+  MdDashboard,
+  MdHub,
+  MdSupportAgent,
+  MdAnalytics,
+  MdSecurity,
+  MdInventory2,
+  MdAdminPanelSettings,
+} from "react-icons/md";
+import {
+  HiOutlineCog6Tooth,
+  HiOutlineUserGroup,
+  HiOutlineTicket,
+  HiOutlineComputerDesktop,
+  HiOutlineBookOpen,
+  HiOutlinePresentationChartLine,
+  HiOutlineBuildingOffice2,
+} from "react-icons/hi2";
 import { useNavigation } from "../../hooks/useNavigation";
 import "./SideNav.css";
 
@@ -28,20 +35,32 @@ const SideNavModern: React.FC<SideNavProps> = ({
   const { navigationItems, isLoading } = useNavigation();
   const location = useLocation();
 
-  // Icon mapping for navigation items
+  // Professional icon mapping for navigation items
   const getIcon = (iconName: string): React.ReactNode => {
     const iconMap: Record<string, React.ReactNode> = {
-      dashboard: <FaTachometerAlt />,
-      tickets: <FaTicketAlt />,
-      assets: <FaLaptop />,
-      users: <FaUsers />,
-      departments: <FaBuilding />,
-      knowledge: <FaBook />,
-      reports: <FaChartBar />,
-      network: <FaNetworkWired />,
-      settings: <FaCog />,
+      // Primary Navigation
+      dashboard: <MdDashboard className="nav-icon" />,
+      ticket: <HiOutlineTicket className="nav-icon" />,
+      tickets: <HiOutlineTicket className="nav-icon" />,
+      assets: <HiOutlineComputerDesktop className="nav-icon" />,
+      users: <HiOutlineUserGroup className="nav-icon" />,
+      people: <HiOutlineUserGroup className="nav-icon" />,
+      departments: <HiOutlineBuildingOffice2 className="nav-icon" />,
+      business: <HiOutlineBuildingOffice2 className="nav-icon" />,
+      knowledge: <HiOutlineBookOpen className="nav-icon" />,
+      reports: <HiOutlinePresentationChartLine className="nav-icon" />,
+      assessment: <HiOutlinePresentationChartLine className="nav-icon" />,
+      network: <MdHub className="nav-icon" />,
+      settings: <HiOutlineCog6Tooth className="nav-icon" />,
+
+      // Alternative professional icons
+      analytics: <MdAnalytics className="nav-icon" />,
+      support: <MdSupportAgent className="nav-icon" />,
+      security: <MdSecurity className="nav-icon" />,
+      inventory: <MdInventory2 className="nav-icon" />,
+      admin: <MdAdminPanelSettings className="nav-icon" />,
     };
-    return iconMap[iconName] || <FaCog />;
+    return iconMap[iconName] || <HiOutlineCog6Tooth className="nav-icon" />;
   };
 
   const isActive = (path: string): boolean => {
@@ -111,6 +130,7 @@ const SideNavModern: React.FC<SideNavProps> = ({
                     }
                   }}
                   title={isCollapsed ? item.label : undefined}
+                  data-tooltip={isCollapsed ? item.label : undefined}
                 >
                   <div className="modern-nav-icon">
                     {getIcon(item.icon || "settings")}
@@ -119,7 +139,16 @@ const SideNavModern: React.FC<SideNavProps> = ({
                   {!isCollapsed && (
                     <>
                       <span className="modern-nav-label">{item.label}</span>
+                      {/* Optional: Add notification badges */}
+                      {item.path === "/tickets" && (
+                        <span className="modern-nav-badge">3</span>
+                      )}
                     </>
+                  )}
+
+                  {/* Collapsed state tooltip indicator */}
+                  {isCollapsed && item.path === "/tickets" && (
+                    <div className="modern-nav-badge-collapsed">3</div>
                   )}
                 </Link>
               </li>

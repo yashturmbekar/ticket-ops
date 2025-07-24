@@ -20,7 +20,7 @@ import TicketDetailsPageProfessional from "./pages/GetTicketDetailsPage.tsx";
 import { AssetsPage } from "./pages/AssetsPage.tsx";
 import { UsersPage } from "./pages/UsersPage.tsx";
 import { KnowledgePage } from "./pages/KnowledgePage.tsx";
-import { ReportsPage } from "./pages/ReportsPage.tsx";
+import ReportsPage from "./pages/ReportsPage.tsx";
 import { NetworkPage } from "./pages/NetworkPage.tsx";
 import { SettingsPage } from "./pages/SettingsPage.tsx";
 import DepartmentsCreatePage from "./pages/CreateDepartmentsPage.tsx";
@@ -236,34 +236,34 @@ const AppContent: React.FC = () => {
   };
 
 
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = localStorage.getItem('it-ticket-auth-token');
-    const urlParams = new URLSearchParams(window.location.search);
-    const queryToken = urlParams.get("token");
-    const userEmail = urlParams.get("email");
 
-    if (!token && queryToken && userEmail) {
-      const userData = {
-        username: userEmail,
-        email: userEmail,
-      };
-      localStorage.setItem("it-ticket-auth-token", queryToken);
-      localStorage.setItem("it-ticket-user-data", JSON.stringify(userData));
 
-      // Clear the token from URL
-      window.history.replaceState({}, document.title, "/dashboard");
 
-      // Redirect to dashboard
-      navigate("/dashboard");
-    }
-  }, [navigate]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
   return (
-    <>
+    <Router>
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
@@ -348,7 +348,12 @@ const AppContent: React.FC = () => {
           path="/employees"
           element={
             <ProtectedRoute
-              requiredRoles={[UserRole.HR, UserRole.ORG_ADMIN, UserRole.CXO]}
+              requiredRoles={[
+                UserRole.HR,
+                UserRole.ORG_ADMIN,
+                UserRole.CXO,
+                UserRole.HELPDESK_ADMIN,
+              ]}
             >
               <LayoutWrapper>
                 <div style={{ padding: "2rem" }}>
@@ -448,7 +453,11 @@ const AppContent: React.FC = () => {
           path="/sla"
           element={
             <ProtectedRoute
-              requiredRoles={[UserRole.ORG_ADMIN, UserRole.MANAGER]}
+              requiredRoles={[
+                UserRole.ORG_ADMIN,
+                UserRole.MANAGER,
+                UserRole.HELPDESK_ADMIN,
+              ]}
             >
               <LayoutWrapper>
                 <div style={{ padding: "2rem" }}>
@@ -466,7 +475,11 @@ const AppContent: React.FC = () => {
           path="/escalations"
           element={
             <ProtectedRoute
-              requiredRoles={[UserRole.MANAGER, UserRole.ORG_ADMIN]}
+              requiredRoles={[
+                UserRole.MANAGER,
+                UserRole.ORG_ADMIN,
+                UserRole.HELPDESK_ADMIN,
+              ]}
             >
               <LayoutWrapper>
                 <div style={{ padding: "2rem" }}>
@@ -525,7 +538,9 @@ const AppContent: React.FC = () => {
         <Route
           path="/assets"
           element={
-            <ProtectedRoute requiredRoles={[UserRole.ORG_ADMIN]}>
+            <ProtectedRoute
+              requiredRoles={[UserRole.ORG_ADMIN, UserRole.HELPDESK_ADMIN]}
+            >
               <LayoutWrapper>
                 <AssetsPage />
               </LayoutWrapper>
@@ -535,7 +550,9 @@ const AppContent: React.FC = () => {
         <Route
           path="/users"
           element={
-            <ProtectedRoute requiredRoles={[UserRole.HR, UserRole.ORG_ADMIN]}>
+            <ProtectedRoute
+              requiredRoles={[UserRole.ORG_ADMIN, UserRole.HELPDESK_ADMIN]}
+            >
               <LayoutWrapper>
                 <UsersPage />
               </LayoutWrapper>
@@ -556,11 +573,7 @@ const AppContent: React.FC = () => {
           path="/reports"
           element={
             <ProtectedRoute
-              requiredRoles={[
-                UserRole.CXO,
-                UserRole.MANAGER,
-                UserRole.ORG_ADMIN,
-              ]}
+              requiredRoles={[UserRole.ORG_ADMIN, UserRole.HELPDESK_ADMIN]}
             >
               <LayoutWrapper>
                 <ReportsPage />
@@ -571,7 +584,9 @@ const AppContent: React.FC = () => {
         <Route
           path="/network"
           element={
-            <ProtectedRoute requiredRoles={[UserRole.ORG_ADMIN]}>
+            <ProtectedRoute
+              requiredRoles={[UserRole.ORG_ADMIN, UserRole.HELPDESK_ADMIN]}
+            >
               <LayoutWrapper>
                 <NetworkPage />
               </LayoutWrapper>
@@ -581,7 +596,9 @@ const AppContent: React.FC = () => {
         <Route
           path="/departments"
           element={
-            <ProtectedRoute requiredRole={UserRole.ORG_ADMIN}>
+            <ProtectedRoute
+              requiredRoles={[UserRole.ORG_ADMIN, UserRole.HELPDESK_ADMIN]}
+            >
               <LayoutWrapper>
                 <DepartmentsPage />
               </LayoutWrapper>
@@ -591,7 +608,9 @@ const AppContent: React.FC = () => {
         <Route
           path="/departments/create"
           element={
-            <ProtectedRoute requiredRole={UserRole.ORG_ADMIN}>
+            <ProtectedRoute
+              requiredRoles={[UserRole.ORG_ADMIN, UserRole.HELPDESK_ADMIN]}
+            >
               <LayoutWrapper>
                 <DepartmentsCreatePage />
               </LayoutWrapper>
@@ -601,7 +620,9 @@ const AppContent: React.FC = () => {
         <Route
           path="/departments/edit/:id"
           element={
-            <ProtectedRoute requiredRole={UserRole.ORG_ADMIN}>
+            <ProtectedRoute
+              requiredRoles={[UserRole.ORG_ADMIN, UserRole.HELPDESK_ADMIN]}
+            >
               <LayoutWrapper>
                 <DepartmentsEditPage />
               </LayoutWrapper>
@@ -611,7 +632,13 @@ const AppContent: React.FC = () => {
         <Route
           path="/settings"
           element={
-            <ProtectedRoute requiredRoles={[UserRole.ORG_ADMIN, UserRole.CXO]}>
+            <ProtectedRoute
+              requiredRoles={[
+                UserRole.ORG_ADMIN,
+                UserRole.CXO,
+                UserRole.HELPDESK_ADMIN,
+              ]}
+            >
               <LayoutWrapper>
                 <SettingsPage />
               </LayoutWrapper>
@@ -639,46 +666,27 @@ const AppContent: React.FC = () => {
       />
 
       <NotificationContainer />
-    </>
+    </Router>
   );
 };
 
 const App: React.FC = () => {
-  // useEffect(() => {
-  //   const token = localStorage.getItem('it-ticket-auth-token');
-  //   const urlParams = new URLSearchParams(window.location.search);
-  //   const queryToken = urlParams.get("token");
-  //   const userEmail = urlParams.get("email");
+  useEffect(() => {
+    // Handle token from URL parameters on app initialization
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryToken = urlParams.get("token");
+    const userEmail = urlParams.get("email");
 
-  //   if (!token && queryToken) {
-  //     const userData = {
-  //       "username": userEmail,
-  //       "email": userEmail,
-  //     }
-  //     localStorage.setItem("it-ticket-auth-token", queryToken);
-  //     localStorage.setItem("it-ticket-user-data", JSON.stringify(userData));
-  //   }
-  // }, []);
-  // const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   const token = localStorage.getItem('it-ticket-auth-token');
-  //   const urlParams = new URLSearchParams(window.location.search);
-  //   const queryToken = urlParams.get("token");
-  //   const userEmail = urlParams.get("email");
-
-  //   if (!token && queryToken && userEmail) {
-  //     const userData = {
-  //       username: userEmail,
-  //       email: userEmail,
-  //     };
-  //     localStorage.setItem("it-ticket-auth-token", queryToken);
-  //     localStorage.setItem("it-ticket-user-data", JSON.stringify(userData));
-
-  //     // Redirect to dashboard after login token is set
-  //     navigate("/dashboard"); // Change this path to your actual landing page
-  //   }
-  // }, [navigate]);
+    if (!token && queryToken) {
+      const userData = {
+        username: userEmail,
+        email: userEmail,
+      };
+      localStorage.setItem(AUTH_TOKEN_KEY, queryToken);
+      localStorage.setItem(USER_DATA_KEY, JSON.stringify(userData));
+    }
+  }, []);
   return (
     <ThemeProvider>
       <AuthProvider>

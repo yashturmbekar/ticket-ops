@@ -31,6 +31,8 @@ const RoleWelcome: React.FC<RoleWelcomeProps> = ({
       [UserRole.HR]: "HR Specialist",
       [UserRole.CXO]: "Executive",
       [UserRole.ORG_ADMIN]: "Organization Administrator",
+      [UserRole.HELPDESK_DEPARTMENT]: "Helpdesk Department",
+      [UserRole.HELPDESK_ADMIN]: "Helpdesk Administrator",
     };
     return roleNames[role] || "User";
   };
@@ -47,6 +49,10 @@ const RoleWelcome: React.FC<RoleWelcomeProps> = ({
         "Welcome to your executive dashboard. Access strategic insights and company-wide analytics.",
       [UserRole.ORG_ADMIN]:
         "Welcome to organization management. Configure settings, manage departments, and oversee operations.",
+      [UserRole.HELPDESK_DEPARTMENT]:
+        "Welcome to the helpdesk portal. Manage tickets, assist users, and maintain service quality.",
+      [UserRole.HELPDESK_ADMIN]:
+        "Welcome to helpdesk administration. Full system access to manage tickets, departments, and configurations.",
     };
     return messages[role] || "Welcome to the platform.";
   };

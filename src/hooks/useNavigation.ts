@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useAuth } from "./useAuth";
 import { usePermissions } from "./usePermissions";
 import { NavigationService } from "../services/navigationService";
+import RoleBasedNavigationService from "../services/roleBasedNavigation";
 import type { NavigationItem } from "../services/navigationService";
 import { UserRole } from "../types";
 
@@ -20,14 +21,27 @@ export const useNavigation = (): UseNavigationResult => {
 
   const userRole = user?.role || UserRole.EMPLOYEE;
 
+  // Use role-based navigation that filters implemented items
   const navigationItems = useMemo(() => {
     if (permissionsLoading) return [];
-    return NavigationService.getNavigationForRole(userRole);
+
+    // Get role-specific navigation items
+    const roleBasedItems =
+      RoleBasedNavigationService.getNavigationForRole(userRole);
+
+    // Convert to NavigationItem format for compatibility
+    return roleBasedItems.map((item) => ({
+      path: item.path,
+      label: item.label,
+      icon: item.icon,
+      requiredRoles: [userRole],
+      description: item.description,
+    }));
   }, [userRole, permissionsLoading]);
 
   const quickActions = useMemo(() => {
     if (permissionsLoading) return [];
-    return NavigationService.getQuickActions(userRole);
+    return RoleBasedNavigationService.getQuickActionsForRole(userRole);
   }, [userRole, permissionsLoading]);
 
   const defaultDashboard = useMemo(() => {
@@ -42,7 +56,7 @@ export const useNavigation = (): UseNavigationResult => {
   const hasAccessToPath = useMemo(() => {
     return (path: string) => {
       if (permissionsLoading) return false;
-      return NavigationService.hasAccessToPath(userRole, path);
+      return RoleBasedNavigationService.hasAccessToPath(userRole, path);
     };
   }, [userRole, permissionsLoading]);
 

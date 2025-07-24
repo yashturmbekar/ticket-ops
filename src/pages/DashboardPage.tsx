@@ -6,6 +6,7 @@ import { RoleWelcome } from "../components/common/RoleWelcome";
 import { AdminDashboard } from "../components/dashboards/AdminDashboard";
 import { ManagerDashboard } from "../components/dashboards/ManagerDashboard";
 import { EmployeeDashboard } from "../components/dashboards/EmployeeDashboard";
+import { HelpdeskDashboard } from "../components/dashboards/HelpdeskDashboard";
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -32,6 +33,12 @@ export const DashboardPage: React.FC = () => {
           <AdminDashboard />
         </DashboardLayout>
       );
+    case UserRole.HELPDESK_ADMIN:
+      return (
+        <DashboardLayout>
+          <AdminDashboard />
+        </DashboardLayout>
+      );
     case UserRole.MANAGER:
       return (
         <DashboardLayout>
@@ -48,6 +55,12 @@ export const DashboardPage: React.FC = () => {
       return (
         <DashboardLayout>
           <AdminDashboard />
+        </DashboardLayout>
+      );
+    case UserRole.HELPDESK_DEPARTMENT:
+      return (
+        <DashboardLayout>
+          <HelpdeskDashboard />
         </DashboardLayout>
       );
     case UserRole.EMPLOYEE:

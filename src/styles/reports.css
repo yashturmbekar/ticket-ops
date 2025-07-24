@@ -122,13 +122,13 @@
 }
 
 .export-pdf {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: linear-gradient(135deg, var(--color-error), var(--color-error-dark));
   color: white;
   border-color: transparent;
 }
 
 .export-pdf:hover {
-  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  background: linear-gradient(135deg, var(--color-error-dark), #b91c1c);
   color: white;
   box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
 }
@@ -257,7 +257,7 @@
 }
 
 .trend-indicator.down {
-  color: #dc2626;
+  color: var(--color-error-dark);
 }
 
 .trend-indicator.stable {
@@ -875,11 +875,6 @@
   color: white;
 }
 
-.notification-error {
-  background: rgba(239, 68, 68, 0.9);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: white;
-}
 
 .notification-info {
   background: rgba(79, 70, 229, 0.9);

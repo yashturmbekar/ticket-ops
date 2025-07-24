@@ -87,6 +87,13 @@ export const roleNavigationConfig: Record<UserRole, RoleNavigationItem[]> = {
       isImplemented: true,
     },
     {
+      path: "/sla-rules",
+      label: "SLA Rules",
+      icon: "schedule",
+      isImplemented: true,
+      description: "Service Level Agreement policies",
+    },
+    {
       path: "/reports",
       label: "Reports",
       icon: "assessment",
@@ -137,6 +144,13 @@ export const roleNavigationConfig: Record<UserRole, RoleNavigationItem[]> = {
       label: "Departments",
       icon: "business",
       isImplemented: true,
+    },
+    {
+      path: "/sla-rules",
+      label: "SLA Rules",
+      icon: "schedule",
+      isImplemented: true,
+      description: "Service Level Agreement policies",
     },
     {
       path: "/reports",
@@ -219,6 +233,7 @@ export class RoleBasedNavigationService {
         { label: "Dashboard Stats", path: "/dashboard", icon: "dashboard" },
         { label: "All Tickets", path: "/tickets", icon: "list" },
         { label: "Departments", path: "/departments", icon: "business" },
+        { label: "SLA Rules", path: "/sla-rules", icon: "schedule" },
         { label: "Reports", path: "/reports", icon: "assessment" },
         { label: "Settings", path: "/settings", icon: "settings" },
       ],
@@ -235,6 +250,7 @@ export class RoleBasedNavigationService {
         { label: "Dashboard Stats", path: "/dashboard", icon: "dashboard" },
         { label: "All Tickets", path: "/tickets", icon: "list" },
         { label: "Departments", path: "/departments", icon: "business" },
+        { label: "SLA Rules", path: "/sla-rules", icon: "schedule" },
         { label: "Reports", path: "/reports", icon: "assessment" },
         { label: "Settings", path: "/settings", icon: "settings" },
       ],

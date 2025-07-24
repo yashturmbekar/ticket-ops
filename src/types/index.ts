@@ -201,6 +201,17 @@ export interface SlaInfo {
   updatedAt: Date;
 }
 
+export interface SlaPolicy {
+  id: string;
+  helpdeskDepartmentId: string;
+  helpdeskDepartmentName?: string;
+  responseTimeMinutes: number;
+  resolutionTimeMinutes: number;
+  isActive: boolean;
+  createdDate: string;
+  lastModifiedDate: string;
+}
+
 export interface WebSocketEvent {
   id: string;
   type: string;

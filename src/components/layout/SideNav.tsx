@@ -8,6 +8,7 @@ import {
   MdSecurity,
   MdInventory2,
   MdAdminPanelSettings,
+  MdSchedule,
 } from "react-icons/md";
 import {
   HiOutlineCog6Tooth,
@@ -52,6 +53,7 @@ const SideNavModern: React.FC<SideNavProps> = ({
       assessment: <HiOutlinePresentationChartLine className="nav-icon" />,
       network: <MdHub className="nav-icon" />,
       settings: <HiOutlineCog6Tooth className="nav-icon" />,
+      schedule: <MdSchedule className="nav-icon" />,
 
       // Alternative professional icons
       analytics: <MdAnalytics className="nav-icon" />,

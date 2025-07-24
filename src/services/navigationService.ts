@@ -154,6 +154,13 @@ export const navigationItems: NavigationItem[] = [
     description: "Network monitoring and management",
   },
   {
+    path: "/sla-rules",
+    label: "SLA Rules",
+    icon: "schedule",
+    requiredRoles: [UserRole.ORG_ADMIN, UserRole.HELPDESK_ADMIN],
+    description: "Service Level Agreement policies",
+  },
+  {
     path: "/settings",
     label: "Settings",
     icon: "settings",

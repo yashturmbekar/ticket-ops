@@ -10,11 +10,10 @@ export {
   updateProfile,
 } from "./authService";
 
-
 export {
-  // Navigation
-  NavigationService,
-} from "./navigationService";
+  // SLA
+  SlaService,
+} from "./slaService";
 
 export {
   // User

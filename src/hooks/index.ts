@@ -6,6 +6,7 @@ export { useDepartmentEdit } from "./useDepartmentEdit";
 export { useEmployeeProfile } from "./useEmployeeProfile";
 export { usePermissions } from "./usePermissions";
 export { useNavigation } from "./useNavigation";
+export { useSlaManagement } from "./useSlaManagement";
 export {
   useApi,
   usePaginatedApi,

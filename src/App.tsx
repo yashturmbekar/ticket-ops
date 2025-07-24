@@ -23,6 +23,7 @@ import { KnowledgePage } from "./pages/KnowledgePage.tsx";
 import ReportsPage from "./pages/ReportsPage.tsx";
 import { NetworkPage } from "./pages/NetworkPage.tsx";
 import { SettingsPage } from "./pages/SettingsPage.tsx";
+import SlaRulesPage from "./pages/SlaRulesPage.tsx";
 import DepartmentsCreatePage from "./pages/CreateDepartmentsPage.tsx";
 import DepartmentsPage from "./pages/DepartmentsPage";
 import DepartmentsEditPage from "./pages/EditDepartmentPage.tsx";
@@ -234,33 +235,6 @@ const AppContent: React.FC = () => {
   const handleNotificationClose = () => {
     setNotification((prev) => ({ ...prev, open: false }));
   };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   return (
     <Router>
@@ -589,6 +563,18 @@ const AppContent: React.FC = () => {
             >
               <LayoutWrapper>
                 <NetworkPage />
+              </LayoutWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sla-rules"
+          element={
+            <ProtectedRoute
+              requiredRoles={[UserRole.ORG_ADMIN, UserRole.HELPDESK_ADMIN]}
+            >
+              <LayoutWrapper>
+                <SlaRulesPage />
               </LayoutWrapper>
             </ProtectedRoute>
           }

@@ -43,8 +43,8 @@
 }
 
 .notification-error {
-  border-left: 4px solid #ef4444;
-  background: linear-gradient(135deg, #fef2f2 0%, white 100%);
+  border-left: 4px solid var(--color-error);
+  background: linear-gradient(135deg, #f8f9fa 0%, white 100%);
 }
 
 .notification-warning {
@@ -94,8 +94,8 @@
 }
 
 .notification-error .notification-icon {
-  color: #dc2626;
-  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-error-dark);
+  background: var(--color-error-alpha);
 }
 
 .notification-warning .notification-icon {
@@ -239,7 +239,7 @@ to {
 }
 
 .notification-error .notification-progress-bar {
-  background: linear-gradient(90deg, #ef4444, #dc2626);
+  background: linear-gradient(90deg, var(--color-error), var(--color-error-dark));
 }
 
 .notification-warning .notification-progress-bar {

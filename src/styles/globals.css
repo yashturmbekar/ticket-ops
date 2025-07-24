@@ -171,7 +171,6 @@
   --color-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
   --color-shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  --color-shadow-colored: 0 4px 14px 0 rgba(255, 93, 93, 0.25);
 
   /* Shadow shortcuts without color prefix */
   --shadow-sm: var(--color-shadow-sm);
@@ -1635,9 +1634,6 @@ button:focus:not(:focus-visible) {
 .rounded-2xl {
   border-radius: var(--border-radius-2xl);
 }
-.rounded-3xl {
-  border-radius: var(--border-radius-3xl);
-}
 .rounded-full {
   border-radius: var(--border-radius-full);
 }
@@ -1663,9 +1659,6 @@ button:focus:not(:focus-visible) {
 }
 .shadow-2xl {
   box-shadow: var(--color-shadow-2xl);
-}
-.shadow-colored {
-  box-shadow: var(--color-shadow-colored);
 }
 
 /* Display */
@@ -2419,21 +2412,6 @@ button:focus:not(:focus-visible) {
   }
   .xl\:text-2xl {
     font-size: var(--font-size-2xl);
-  }
-  .xl\:text-3xl {
-    font-size: var(--font-size-3xl);
-  }
-  .xl\:p-10 {
-    padding: var(--spacing-10);
-  }
-  .xl\:p-12 {
-    padding: var(--spacing-12);
-  }
-  .xl\:m-10 {
-    margin: var(--spacing-10);
-  }
-  .xl\:m-12 {
-    margin: var(--spacing-12);
   }
 }
 

@@ -11,9 +11,9 @@ export const WEBSOCKET_URL =
   import.meta.env.VITE_WEBSOCKET_URL || "ws://localhost:3000";
 export const API_TIMEOUT = 10000; // 10 seconds default
 export const UNAUTH_ROUTES = [
-  '/auth/login',
-  '/auth/register',
-  '/auth/forgot-password',
+  "/auth/login",
+  "/auth/register",
+  "/auth/forgot-password",
 ];
 
 // File Upload
@@ -85,24 +85,6 @@ export const VALIDATION_RULES = {
     MAX_LENGTH: 50,
     PATTERN: /^[a-zA-Z0-9_]+$/,
   },
-} as const;
-
-// Chart Colors
-export const CHART_COLORS = {
-  PRIMARY: "#0066CC",
-  SUCCESS: "#28a745",
-  WARNING: "#ffc107",
-  DANGER: "#dc3545",
-  INFO: "#17a2b8",
-  LIGHT: "#f8f9fa",
-  DARK: "#343a40",
-  PURPLE: "#6f42c1",
-  PINK: "#e83e8c",
-  ORANGE: "#fd7e14",
-  YELLOW: "#ffc107",
-  GREEN: "#28a745",
-  TEAL: "#20c997",
-  CYAN: "#17a2b8",
 } as const;
 
 // Export individual constants for specific domains

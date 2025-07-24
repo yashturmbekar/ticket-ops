@@ -16,7 +16,7 @@ type DisplayTicket = Ticket & { ticketCode?: string };
 import { searchMyTickets } from "../../services";
 import { useNotifications } from "../../hooks";
 import { transformApiTicketsToTickets } from "../../utils/apiTransforms";
-import "../../styles/dashboard.css";
+import "../../styles/dashboardShared.css";
 
 interface EmployeeStats {
   myTickets: number;
@@ -124,53 +124,61 @@ export const EmployeeDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Compact Stats Bar */}
-      <div className="compact-stats-bar">
-        <div className="compact-stat-item">
-          <div className="compact-stat-icon primary">
-            <FaTicketAlt />
-          </div>
-          <div className="compact-stat-content">
-            <div className="compact-stat-value">{stats.myTickets}</div>
-            <div className="compact-stat-label">Total Tickets</div>
-          </div>
-        </div>
-
-        <div className="compact-stat-divider"></div>
-
-        <div className="compact-stat-item">
-          <div className="compact-stat-icon warning">
-            <FaExclamationTriangle />
-          </div>
-          <div className="compact-stat-content">
-            <div className="compact-stat-value">{stats.openTickets}</div>
-            <div className="compact-stat-label">Open</div>
-          </div>
-        </div>
-
-        <div className="compact-stat-divider"></div>
-
-        <div className="compact-stat-item">
-          <div className="compact-stat-icon success">
-            <FaCheckCircle />
-          </div>
-          <div className="compact-stat-content">
-            <div className="compact-stat-value">{stats.resolvedTickets}</div>
-            <div className="compact-stat-label">Resolved</div>
-          </div>
-        </div>
-
-        <div className="compact-stat-divider"></div>
-
-        <div className="compact-stat-item">
-          <div className="compact-stat-icon info">
-            <FaClock />
-          </div>
-          <div className="compact-stat-content">
-            <div className="compact-stat-value">
-              {stats.avgResponseTime.toFixed(1)}h
+      {/* Employee Stats Grid */}
+      <div className="modern-stats-grid employee">
+        <div className="modern-stat-card">
+          <div className="modern-stat-header">
+            <div className="modern-stat-icon primary">
+              <FaTicketAlt />
             </div>
-            <div className="compact-stat-label">Avg Response</div>
+          </div>
+          <div className="modern-stat-value">{stats.myTickets}</div>
+          <div className="modern-stat-label">Total Tickets</div>
+          <div className="modern-stat-change neutral">
+            <span>All time</span>
+          </div>
+        </div>
+
+        <div className="modern-stat-card">
+          <div className="modern-stat-header">
+            <div className="modern-stat-icon warning">
+              <FaExclamationTriangle />
+            </div>
+          </div>
+          <div className="modern-stat-value">{stats.openTickets}</div>
+          <div className="modern-stat-label">Open Tickets</div>
+          <div className="modern-stat-change neutral">
+            <span>Active requests</span>
+          </div>
+        </div>
+
+        <div className="modern-stat-card">
+          <div className="modern-stat-header">
+            <div className="modern-stat-icon success">
+              <FaCheckCircle />
+            </div>
+          </div>
+          <div className="modern-stat-value">{stats.resolvedTickets}</div>
+          <div className="modern-stat-label">Resolved</div>
+          <div className="modern-stat-change positive">
+            <span>Completed</span>
+          </div>
+        </div>
+
+        <div className="modern-stat-card">
+          <div className="modern-stat-header">
+            <div className="modern-stat-icon info">
+              <FaClock />
+            </div>
+          </div>
+          <div className="modern-stat-value">
+            {stats.avgResponseTime > 0
+              ? `${stats.avgResponseTime.toFixed(1)}h`
+              : "N/A"}
+          </div>
+          <div className="modern-stat-label">Avg Response</div>
+          <div className="modern-stat-change neutral">
+            <span>Response time</span>
           </div>
         </div>
       </div>

@@ -90,10 +90,7 @@ export const searchHelpdeskDepartments = async (
 export const updateHelpdeskDepartment = async (
   payload: HelpdeskDepartmentPayload
 ) => {
-  const response = await apiClient.put(
-    `/helpdesk-departments`,
-    payload
-  );
+  const response = await apiClient.put(`/helpdesk-departments`, payload);
   return response.data;
 };
 
@@ -106,16 +103,6 @@ export const toggleDepartmentStatus = async (id: string, isActive: boolean) => {
   const response = await apiClient.patch(`/helpdesk-departments/${id}/status`, {
     isActive,
   });
-  return response.data;
-};
-
-export const removeEmployeeFromDepartment = async (
-  departmentId: string,
-  employeeId: number
-) => {
-  const response = await apiClient.delete(
-    `/helpdesk-departments/${departmentId}/employees/${employeeId}`
-  );
   return response.data;
 };
 

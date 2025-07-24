@@ -14,7 +14,7 @@ import {
 } from "react-icons/fa";
 import { Loader, TicketTile } from "../common";
 import type { Ticket, TicketStatus, Priority } from "../../types";
-import "../../styles/dashboard.css";
+import "../../styles/dashboardShared.css";
 
 interface ManagerStats {
   teamTickets: number;
@@ -200,7 +200,7 @@ export const ManagerDashboard: React.FC = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="modern-stats-grid">
+      <div className="modern-stats-grid manager">
         <div className="modern-stat-card">
           <div className="modern-stat-header">
             <div className="modern-stat-icon primary">

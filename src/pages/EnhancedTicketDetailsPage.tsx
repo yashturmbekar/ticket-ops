@@ -42,21 +42,35 @@ import {
 import { Loader, ButtonLoader } from "../components/common";
 import "../styles/enhancedTicketDetails.css";
 
-// SLA Helper Functions
-const calculateSLAProgress = (createdAt: string, priority: string): number => {
+// Enhanced SLA Helper Functions
+const calculateSLAProgress = (
+  createdAt: string,
+  priority: string,
+  slaType: "response" | "resolution"
+): number => {
   const now = new Date().getTime();
   const created = new Date(createdAt).getTime();
   const elapsed = now - created;
 
-  // SLA times in hours by priority
+  // SLA times in hours by priority - different for response and resolution
   const slaHours = {
-    CRITICAL: 4,
-    HIGH: 8,
-    MEDIUM: 24,
-    LOW: 72,
+    response: {
+      CRITICAL: 1, // 1 hour response time for critical
+      HIGH: 4, // 4 hours for high
+      MEDIUM: 8, // 8 hours for medium
+      LOW: 24, // 24 hours for low
+    },
+    resolution: {
+      CRITICAL: 4, // 4 hours resolution time for critical
+      HIGH: 8, // 8 hours for high
+      MEDIUM: 24, // 24 hours for medium
+      LOW: 72, // 72 hours for low
+    },
   };
 
-  const targetHours = slaHours[priority as keyof typeof slaHours] || 24;
+  const targetHours =
+    slaHours[slaType][priority as keyof (typeof slaHours)[typeof slaType]] ||
+    24;
   const targetMs = targetHours * 60 * 60 * 1000;
 
   return Math.min((elapsed / targetMs) * 100, 100);
@@ -68,19 +82,33 @@ const getSLAStatus = (progress: number): "good" | "warning" | "critical" => {
   return "critical";
 };
 
-const formatTimeRemaining = (createdAt: string, priority: string): string => {
+const formatTimeRemaining = (
+  createdAt: string,
+  priority: string,
+  slaType: "response" | "resolution"
+): string => {
   const now = new Date().getTime();
   const created = new Date(createdAt).getTime();
   const elapsed = now - created;
 
   const slaHours = {
-    CRITICAL: 4,
-    HIGH: 8,
-    MEDIUM: 24,
-    LOW: 72,
+    response: {
+      CRITICAL: 1,
+      HIGH: 4,
+      MEDIUM: 8,
+      LOW: 24,
+    },
+    resolution: {
+      CRITICAL: 4,
+      HIGH: 8,
+      MEDIUM: 24,
+      LOW: 72,
+    },
   };
 
-  const targetHours = slaHours[priority as keyof typeof slaHours] || 24;
+  const targetHours =
+    slaHours[slaType][priority as keyof (typeof slaHours)[typeof slaType]] ||
+    24;
   const targetMs = targetHours * 60 * 60 * 1000;
   const remaining = targetMs - elapsed;
 
@@ -117,32 +145,38 @@ const getEnhancedTimeline = (statusHistory: any[], comments: any[]) => {
       // Create more descriptive status messages
       let statusMessage = "";
       const status = item.status || item.newStatus || "Unknown";
-      
+
       switch (status.toLowerCase()) {
         case "new":
-          statusMessage = "Ticket Created - New support request submitted and queued for review";
+          statusMessage =
+            "Ticket Created - New support request submitted and queued for review";
           break;
         case "open":
-          statusMessage = "Ticket Opened - Support request is now being actively reviewed";
+          statusMessage =
+            "Ticket Opened - Support request is now being actively reviewed";
           break;
         case "in progress":
         case "in_progress":
-          statusMessage = "Work Started - Technical team has begun working on this ticket";
+          statusMessage =
+            "Work Started - Technical team has begun working on this ticket";
           break;
         case "resolved":
-          statusMessage = "Issue Resolved - Problem has been fixed and solution implemented";
+          statusMessage =
+            "Issue Resolved - Problem has been fixed and solution implemented";
           break;
         case "closed":
-          statusMessage = "Ticket Closed - Support request completed and verified";
+          statusMessage =
+            "Ticket Closed - Support request completed and verified";
           break;
         case "on hold":
         case "on_hold":
-          statusMessage = "Placed On Hold - Ticket temporarily paused pending additional information";
+          statusMessage =
+            "Placed On Hold - Ticket temporarily paused pending additional information";
           break;
         default:
           statusMessage = `Status Updated - Ticket status changed to ${status}`;
       }
-      
+
       return {
         ...item,
         type: "status",
@@ -1083,128 +1117,7 @@ const EnhancedTicketDetailsPage: React.FC = () => {
         <div className="content-grid">
           {/* Left Column - Main Information */}
           <div className="main-column">
-            {/* Ticket Overview Card */}
-            <div className="enhanced-card ticket-overview-card">
-              <div className="card-header">
-                <div className="header-title">
-                  <FaTicketAlt className="header-icon" />
-                  <h2>Ticket Overview</h2>
-                </div>
-              </div>
-              <div className="card-content">
-                <div className="ticket-main-info">
-                  <div className="ticket-code-display">{ticket.ticketCode}</div>
-                  <h1 className="ticket-title">{ticket.title}</h1>
-                  <div className="ticket-description">
-                    <p>{ticket.description}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* SLA Card */}
-            <div className="enhanced-card sla-card">
-              <div className="card-header">
-                <div className="header-title">
-                  <FaClock className="header-icon" />
-                  <h2>SLA Status</h2>
-                </div>
-              </div>
-              <div className="card-content">
-                <div className="sla-overview">
-                  <div className="sla-progress-section">
-                    <div className="sla-progress-info">
-                      <span className="sla-label">Response Time</span>
-                      <span className="sla-time-remaining">
-                        {formatTimeRemaining(
-                          ticket.dateCreated,
-                          ticket.priority
-                        )}
-                      </span>
-                    </div>
-                    <div className="sla-progress-bar">
-                      <div
-                        className={`sla-progress-fill ${getSLAStatus(
-                          calculateSLAProgress(
-                            ticket.dateCreated,
-                            ticket.priority
-                          )
-                        )}`}
-                        style={{
-                          width: `${calculateSLAProgress(
-                            ticket.dateCreated,
-                            ticket.priority
-                          )}%`,
-                        }}
-                      ></div>
-                    </div>
-                    <div className="sla-progress-percentage">
-                      {Math.round(
-                        calculateSLAProgress(
-                          ticket.dateCreated,
-                          ticket.priority
-                        )
-                      )}
-                      % elapsed
-                    </div>
-                  </div>
-                  <div className="sla-details">
-                    <div className="sla-detail-item">
-                      <span className="sla-detail-label">Priority:</span>
-                      <span
-                        className={`sla-priority-badge ${ticket.priority.toLowerCase()}`}
-                      >
-                        {
-                          PRIORITY_LABELS[
-                            ticket.priority as keyof typeof PRIORITY_LABELS
-                          ]
-                        }
-                      </span>
-                    </div>
-                    <div className="sla-detail-item">
-                      <span className="sla-detail-label">SLA Status:</span>
-                      <span
-                        className={`sla-status-indicator ${getSLAStatus(
-                          calculateSLAProgress(
-                            ticket.dateCreated,
-                            ticket.priority
-                          )
-                        )}`}
-                      >
-                        {getSLAStatus(
-                          calculateSLAProgress(
-                            ticket.dateCreated,
-                            ticket.priority
-                          )
-                        ).toUpperCase()}
-                      </span>
-                    </div>
-                    <div className="sla-detail-item">
-                      <span className="sla-detail-label">Created:</span>
-                      <span className="sla-time-info">
-                        {formatRelativeTime(ticket.dateCreated)}
-                      </span>
-                    </div>
-                    <div className="sla-detail-item">
-                      <span className="sla-detail-label">Last Update:</span>
-                      <span className="sla-time-info">
-                        {formatRelativeTime(ticket.dateModified)}
-                      </span>
-                    </div>
-                    {ticket.dueDate && (
-                      <div className="sla-detail-item">
-                        <span className="sla-detail-label">Due Date:</span>
-                        <span className="sla-time-info">
-                          {formatRelativeTime(ticket.dueDate)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Requester Information Card */}
+            {/* Requester Information Card - MOVED TO TOP */}
             <div className="enhanced-card requester-card">
               <div className="card-header">
                 <div className="header-title">
@@ -1241,11 +1154,15 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                     <div className="profile-meta">
                       <div className="meta-item">
                         <FaCalendarAlt className="meta-icon" />
-                        <span>Created: {formatDate(ticket.dateCreated)}</span>
+                        <span>
+                          Ticket Created At : {formatDate(ticket.dateCreated)}
+                        </span>
                       </div>
                       <div className="meta-item">
                         <FaClock className="meta-icon" />
-                        <span>Updated: {formatDate(ticket.dateModified)}</span>
+                        <span>
+                          Ticket Updated At : {formatDate(ticket.dateModified)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1253,7 +1170,26 @@ const EnhancedTicketDetailsPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Attachments Card */}
+            {/* Ticket Overview Card - TICKET CODE, TITLE, DESCRIPTION */}
+            <div className="enhanced-card ticket-overview-card">
+              <div className="card-header">
+                <div className="header-title">
+                  <FaTicketAlt className="header-icon" />
+                  <h2>Ticket Overview</h2>
+                </div>
+              </div>
+              <div className="card-content">
+                <div className="ticket-main-info">
+                  <div className="ticket-code-display">{ticket.ticketCode}</div>
+                  <h1 className="ticket-title">{ticket.title}</h1>
+                  <div className="ticket-description">
+                    <p>{ticket.description}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Attachments Card - MOVED AFTER TICKET OVERVIEW */}
             {ticket.attachments && ticket.attachments.length > 0 && (
               <div className="enhanced-card attachments-card">
                 <div className="card-header">
@@ -1304,6 +1240,187 @@ const EnhancedTicketDetailsPage: React.FC = () => {
               </div>
             )}
 
+            {/* Enhanced SLA Card - REDESIGNED WITH BOTH RESPONSE AND RESOLUTION */}
+            <div className="enhanced-card sla-card">
+              <div className="card-header">
+                <div className="header-title">
+                  <FaClock className="header-icon" />
+                  <h2>SLA Compliance</h2>
+                </div>
+              </div>
+              <div className="card-content">
+                <div className="sla-overview">
+                  {/* Response Time SLA */}
+                  <div className="sla-section">
+                    <div className="sla-section-header">
+                      <span className="sla-section-title">Response Time</span>
+                      <span className="sla-section-subtitle">
+                        Initial response to ticket
+                      </span>
+                    </div>
+                    <div className="sla-progress-section">
+                      <div className="sla-progress-info">
+                        <span className="sla-time-remaining">
+                          {formatTimeRemaining(
+                            ticket.dateCreated,
+                            ticket.priority,
+                            "response"
+                          )}
+                        </span>
+                      </div>
+                      <div className="sla-progress-bar">
+                        <div
+                          className={`sla-progress-fill ${getSLAStatus(
+                            calculateSLAProgress(
+                              ticket.dateCreated,
+                              ticket.priority,
+                              "response"
+                            )
+                          )}`}
+                          style={{
+                            width: `${calculateSLAProgress(
+                              ticket.dateCreated,
+                              ticket.priority,
+                              "response"
+                            )}%`,
+                          }}
+                        ></div>
+                      </div>
+                      <div className="sla-progress-percentage">
+                        {Math.round(
+                          calculateSLAProgress(
+                            ticket.dateCreated,
+                            ticket.priority,
+                            "response"
+                          )
+                        )}
+                        % elapsed
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Resolution Time SLA */}
+                  <div className="sla-section">
+                    <div className="sla-section-header">
+                      <span className="sla-section-title">Resolution Time</span>
+                      <span className="sla-section-subtitle">
+                        Complete resolution of issue
+                      </span>
+                    </div>
+                    <div className="sla-progress-section">
+                      <div className="sla-progress-info">
+                        <span className="sla-time-remaining">
+                          {formatTimeRemaining(
+                            ticket.dateCreated,
+                            ticket.priority,
+                            "resolution"
+                          )}
+                        </span>
+                      </div>
+                      <div className="sla-progress-bar">
+                        <div
+                          className={`sla-progress-fill ${getSLAStatus(
+                            calculateSLAProgress(
+                              ticket.dateCreated,
+                              ticket.priority,
+                              "resolution"
+                            )
+                          )}`}
+                          style={{
+                            width: `${calculateSLAProgress(
+                              ticket.dateCreated,
+                              ticket.priority,
+                              "resolution"
+                            )}%`,
+                          }}
+                        ></div>
+                      </div>
+                      <div className="sla-progress-percentage">
+                        {Math.round(
+                          calculateSLAProgress(
+                            ticket.dateCreated,
+                            ticket.priority,
+                            "resolution"
+                          )
+                        )}
+                        % elapsed
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SLA Details */}
+                  <div className="sla-details">
+                    <div className="sla-detail-item">
+                      <span className="sla-detail-label">Priority:</span>
+                      <span
+                        className={`sla-priority-badge ${ticket.priority.toLowerCase()}`}
+                      >
+                        {
+                          PRIORITY_LABELS[
+                            ticket.priority as keyof typeof PRIORITY_LABELS
+                          ]
+                        }
+                      </span>
+                    </div>
+                    <div className="sla-detail-item">
+                      <span className="sla-detail-label">Overall Status:</span>
+                      <span
+                        className={`sla-status-indicator ${getSLAStatus(
+                          Math.max(
+                            calculateSLAProgress(
+                              ticket.dateCreated,
+                              ticket.priority,
+                              "response"
+                            ),
+                            calculateSLAProgress(
+                              ticket.dateCreated,
+                              ticket.priority,
+                              "resolution"
+                            )
+                          )
+                        )}`}
+                      >
+                        {getSLAStatus(
+                          Math.max(
+                            calculateSLAProgress(
+                              ticket.dateCreated,
+                              ticket.priority,
+                              "response"
+                            ),
+                            calculateSLAProgress(
+                              ticket.dateCreated,
+                              ticket.priority,
+                              "resolution"
+                            )
+                          )
+                        ).toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="sla-detail-item">
+                      <span className="sla-detail-label">Created:</span>
+                      <span className="sla-time-info">
+                        {formatRelativeTime(ticket.dateCreated)}
+                      </span>
+                    </div>
+                    <div className="sla-detail-item">
+                      <span className="sla-detail-label">Last Update:</span>
+                      <span className="sla-time-info">
+                        {formatRelativeTime(ticket.dateModified)}
+                      </span>
+                    </div>
+                    {ticket.dueDate && (
+                      <div className="sla-detail-item">
+                        <span className="sla-detail-label">Due Date:</span>
+                        <span className="sla-time-info">
+                          {formatRelativeTime(ticket.dueDate)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Enhanced Activity Timeline Card */}
             <div className="enhanced-card activity-card">
               <div className="card-header">
@@ -1319,7 +1436,7 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                     {(() => {
                       // Count status changes (creation + current status change if not OPEN)
                       let statusChangeCount = 1; // Always have ticket creation
-                      if (ticket.status !== 'OPEN') statusChangeCount++;
+                      if (ticket.status !== "OPEN") statusChangeCount++;
                       return `${statusChangeCount} Status Changes`;
                     })()}
                   </span>
@@ -1330,26 +1447,29 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                   {(() => {
                     // Generate status history from ticket creation and current status
                     const statusHistory = [];
-                    
+
                     // Add ticket creation status
                     statusHistory.push({
                       id: `creation-${ticket.id}`,
                       fromStatus: null,
-                      toStatus: 'OPEN',
+                      toStatus: "OPEN",
                       changedAt: ticket.dateCreated,
                       changedBy: ticket.requestedBy.employeeName,
-                      reason: 'Ticket created'
+                      reason: "Ticket created",
                     });
-                    
+
                     // If ticket status is not OPEN, add a status change
-                    if (ticket.status !== 'OPEN') {
+                    if (ticket.status !== "OPEN") {
                       statusHistory.push({
                         id: `status-change-${ticket.id}`,
-                        fromStatus: 'OPEN',
+                        fromStatus: "OPEN",
                         toStatus: ticket.status,
                         changedAt: ticket.dateModified,
-                        changedBy: ticket.assignedTo?.employeeName || 'System',
-                        reason: `Status changed to ${ticket.status.replace('_', ' ')}`
+                        changedBy: ticket.assignedTo?.employeeName || "System",
+                        reason: `Status changed to ${ticket.status.replace(
+                          "_",
+                          " "
+                        )}`,
                       });
                     }
 
@@ -1389,7 +1509,9 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                                 </>
                               ) : (
                                 <>
-                                  <span className="activity-type">Comment Added</span>
+                                  <span className="activity-type">
+                                    Comment Added
+                                  </span>
                                   <span className="author-name">
                                     by {item.author}
                                   </span>
@@ -1687,7 +1809,8 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                 </div>
               </div>
               <div className="card-content">
-                <div className="assignment-fields">{/* Department */}
+                <div className="assignment-fields">
+                  {/* Department */}
                   <div className="field-group">
                     <label className="field-label">
                       <FaBuilding className="label-icon" />

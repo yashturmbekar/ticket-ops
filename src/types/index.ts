@@ -319,6 +319,8 @@ export const UserRole = {
   EMPLOYEE: "EMPLOYEE",
   MANAGER: "MANAGER",
   ORG_ADMIN: "ORG-ADMIN",
+  HELPDESK_DEPARTMENT: "HELPDESK-DEPARTMENT",
+  HELPDESK_ADMIN: "HELPDESK-ADMIN",
 } as const;
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];

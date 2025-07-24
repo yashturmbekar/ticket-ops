@@ -400,6 +400,17 @@
   color: var(--dashboard-text-secondary);
 }
 
+.modern-empty-state-full {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--dashboard-text-secondary);
+  background: var(--dashboard-card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--dashboard-border);
+  margin: 2rem 0;
+}
+
 .modern-empty-icon {
   width: 80px;
   height: 80px;
@@ -413,19 +424,25 @@
   color: var(--dashboard-text-muted);
 }
 
-.modern-empty-state h3 {
+.modern-empty-state h3,
+.modern-empty-state-full h3 {
   font-size: 1.125rem;
   font-weight: 600;
   color: var(--dashboard-text);
   margin: 0 0 0.5rem 0;
 }
 
-.modern-empty-state p {
-  margin: 0;
+.modern-empty-state p,
+.modern-empty-state-full p {
+  margin: 0 0 1.5rem 0;
   max-width: 400px;
   margin-left: auto;
   margin-right: auto;
   line-height: 1.5;
+}
+
+.modern-empty-state-full .btn {
+  margin-top: 0.5rem;
 }
 
 /* Responsive Design */

@@ -319,6 +319,12 @@
   border-color: var(--color-success);
 }
 
+.role-helpdesk-department {
+  background: #fd7e14;
+  color: white;
+  border-color: #fd7e14;
+}
+
 .status-badge {
   display: inline-block;
   padding: 0.25rem var(--spacing-sm);

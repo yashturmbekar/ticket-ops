@@ -17,7 +17,7 @@ import {
   FaCalendarCheck,
 } from "react-icons/fa";
 import { Loader, TicketTile } from "../common";
-import type { Ticket, TicketStatus, Priority } from "../../types";
+import type { Ticket } from "../../types";
 import { searchTickets } from "../../services";
 import { transformApiTicketsToTickets } from "../../utils/apiTransforms";
 import { useNotifications } from "../../hooks";
@@ -162,83 +162,6 @@ export const AdminDashboard: React.FC = () => {
           );
 
           setRecentTickets(activeTickets);
-        } else {
-          // Fallback to mock data if no API data
-          console.log("No tickets found, using mock data");
-          setStats({
-            totalTickets: 1247,
-            openTickets: 89,
-            resolvedTickets: 1158,
-            criticalTickets: 23,
-            slaBreaches: 5,
-            overdueTickets: 12,
-            avgResolutionTime: 18.5,
-            todayTickets: 24,
-            weeklyTickets: 167,
-            monthlyTickets: 623,
-            teamEfficiency: 87,
-            userSatisfaction: 4.2,
-          });
-
-          // Mock tickets for display
-          const mockTickets: Ticket[] = [
-            {
-              id: "T-001",
-              title: "Email server not responding",
-              description:
-                "Users unable to access email services. Multiple departments affected.",
-              priority: "HIGH" as Priority,
-              status: "RAISED" as TicketStatus,
-              assignedTo: "John Smith",
-              createdAt: new Date("2024-01-15T08:30:00"),
-              updatedAt: new Date("2024-01-15T08:30:00"),
-              createdBy: "user@company.com",
-              category: "hardware",
-              slaDeadline: new Date("2024-01-15T12:30:00"),
-              tags: ["urgent", "email", "server"],
-              attachments: [],
-              comments: [],
-              assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
-            },
-            {
-              id: "T-002",
-              title: "Software installation request",
-              description:
-                "Need Adobe Creative Suite installed on workstation for new designer.",
-              priority: "MEDIUM" as Priority,
-              status: "IN_PROGRESS" as TicketStatus,
-              assignedTo: "Jane Doe",
-              createdAt: new Date("2024-01-15T09:15:00"),
-              updatedAt: new Date("2024-01-15T09:15:00"),
-              createdBy: "designer@company.com",
-              category: "software",
-              slaDeadline: new Date("2024-01-15T17:15:00"),
-              tags: ["software", "installation", "adobe"],
-              attachments: [],
-              comments: [],
-              assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
-            },
-            {
-              id: "T-003",
-              title: "Network connectivity issues",
-              description:
-                "Intermittent connection drops affecting productivity in Marketing dept.",
-              priority: "HIGH" as Priority,
-              status: "RAISED" as TicketStatus,
-              assignedTo: "Mike Wilson",
-              createdAt: new Date("2024-01-15T10:00:00"),
-              updatedAt: new Date("2024-01-15T10:00:00"),
-              createdBy: "manager@company.com",
-              category: "network",
-              slaDeadline: new Date("2024-01-15T14:00:00"),
-              tags: ["network", "connectivity", "urgent"],
-              attachments: [],
-              comments: [],
-              assignedDepartmentId: "45c30b4a-52d2-4535-800b-d8fada23dcb6",
-            },
-          ];
-
-          setRecentTickets(mockTickets);
         }
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -462,39 +385,46 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         <div className="dashboard-tickets-grid">
-          {recentTickets.slice(0, 8).map((ticket) => (
-            <TicketTile
-              key={ticket.id}
-              ticket={{
-                id: ticket.id,
-                ticketCode: `TKT-${ticket.id.slice(0, 8)}`,
-                title: ticket.title,
-                description: ticket.description,
-                status: ticket.status,
-                priority: ticket.priority,
-                assignedTo: ticket.assignedTo,
-                department: ticket.assignedDepartmentName,
-                createdAt: ticket.createdAt.toISOString(),
-                slaDeadline: ticket.slaDeadline?.toISOString(),
-                commentCount: ticket.comments?.length || 0,
-                attachmentCount: ticket.attachments?.length || 0,
-                tags: ticket.tags,
-              }}
-              onClick={handleTicketClick}
-              compact={true}
-            />
-          ))}
-        </div>
-
-        {recentTickets.length === 0 && (
-          <div className="modern-empty-state">
-            <div className="modern-empty-icon">
-              <FaCalendarCheck />
+          {recentTickets.length > 0 ? (
+            recentTickets.slice(0, 8).map((ticket) => (
+              <TicketTile
+                key={ticket.id}
+                ticket={{
+                  id: ticket.id,
+                  ticketCode: `TKT-${ticket.id.slice(0, 8)}`,
+                  title: ticket.title,
+                  description: ticket.description,
+                  status: ticket.status,
+                  priority: ticket.priority,
+                  assignedTo: ticket.assignedTo,
+                  department: ticket.assignedDepartmentName,
+                  createdAt: ticket.createdAt.toISOString(),
+                  slaDeadline: ticket.slaDeadline?.toISOString(),
+                  commentCount: ticket.comments?.length || 0,
+                  attachmentCount: ticket.attachments?.length || 0,
+                  tags: ticket.tags,
+                }}
+                onClick={handleTicketClick}
+                compact={true}
+              />
+            ))
+          ) : (
+            <div className="modern-empty-state-full">
+              <div className="modern-empty-icon">
+                <FaCalendarCheck />
+              </div>
+              <h3>All caught up!</h3>
+              <p>No active tickets at the moment. Your team is doing great!</p>
+              <button
+                className="btn btn-primary"
+                onClick={() => navigate("/tickets")}
+              >
+                <FaEye />
+                <span>View All Tickets</span>
+              </button>
             </div>
-            <h3>All caught up!</h3>
-            <p>No active tickets at the moment. Your team is doing great!</p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

@@ -105,7 +105,6 @@ const mapRoleFromToken = (tokenRole: string): UserRole => {
   console.log("Mapping role from token:", tokenRole);
 
   const roleMap: Record<string, UserRole> = {
-
     // Organizational roles
     cxo: UserRole.CXO,
     hr: UserRole.HR,
@@ -113,6 +112,10 @@ const mapRoleFromToken = (tokenRole: string): UserRole => {
     manager: UserRole.MANAGER,
     org_admin: UserRole.ORG_ADMIN,
     "org-admin": UserRole.ORG_ADMIN,
+    helpdesk_department: UserRole.HELPDESK_DEPARTMENT,
+    "helpdesk-department": UserRole.HELPDESK_DEPARTMENT,
+    helpdesk_admin: UserRole.HELPDESK_ADMIN,
+    "helpdesk-admin": UserRole.HELPDESK_ADMIN,
   };
 
   // Normalize role: lowercase, trim, and replace underscores with hyphens for consistent lookup

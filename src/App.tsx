@@ -20,7 +20,7 @@ import TicketDetailsPageProfessional from "./pages/GetTicketDetailsPage.tsx";
 import { AssetsPage } from "./pages/AssetsPage.tsx";
 import { UsersPage } from "./pages/UsersPage.tsx";
 import { KnowledgePage } from "./pages/KnowledgePage.tsx";
-import { ReportsPage } from "./pages/ReportsPage.tsx";
+import ReportsPage from "./pages/ReportsPage.tsx";
 import { NetworkPage } from "./pages/NetworkPage.tsx";
 import { SettingsPage } from "./pages/SettingsPage.tsx";
 import DepartmentsCreatePage from "./pages/CreateDepartmentsPage.tsx";
@@ -321,7 +321,12 @@ const AppContent: React.FC = () => {
           path="/employees"
           element={
             <ProtectedRoute
-              requiredRoles={[UserRole.HR, UserRole.ORG_ADMIN, UserRole.CXO]}
+              requiredRoles={[
+                UserRole.HR,
+                UserRole.ORG_ADMIN,
+                UserRole.CXO,
+                UserRole.HELPDESK_ADMIN,
+              ]}
             >
               <LayoutWrapper>
                 <div style={{ padding: "2rem" }}>
@@ -421,7 +426,11 @@ const AppContent: React.FC = () => {
           path="/sla"
           element={
             <ProtectedRoute
-              requiredRoles={[UserRole.ORG_ADMIN, UserRole.MANAGER]}
+              requiredRoles={[
+                UserRole.ORG_ADMIN,
+                UserRole.MANAGER,
+                UserRole.HELPDESK_ADMIN,
+              ]}
             >
               <LayoutWrapper>
                 <div style={{ padding: "2rem" }}>
@@ -439,7 +448,11 @@ const AppContent: React.FC = () => {
           path="/escalations"
           element={
             <ProtectedRoute
-              requiredRoles={[UserRole.MANAGER, UserRole.ORG_ADMIN]}
+              requiredRoles={[
+                UserRole.MANAGER,
+                UserRole.ORG_ADMIN,
+                UserRole.HELPDESK_ADMIN,
+              ]}
             >
               <LayoutWrapper>
                 <div style={{ padding: "2rem" }}>
@@ -498,7 +511,9 @@ const AppContent: React.FC = () => {
         <Route
           path="/assets"
           element={
-            <ProtectedRoute requiredRoles={[UserRole.ORG_ADMIN]}>
+            <ProtectedRoute
+              requiredRoles={[UserRole.ORG_ADMIN, UserRole.HELPDESK_ADMIN]}
+            >
               <LayoutWrapper>
                 <AssetsPage />
               </LayoutWrapper>
@@ -508,7 +523,9 @@ const AppContent: React.FC = () => {
         <Route
           path="/users"
           element={
-            <ProtectedRoute requiredRoles={[UserRole.HR, UserRole.ORG_ADMIN]}>
+            <ProtectedRoute
+              requiredRoles={[UserRole.ORG_ADMIN, UserRole.HELPDESK_ADMIN]}
+            >
               <LayoutWrapper>
                 <UsersPage />
               </LayoutWrapper>
@@ -529,11 +546,7 @@ const AppContent: React.FC = () => {
           path="/reports"
           element={
             <ProtectedRoute
-              requiredRoles={[
-                UserRole.CXO,
-                UserRole.MANAGER,
-                UserRole.ORG_ADMIN,
-              ]}
+              requiredRoles={[UserRole.ORG_ADMIN, UserRole.HELPDESK_ADMIN]}
             >
               <LayoutWrapper>
                 <ReportsPage />
@@ -544,7 +557,9 @@ const AppContent: React.FC = () => {
         <Route
           path="/network"
           element={
-            <ProtectedRoute requiredRoles={[UserRole.ORG_ADMIN]}>
+            <ProtectedRoute
+              requiredRoles={[UserRole.ORG_ADMIN, UserRole.HELPDESK_ADMIN]}
+            >
               <LayoutWrapper>
                 <NetworkPage />
               </LayoutWrapper>
@@ -554,7 +569,9 @@ const AppContent: React.FC = () => {
         <Route
           path="/departments"
           element={
-            <ProtectedRoute requiredRole={UserRole.ORG_ADMIN}>
+            <ProtectedRoute
+              requiredRoles={[UserRole.ORG_ADMIN, UserRole.HELPDESK_ADMIN]}
+            >
               <LayoutWrapper>
                 <DepartmentsPage />
               </LayoutWrapper>
@@ -564,7 +581,9 @@ const AppContent: React.FC = () => {
         <Route
           path="/departments/create"
           element={
-            <ProtectedRoute requiredRole={UserRole.ORG_ADMIN}>
+            <ProtectedRoute
+              requiredRoles={[UserRole.ORG_ADMIN, UserRole.HELPDESK_ADMIN]}
+            >
               <LayoutWrapper>
                 <DepartmentsCreatePage />
               </LayoutWrapper>
@@ -574,7 +593,9 @@ const AppContent: React.FC = () => {
         <Route
           path="/departments/edit/:id"
           element={
-            <ProtectedRoute requiredRole={UserRole.ORG_ADMIN}>
+            <ProtectedRoute
+              requiredRoles={[UserRole.ORG_ADMIN, UserRole.HELPDESK_ADMIN]}
+            >
               <LayoutWrapper>
                 <DepartmentsEditPage />
               </LayoutWrapper>
@@ -584,7 +605,13 @@ const AppContent: React.FC = () => {
         <Route
           path="/settings"
           element={
-            <ProtectedRoute requiredRoles={[UserRole.ORG_ADMIN, UserRole.CXO]}>
+            <ProtectedRoute
+              requiredRoles={[
+                UserRole.ORG_ADMIN,
+                UserRole.CXO,
+                UserRole.HELPDESK_ADMIN,
+              ]}
+            >
               <LayoutWrapper>
                 <SettingsPage />
               </LayoutWrapper>

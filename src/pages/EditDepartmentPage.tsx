@@ -204,7 +204,7 @@ export const DepartmentsEditPage: React.FC = () => {
         message: `Department "${formData.name}" has been updated successfully!`,
       });
 
-      navigate("/departments");
+      navigate(-1);
     } catch (error: unknown) {
       console.error("Error updating department:", error);
       const errorMessage =

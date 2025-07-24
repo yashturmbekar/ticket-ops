@@ -185,9 +185,8 @@ export const TicketTile: React.FC<TicketTileProps> = ({
 
   return (
     <div
-      className={`professional-ticket-tile ${isSelected ? "selected" : ""} ${
-        compact ? "compact" : ""
-      }`}
+      className={`professional-ticket-tile ${isSelected ? "selected" : ""} ${compact ? "compact" : ""
+        }`}
       onClick={handleTileClick}
       style={
         {
@@ -293,31 +292,31 @@ export const TicketTile: React.FC<TicketTileProps> = ({
           <span>{formatTimeAgo(ticket.createdAt)}</span>
         </div>
       </div>
-
       {/* Counts and SLA */}
-      <div className="tile-footer">
+      <div className="tile-footer" style={{ display: "flex", justifyContent: "space-between" }}>
         <div className="counts">
           <div className="count-item">
             <FaComments />
-            <span>{ticket.commentCount || 0}</span>
+            <span>{ticket?.commentCount}</span>
           </div>
           {/* <div className="count-item">
             <FaPaperclip />
             <span>{ticket.attachmentCount || 0}</span>
           </div> */}
+          {slaStatus && (
+            <div className="sla-indicator">
+              <div
+                className="sla-dot"
+                style={{ backgroundColor: slaStatus.color }}
+              />
+              <span className="sla-text" style={{ color: slaStatus.color }}>
+                {slaStatus.text}
+              </span>
+            </div>
+          )}
         </div>
 
-        {slaStatus && (
-          <div className="sla-indicator">
-            <div
-              className="sla-dot"
-              style={{ backgroundColor: slaStatus.color }}
-            />
-            <span className="sla-text" style={{ color: slaStatus.color }}>
-              {slaStatus.text}
-            </span>
-          </div>
-        )}
+
       </div>
 
       {/* Tags */}

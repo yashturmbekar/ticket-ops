@@ -13,7 +13,6 @@ import {
   FaBan,
   FaUser,
   FaUsers,
-  FaBuilding,
 } from "react-icons/fa";
 import { Loader, TicketTile } from "../components/common";
 import type { Ticket, TicketStatus, Priority, UserRole } from "../types";
@@ -57,39 +56,57 @@ export const TicketsPage: React.FC = () => {
   const [searchLoading, setSearchLoading] = useState(false); // Search/filter operations
   const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"tiles" | "list">("tiles");
-  const [activeTab, setActiveTab] = useState<string>("my-tickets");
+
+  // Set default active tab based on user role
+  const getDefaultTab = (userRole: UserRole) => {
+    switch (userRole) {
+      case "ORG-ADMIN":
+      case "HELPDESK-ADMIN":
+        return "all-tickets";
+      case "MANAGER":
+      case "HELPDESK-DEPARTMENT":
+        return "assigned-tickets";
+      default: // EMPLOYEE
+        return "my-tickets";
+    }
+  };
+
+  const [activeTab, setActiveTab] = useState<string>(
+    getDefaultTab(user?.role || "EMPLOYEE")
+  );
 
   // Define available tabs based on user role
   const getAvailableTabs = (userRole: UserRole) => {
     switch (userRole) {
       case "ORG-ADMIN":
+      case "HELPDESK-ADMIN":
         return [
-          { id: "all-tickets", label: "All Tickets", icon: <FaTicketAlt /> },
           {
-            id: "department-view",
-            label: "Department View",
-            icon: <FaBuilding />,
+            id: "all-tickets",
+            label: "All Organization Tickets",
+            icon: <FaTicketAlt />,
           },
+          { id: "my-tickets", label: "My Tickets", icon: <FaUser /> },
         ];
       case "MANAGER":
         return [
-          { id: "my-tickets", label: "My Tickets", icon: <FaUser /> },
           {
             id: "assigned-tickets",
-            label: "My Assigned Tickets",
+            label: "Assigned to Me",
             icon: <FaUsers />,
           },
+          { id: "my-tickets", label: "My Tickets", icon: <FaUser /> },
         ];
       case "HELPDESK-DEPARTMENT":
         return [
-          { id: "my-tickets", label: "My Tickets", icon: <FaUser /> },
           {
             id: "assigned-tickets",
-            label: "My Assigned Tickets",
+            label: "Assigned to Me",
             icon: <FaUsers />,
           },
+          { id: "my-tickets", label: "My Tickets", icon: <FaUser /> },
         ];
-      default:
+      default: // EMPLOYEE
         return [{ id: "my-tickets", label: "My Tickets", icon: <FaUser /> }];
     }
   };
@@ -104,6 +121,13 @@ export const TicketsPage: React.FC = () => {
     search: "",
   });
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [ticketCounts, setTicketCounts] = useState<Record<string, number>>({});
+
+  // Update active tab when user role changes
+  useEffect(() => {
+    const defaultTab = getDefaultTab(user?.role || "EMPLOYEE");
+    setActiveTab(defaultTab);
+  }, [user?.role]);
 
   // Debounce search input
   useEffect(() => {
@@ -113,6 +137,48 @@ export const TicketsPage: React.FC = () => {
 
     return () => clearTimeout(timer);
   }, [filters.search]);
+
+  // Fetch ticket counts for all available tabs
+  useEffect(() => {
+    const fetchTicketCounts = async () => {
+      try {
+        const counts: Record<string, number> = {};
+
+        for (const tab of availableTabs) {
+          const searchCriteria: Record<string, unknown> = {};
+
+          switch (tab.id) {
+            case "my-tickets":
+              searchCriteria.submittedBy = user?.email || user?.username;
+              break;
+            case "assigned-tickets":
+              searchCriteria.assignedTo = user?.email || user?.username;
+              break;
+            case "all-tickets":
+              // No filter for all tickets
+              break;
+          }
+
+          const response = await searchMyTickets(
+            searchCriteria,
+            0,
+            1,
+            "createdDate,desc"
+          );
+          counts[tab.id] =
+            response.data?.totalElements || response.totalElements || 0;
+        }
+
+        setTicketCounts(counts);
+      } catch (error) {
+        console.error("Error fetching ticket counts:", error);
+      }
+    };
+
+    if (user && availableTabs.length > 0) {
+      fetchTicketCounts();
+    }
+  }, [user, availableTabs]);
 
   // Fetch departments on component mount
   useEffect(() => {
@@ -171,18 +237,8 @@ export const TicketsPage: React.FC = () => {
             searchCriteria.assignedTo = user?.email || user?.username;
             break;
           case "all-tickets":
-            // Show all tickets (no additional filter) - only for ORG_ADMIN
-            break;
-          case "department-view":
-            // Show tickets by department - only for ORG_ADMIN
-            if (filters.department) {
-              const selectedDept = departments.find(
-                (dept) => dept.name === filters.department
-              );
-              if (selectedDept) {
-                searchCriteria.assignedDepartmentId = selectedDept.id;
-              }
-            }
+            // Show all tickets in the organization - only for ORG_ADMIN and HELPDESK_ADMIN
+            // No additional filter needed - will show all organization tickets
             break;
         }
 
@@ -193,7 +249,7 @@ export const TicketsPage: React.FC = () => {
         if (filters.priority) {
           searchCriteria.priority = filters.priority.toUpperCase();
         }
-        if (filters.department && activeTab !== "department-view") {
+        if (filters.department) {
           // Find department ID by name
           const selectedDept = departments.find(
             (dept) => dept.name === filters.department
@@ -344,6 +400,68 @@ export const TicketsPage: React.FC = () => {
     }
   };
 
+  // Get page title and subtitle based on active tab
+  const getPageTitleInfo = (tab: string) => {
+    switch (tab) {
+      case "all-tickets":
+        return {
+          title: "All Organization Tickets",
+          subtitle:
+            "Manage and track all support requests across the organization",
+        };
+      case "assigned-tickets":
+        return {
+          title: "Assigned Tickets",
+          subtitle: "Support tickets assigned to you for resolution",
+        };
+      case "my-tickets":
+      default:
+        return {
+          title: "My Tickets",
+          subtitle: "Support tickets you have submitted",
+        };
+    }
+  };
+
+  // Get role-specific information
+  const getRoleInfo = (userRole: UserRole) => {
+    switch (userRole) {
+      case "ORG-ADMIN":
+        return {
+          badge: "Organization Admin",
+          description: "Full access to all tickets across the organization",
+          color: "admin",
+        };
+      case "HELPDESK-ADMIN":
+        return {
+          badge: "Helpdesk Admin",
+          description: "Administrative access to all organizational tickets",
+          color: "admin",
+        };
+      case "MANAGER":
+        return {
+          badge: "Manager",
+          description: "Access to assigned tickets and tickets you created",
+          color: "manager",
+        };
+      case "HELPDESK-DEPARTMENT":
+        return {
+          badge: "Helpdesk Agent",
+          description: "Access to assigned tickets and tickets you created",
+          color: "agent",
+        };
+      default:
+        return {
+          badge: "Employee",
+          description: "Access to tickets you have created",
+          color: "employee",
+        };
+    }
+  };
+
+  const roleInfo = getRoleInfo(user?.role || "EMPLOYEE");
+  const pageInfo = getPageTitleInfo(activeTab);
+
   // Since we're filtering on the backend via API, no need for client-side filtering
   const filteredTickets = tickets;
 
@@ -356,10 +474,12 @@ export const TicketsPage: React.FC = () => {
       {/* Page Title */}
       <div className="tickets-page-header">
         <div className="tickets-page-title-section">
-          <h1 className="tickets-page-title">Support Tickets</h1>
-          <p className="tickets-page-subtitle">
-            Manage and track all support requests and incidents
-          </p>
+          <div className="title-with-badge">
+            <h1 className="tickets-page-title">{pageInfo.title}</h1>
+            <span className={`role-badge ${roleInfo.color}`}></span>
+          </div>
+          <p className="tickets-page-subtitle">{pageInfo.subtitle}</p>
+          <p className="role-description">{roleInfo.description}</p>
         </div>
         <div className="tickets-page-actions">
           <Link to="/tickets/create" className="btn btn-primary">
@@ -372,16 +492,21 @@ export const TicketsPage: React.FC = () => {
       {/* Role-based Tabs */}
       {availableTabs.length > 1 && (
         <div className="tickets-tabs">
-          {availableTabs.map((tab) => (
-            <button
-              key={tab.id}
-              className={`tab-button ${activeTab === tab.id ? "active" : ""}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.icon}
-              <span>{tab.label}</span>
-            </button>
-          ))}
+          <div className="tabs-buttons">
+            {availableTabs.map((tab) => (
+              <button
+                key={tab.id}
+                className={`tab-button ${activeTab === tab.id ? "active" : ""}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+                {ticketCounts[tab.id] !== undefined && (
+                  <span className="tab-count">{ticketCounts[tab.id]}</span>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

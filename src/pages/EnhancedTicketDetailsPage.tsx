@@ -143,7 +143,8 @@ const getEnhancedTimeline = (statusHistory: any[], comments: any[]) => {
     ...statusHistory.map((item: any) => {
       // Create more descriptive status messages
       let statusMessage = "";
-      const status = item.toStatus || item.status || item.newStatus || "Unknown";
+      const status =
+        item.toStatus || item.status || item.newStatus || "Unknown";
 
       switch (status.toLowerCase()) {
         case "new":
@@ -173,7 +174,10 @@ const getEnhancedTimeline = (statusHistory: any[], comments: any[]) => {
             "Placed On Hold - Ticket temporarily paused pending additional information";
           break;
         default:
-          statusMessage = `Status Updated - Ticket status changed to ${status.replace('_', ' ')}`;
+          statusMessage = `Status Updated - Ticket status changed to ${status.replace(
+            "_",
+            " "
+          )}`;
       }
 
       return {
@@ -1242,13 +1246,15 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                   <div className="sla-main-section">
                     <div className="sla-header">
                       <span className="sla-title">Resolution Time</span>
-                      <span className={`sla-status-badge ${getSLAStatus(
-                        calculateSLAProgress(
-                          ticket.dateCreated,
-                          ticket.priority,
-                          "resolution"
-                        )
-                      )}`}>
+                      <span
+                        className={`sla-status-badge ${getSLAStatus(
+                          calculateSLAProgress(
+                            ticket.dateCreated,
+                            ticket.priority,
+                            "resolution"
+                          )
+                        )}`}
+                      >
                         {getSLAStatus(
                           calculateSLAProgress(
                             ticket.dateCreated,
@@ -1289,13 +1295,21 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                   <div className="sla-quick-info">
                     <div className="sla-info-item">
                       <span className="sla-info-label">Priority</span>
-                      <span className={`priority-badge priority-${ticket.priority.toLowerCase()}`}>
-                        {PRIORITY_LABELS[ticket.priority as keyof typeof PRIORITY_LABELS]}
+                      <span
+                        className={`priority-badge priority-${ticket.priority.toLowerCase()}`}
+                      >
+                        {
+                          PRIORITY_LABELS[
+                            ticket.priority as keyof typeof PRIORITY_LABELS
+                          ]
+                        }
                       </span>
                     </div>
                     <div className="sla-info-item">
                       <span className="sla-info-label">Created</span>
-                      <span className="sla-info-value">{formatRelativeTime(ticket.dateCreated)}</span>
+                      <span className="sla-info-value">
+                        {formatRelativeTime(ticket.dateCreated)}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -1682,7 +1696,11 @@ const EnhancedTicketDetailsPage: React.FC = () => {
           {/* Right Column - Assignment & Info */}
           <div className="sidebar-column">
             {/* Assignment Card */}
-            <div className={`enhanced-card assignment-card ${canEditTicket() ? 'editable-heartbeat' : ''}`}>
+            <div
+              className={`enhanced-card assignment-card ${
+                canEditTicket() ? "editable-heartbeat" : ""
+              }`}
+            >
               {isSavingChanges && (
                 <div className="card-loader-overlay">
                   <div className="moving-loader-container">
@@ -1697,7 +1715,8 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                   <h2>Assignment & Status</h2>
                 </div>
               </div>
-              <div className="card-content">{}
+              <div className="card-content">
+                {}
                 <div className="assignment-fields">
                   {/* Department */}
                   <div className="field-group">
@@ -1719,10 +1738,7 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                           {departments
                             .filter((dept) => dept.isActive)
                             .map((department) => (
-                              <option
-                                key={department.id}
-                                value={department.id}
-                              >
+                              <option key={department.id} value={department.id}>
                                 {department.name}
                               </option>
                             ))}
@@ -1779,45 +1795,44 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                                 className="enhanced-input"
                                 disabled={isSavingChanges}
                               />
-                              {showAssigneeDropdown &&
-                                assigneeSearchQuery && (
-                                  <div className="search-dropdown">
-                                    {employeeLoading && (
-                                      <div className="dropdown-item loading">
-                                        <ButtonLoader variant="primary" />
-                                        <span>Searching employees...</span>
+                              {showAssigneeDropdown && assigneeSearchQuery && (
+                                <div className="search-dropdown">
+                                  {employeeLoading && (
+                                    <div className="dropdown-item loading">
+                                      <ButtonLoader variant="primary" />
+                                      <span>Searching employees...</span>
+                                    </div>
+                                  )}
+                                  {!employeeLoading &&
+                                    employeeResults.length === 0 && (
+                                      <div className="dropdown-item no-results">
+                                        <span>No employees found</span>
                                       </div>
                                     )}
-                                    {!employeeLoading &&
-                                      employeeResults.length === 0 && (
-                                        <div className="dropdown-item no-results">
-                                          <span>No employees found</span>
-                                        </div>
-                                      )}
-                                    {!employeeLoading &&
-                                      employeeResults.map((employee) => (
-                                        <div
-                                          key={employee.id}
-                                          className="dropdown-item employee-item"
-                                          onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            handleAssigneeChange(employee);
-                                          }}
-                                        >
-                                          <div className="employee-info">
-                                            <div className="employee-name">
-                                              {employee.employeeName}
-                                            </div>
-                                            <div className="employee-meta">
-                                              {employee.designation} •{" "}
-                                              {employee.departmentName}
-                                            </div>
+                                  {!employeeLoading &&
+                                    employeeResults.map((employee) => (
+                                      <div
+                                        key={employee.id}
+                                        className="dropdown-item employee-item"
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          handleAssigneeChange(employee);
+                                        }}
+                                      >
+                                        <div className="employee-info">
+                                          <div className="employee-name">
+                                            {employee.employeeName}
+                                          </div>
+                                          <div className="employee-meta">
+                                            {employee.designation} •{" "}
+                                            {employee.departmentName}
                                           </div>
                                         </div>
-                                      ))}
-                                  </div>
-                                )}
+                                      </div>
+                                    ))}
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
@@ -1858,9 +1873,7 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                       {canEditTicket() ? (
                         <select
                           value={selectedPriority}
-                          onChange={(e) =>
-                            handlePriorityChange(e.target.value)
-                          }
+                          onChange={(e) => handlePriorityChange(e.target.value)}
                           className="enhanced-select"
                           disabled={isSavingChanges}
                         >

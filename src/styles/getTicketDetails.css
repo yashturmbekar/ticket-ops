@@ -2844,7 +2844,7 @@ textarea:focus-visible {
 
 /* Assignee field specific overrides */
 .assignee-field .professional-input {
-  padding: 12px 40px 12px 16px;
+  padding: 12px 16px;
   font-size: 15px;
   font-weight: 400;
 }
@@ -2908,11 +2908,10 @@ textarea:focus-visible {
 
 .assignee-search-container .professional-input {
   width: 100%;
-  padding-right: 40px;
   background: rgba(255, 255, 255, 0.7);
   border: none;
   border-radius: 6px;
-  padding: 10px 40px 10px 14px;
+  padding: 10px 14px;
   font-size: 14px;
   font-weight: 400;
   color: #1f2937;
@@ -2930,6 +2929,7 @@ textarea:focus-visible {
   font-weight: 400;
 }
 
+/* Removed search icon - no longer needed
 .search-icon {
   position: absolute;
   right: 14px;
@@ -2940,6 +2940,7 @@ textarea:focus-visible {
   pointer-events: none;
   z-index: 1;
 }
+*/
 
 /* Professional Dropdown Styling */
 .professional-dropdown {

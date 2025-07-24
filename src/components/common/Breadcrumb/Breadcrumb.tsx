@@ -67,6 +67,20 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
     if (items) return items;
 
     const pathnames = location.pathname.split("/").filter((x) => x);
+
+    // Only show Dashboard > Departments > Edit-{id} for /departments/edit/:id
+    if (
+      pathnames[0] === "departments" &&
+      pathnames[1] === "edit" &&
+      pathnames.length === 3
+    ) {
+      return [
+        // Only Departments and Edit-{id} (Dashboard is always rendered as the home link)
+        { label: "Departments", path: "/departments", isActive: false },
+        { label: `Edit-${pathnames[2]}`, isActive: true },
+      ];
+    }
+
     const breadcrumbs: BreadcrumbItem[] = [];
 
     if (pathnames.length > 0) {
@@ -91,6 +105,25 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
             isActive: isLast,
           });
           return;
+        }
+
+        // Special handling for /departments/edit/:id - show only one breadcrumb: Edit-{id}
+        if (
+          pathnames[0] === "departments" &&
+          pathnames[1] === "edit" &&
+          pathnames.length === 3
+        ) {
+          // Only push Departments and Edit-{id}
+          breadcrumbs.push({
+            label: routeMap["/departments"] || "Departments",
+            path: "/departments",
+            isActive: false,
+          });
+          breadcrumbs.push({
+            label: `Edit-${pathnames[2]}`,
+            isActive: true,
+          });
+          return breadcrumbs;
         }
 
         // Skip adding breadcrumb if it's the same as the previous one

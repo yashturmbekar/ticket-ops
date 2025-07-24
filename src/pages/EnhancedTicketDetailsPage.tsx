@@ -37,7 +37,6 @@ import {
   FaEdit,
   FaTag,
   FaHistory,
-  FaChevronLeft,
 } from "react-icons/fa";
 import { Loader, ButtonLoader } from "../components/common";
 import "../styles/enhancedTicketDetails.css";
@@ -144,7 +143,7 @@ const getEnhancedTimeline = (statusHistory: any[], comments: any[]) => {
     ...statusHistory.map((item: any) => {
       // Create more descriptive status messages
       let statusMessage = "";
-      const status = item.status || item.newStatus || "Unknown";
+      const status = item.toStatus || item.status || item.newStatus || "Unknown";
 
       switch (status.toLowerCase()) {
         case "new":
@@ -174,7 +173,7 @@ const getEnhancedTimeline = (statusHistory: any[], comments: any[]) => {
             "Placed On Hold - Ticket temporarily paused pending additional information";
           break;
         default:
-          statusMessage = `Status Updated - Ticket status changed to ${status}`;
+          statusMessage = `Status Updated - Ticket status changed to ${status.replace('_', ' ')}`;
       }
 
       return {
@@ -1071,49 +1070,39 @@ const EnhancedTicketDetailsPage: React.FC = () => {
 
   return (
     <div className="enhanced-ticket-details-page">
-      {/* Enhanced Header */}
-      <div className="enhanced-page-header">
-        <div className="header-left">
-          <button className="back-button" onClick={() => window.history.back()}>
-            <FaChevronLeft />
-            <span>Back</span>
-          </button>
-          <div className="page-title-section">
+      {/* Main Content */}
+      <div className="enhanced-page-content">
+        {/* Page Header - Inside content grid width */}
+        <div className="enhanced-page-header">
+          <div className="header-title-section">
             <div className="page-icon">
               <FaTicketAlt />
             </div>
-            <div>
+            <div className="page-title-text">
               <h1 className="page-title">Ticket Details</h1>
-              <div className="page-breadcrumb">
-                <span>IT Support</span>
-                <span className="breadcrumb-separator">•</span>
-                <span>Tickets</span>
-                <span className="breadcrumb-separator">•</span>
-                <span className="current-page">{ticket.ticketCode}</span>
-              </div>
+              <p className="page-subtitle">
+                View and manage ticket information and progress
+              </p>
+            </div>
+          </div>
+          <div className="header-actions">
+            <div className="ticket-status-badges">
+              <span
+                className={`status-badge status-${ticket.status
+                  .toLowerCase()
+                  .replace("_", "-")}`}
+              >
+                {ticket.status.replace("_", " ")}
+              </span>
+              <span
+                className={`priority-badge priority-${ticket.priority.toLowerCase()}`}
+              >
+                {ticket.priority} Priority
+              </span>
             </div>
           </div>
         </div>
-        <div className="header-actions">
-          <div className="ticket-status-badges">
-            <span
-              className={`status-badge status-${ticket.status
-                .toLowerCase()
-                .replace("_", "-")}`}
-            >
-              {ticket.status.replace("_", " ")}
-            </span>
-            <span
-              className={`priority-badge priority-${ticket.priority.toLowerCase()}`}
-            >
-              {ticket.priority} Priority
-            </span>
-          </div>
-        </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="enhanced-page-content">
         <div className="content-grid">
           {/* Left Column - Main Information */}
           <div className="main-column">
@@ -1155,13 +1144,13 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                       <div className="meta-item">
                         <FaCalendarAlt className="meta-icon" />
                         <span>
-                          Ticket Created At : {formatDate(ticket.dateCreated)}
+                          Created: {formatRelativeTime(ticket.dateCreated)}
                         </span>
                       </div>
                       <div className="meta-item">
                         <FaClock className="meta-icon" />
                         <span>
-                          Ticket Updated At : {formatDate(ticket.dateModified)}
+                          Updated: {formatRelativeTime(ticket.dateModified)}
                         </span>
                       </div>
                     </div>
@@ -1202,36 +1191,35 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                   <div className="attachments-grid">
                     {ticket.attachments.map((attachment, index) => (
                       <div key={index} className="attachment-item">
+                        <div
+                          className="attachment-name"
+                          title={attachment.fileName}
+                        >
+                          {attachment.fileName}
+                        </div>
                         <div className="attachment-preview">
                           {getAttachmentPreview(
                             attachment.fileName,
                             attachment.fileData,
                             attachment.fileType
                           )}
-                        </div>
-                        <div className="attachment-info">
-                          <div
-                            className="attachment-name"
-                            title={attachment.fileName}
-                          >
-                            {attachment.fileName}
-                          </div>
-                          <div className="attachment-size">
-                            {formatFileSize(attachment.fileSize)}
-                          </div>
                           <button
-                            onClick={() =>
+                            className="download-attachment-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
                               downloadAttachment(
                                 attachment.fileName,
                                 attachment.fileData,
                                 attachment.fileType
-                              )
-                            }
-                            className="download-btn"
+                              );
+                            }}
+                            title="Download attachment"
                           >
                             <FaDownload />
-                            Download
                           </button>
+                        </div>
+                        <div className="attachment-size">
+                          {formatFileSize(attachment.fileSize)}
                         </div>
                       </div>
                     ))}
@@ -1240,182 +1228,75 @@ const EnhancedTicketDetailsPage: React.FC = () => {
               </div>
             )}
 
-            {/* Enhanced SLA Card - REDESIGNED WITH BOTH RESPONSE AND RESOLUTION */}
+            {/* Simplified SLA Card - MORE EFFECTIVE */}
             <div className="enhanced-card sla-card">
               <div className="card-header">
                 <div className="header-title">
                   <FaClock className="header-icon" />
-                  <h2>SLA Compliance</h2>
+                  <h2>SLA Status</h2>
                 </div>
               </div>
               <div className="card-content">
                 <div className="sla-overview">
-                  {/* Response Time SLA */}
-                  <div className="sla-section">
-                    <div className="sla-section-header">
-                      <span className="sla-section-title">Response Time</span>
-                      <span className="sla-section-subtitle">
-                        Initial response to ticket
-                      </span>
-                    </div>
-                    <div className="sla-progress-section">
-                      <div className="sla-progress-info">
-                        <span className="sla-time-remaining">
-                          {formatTimeRemaining(
-                            ticket.dateCreated,
-                            ticket.priority,
-                            "response"
-                          )}
-                        </span>
-                      </div>
-                      <div className="sla-progress-bar">
-                        <div
-                          className={`sla-progress-fill ${getSLAStatus(
-                            calculateSLAProgress(
-                              ticket.dateCreated,
-                              ticket.priority,
-                              "response"
-                            )
-                          )}`}
-                          style={{
-                            width: `${calculateSLAProgress(
-                              ticket.dateCreated,
-                              ticket.priority,
-                              "response"
-                            )}%`,
-                          }}
-                        ></div>
-                      </div>
-                      <div className="sla-progress-percentage">
-                        {Math.round(
-                          calculateSLAProgress(
-                            ticket.dateCreated,
-                            ticket.priority,
-                            "response"
-                          )
-                        )}
-                        % elapsed
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Resolution Time SLA */}
-                  <div className="sla-section">
-                    <div className="sla-section-header">
-                      <span className="sla-section-title">Resolution Time</span>
-                      <span className="sla-section-subtitle">
-                        Complete resolution of issue
-                      </span>
-                    </div>
-                    <div className="sla-progress-section">
-                      <div className="sla-progress-info">
-                        <span className="sla-time-remaining">
-                          {formatTimeRemaining(
-                            ticket.dateCreated,
-                            ticket.priority,
-                            "resolution"
-                          )}
-                        </span>
-                      </div>
-                      <div className="sla-progress-bar">
-                        <div
-                          className={`sla-progress-fill ${getSLAStatus(
-                            calculateSLAProgress(
-                              ticket.dateCreated,
-                              ticket.priority,
-                              "resolution"
-                            )
-                          )}`}
-                          style={{
-                            width: `${calculateSLAProgress(
-                              ticket.dateCreated,
-                              ticket.priority,
-                              "resolution"
-                            )}%`,
-                          }}
-                        ></div>
-                      </div>
-                      <div className="sla-progress-percentage">
-                        {Math.round(
-                          calculateSLAProgress(
-                            ticket.dateCreated,
-                            ticket.priority,
-                            "resolution"
-                          )
-                        )}
-                        % elapsed
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* SLA Details */}
-                  <div className="sla-details">
-                    <div className="sla-detail-item">
-                      <span className="sla-detail-label">Priority:</span>
-                      <span
-                        className={`sla-priority-badge ${ticket.priority.toLowerCase()}`}
-                      >
-                        {
-                          PRIORITY_LABELS[
-                            ticket.priority as keyof typeof PRIORITY_LABELS
-                          ]
-                        }
-                      </span>
-                    </div>
-                    <div className="sla-detail-item">
-                      <span className="sla-detail-label">Overall Status:</span>
-                      <span
-                        className={`sla-status-indicator ${getSLAStatus(
-                          Math.max(
-                            calculateSLAProgress(
-                              ticket.dateCreated,
-                              ticket.priority,
-                              "response"
-                            ),
-                            calculateSLAProgress(
-                              ticket.dateCreated,
-                              ticket.priority,
-                              "resolution"
-                            )
-                          )
-                        )}`}
-                      >
+                  {/* Primary SLA - Resolution Time */}
+                  <div className="sla-main-section">
+                    <div className="sla-header">
+                      <span className="sla-title">Resolution Time</span>
+                      <span className={`sla-status-badge ${getSLAStatus(
+                        calculateSLAProgress(
+                          ticket.dateCreated,
+                          ticket.priority,
+                          "resolution"
+                        )
+                      )}`}>
                         {getSLAStatus(
-                          Math.max(
-                            calculateSLAProgress(
-                              ticket.dateCreated,
-                              ticket.priority,
-                              "response"
-                            ),
-                            calculateSLAProgress(
-                              ticket.dateCreated,
-                              ticket.priority,
-                              "resolution"
-                            )
+                          calculateSLAProgress(
+                            ticket.dateCreated,
+                            ticket.priority,
+                            "resolution"
                           )
                         ).toUpperCase()}
                       </span>
                     </div>
-                    <div className="sla-detail-item">
-                      <span className="sla-detail-label">Created:</span>
-                      <span className="sla-time-info">
-                        {formatRelativeTime(ticket.dateCreated)}
+                    <div className="sla-time-display">
+                      {formatTimeRemaining(
+                        ticket.dateCreated,
+                        ticket.priority,
+                        "resolution"
+                      )}
+                    </div>
+                    <div className="sla-progress-bar">
+                      <div
+                        className={`sla-progress-fill ${getSLAStatus(
+                          calculateSLAProgress(
+                            ticket.dateCreated,
+                            ticket.priority,
+                            "resolution"
+                          )
+                        )}`}
+                        style={{
+                          width: `${calculateSLAProgress(
+                            ticket.dateCreated,
+                            ticket.priority,
+                            "resolution"
+                          )}%`,
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  {/* Quick Info */}
+                  <div className="sla-quick-info">
+                    <div className="sla-info-item">
+                      <span className="sla-info-label">Priority</span>
+                      <span className={`priority-badge priority-${ticket.priority.toLowerCase()}`}>
+                        {PRIORITY_LABELS[ticket.priority as keyof typeof PRIORITY_LABELS]}
                       </span>
                     </div>
-                    <div className="sla-detail-item">
-                      <span className="sla-detail-label">Last Update:</span>
-                      <span className="sla-time-info">
-                        {formatRelativeTime(ticket.dateModified)}
-                      </span>
+                    <div className="sla-info-item">
+                      <span className="sla-info-label">Created</span>
+                      <span className="sla-info-value">{formatRelativeTime(ticket.dateCreated)}</span>
                     </div>
-                    {ticket.dueDate && (
-                      <div className="sla-detail-item">
-                        <span className="sla-detail-label">Due Date:</span>
-                        <span className="sla-time-info">
-                          {formatRelativeTime(ticket.dueDate)}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -1801,14 +1682,22 @@ const EnhancedTicketDetailsPage: React.FC = () => {
           {/* Right Column - Assignment & Info */}
           <div className="sidebar-column">
             {/* Assignment Card */}
-            <div className="enhanced-card assignment-card">
+            <div className={`enhanced-card assignment-card ${canEditTicket() ? 'editable-heartbeat' : ''}`}>
+              {isSavingChanges && (
+                <div className="card-loader-overlay">
+                  <div className="moving-loader-container">
+                    <FaTicketAlt className="full-card-moving-ticket" />
+                    <span className="moving-text">Updating ticket...</span>
+                  </div>
+                </div>
+              )}
               <div className="card-header">
                 <div className="header-title">
                   <FaUserTie className="header-icon" />
                   <h2>Assignment & Status</h2>
                 </div>
               </div>
-              <div className="card-content">
+              <div className="card-content">{}
                 <div className="assignment-fields">
                   {/* Department */}
                   <div className="field-group">
@@ -1818,33 +1707,26 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                     </label>
                     <div className="field-content">
                       {canEditTicket() ? (
-                        <div className="field-with-loader">
-                          <select
-                            value={selectedDepartmentId}
-                            onChange={(e) =>
-                              handleDepartmentChange(e.target.value)
-                            }
-                            className="enhanced-select"
-                            disabled={isSavingChanges}
-                          >
-                            <option value="">Select Department...</option>
-                            {departments
-                              .filter((dept) => dept.isActive)
-                              .map((department) => (
-                                <option
-                                  key={department.id}
-                                  value={department.id}
-                                >
-                                  {department.name}
-                                </option>
-                              ))}
-                          </select>
-                          {isSavingChanges && (
-                            <div className="field-loader">
-                              <ButtonLoader variant="primary" />
-                            </div>
-                          )}
-                        </div>
+                        <select
+                          value={selectedDepartmentId}
+                          onChange={(e) =>
+                            handleDepartmentChange(e.target.value)
+                          }
+                          className="enhanced-select"
+                          disabled={isSavingChanges}
+                        >
+                          <option value="">Select Department...</option>
+                          {departments
+                            .filter((dept) => dept.isActive)
+                            .map((department) => (
+                              <option
+                                key={department.id}
+                                value={department.id}
+                              >
+                                {department.name}
+                              </option>
+                            ))}
+                        </select>
                       ) : (
                         <div className="field-display">
                           <FaBuilding className="display-icon" />
@@ -1862,87 +1744,80 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                     </label>
                     <div className="field-content">
                       {canEditTicket() ? (
-                        <div className="field-with-loader">
-                          <div className="assignee-search">
-                            {ticket.assignedTo && !showAssigneeDropdown ? (
-                              <div
-                                className="assigned-display"
-                                onClick={() => setShowAssigneeDropdown(true)}
+                        <div className="assignee-search">
+                          {ticket.assignedTo && !showAssigneeDropdown ? (
+                            <div
+                              className="assigned-display"
+                              onClick={() => setShowAssigneeDropdown(true)}
+                            >
+                              <span className="assigned-name">
+                                {ticket.assignedTo.employeeName}
+                              </span>
+                              <button
+                                type="button"
+                                className="clear-assignee-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleClearAssignee();
+                                }}
+                                title="Clear assignee"
                               >
-                                <span className="assigned-name">
-                                  {ticket.assignedTo.employeeName}
-                                </span>
-                                <button
-                                  type="button"
-                                  className="clear-assignee-btn"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleClearAssignee();
-                                  }}
-                                  title="Clear assignee"
-                                >
-                                  <FaTimes />
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="assignee-search-container">
-                                <input
-                                  type="text"
-                                  value={assigneeSearchQuery}
-                                  onChange={(e) => {
-                                    setAssigneeSearchQuery(e.target.value);
-                                    setShowAssigneeDropdown(true);
-                                  }}
-                                  onFocus={() => setShowAssigneeDropdown(true)}
-                                  placeholder="Search and select employee..."
-                                  className="enhanced-input"
-                                  disabled={isSavingChanges}
-                                />
-                                {showAssigneeDropdown &&
-                                  assigneeSearchQuery && (
-                                    <div className="search-dropdown">
-                                      {employeeLoading && (
-                                        <div className="dropdown-item loading">
-                                          <ButtonLoader variant="primary" />
-                                          <span>Searching employees...</span>
+                                <FaTimes />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="assignee-search-container">
+                              <input
+                                type="text"
+                                value={assigneeSearchQuery}
+                                onChange={(e) => {
+                                  setAssigneeSearchQuery(e.target.value);
+                                  setShowAssigneeDropdown(true);
+                                }}
+                                onFocus={() => setShowAssigneeDropdown(true)}
+                                placeholder="Search and select employee..."
+                                className="enhanced-input"
+                                disabled={isSavingChanges}
+                              />
+                              {showAssigneeDropdown &&
+                                assigneeSearchQuery && (
+                                  <div className="search-dropdown">
+                                    {employeeLoading && (
+                                      <div className="dropdown-item loading">
+                                        <ButtonLoader variant="primary" />
+                                        <span>Searching employees...</span>
+                                      </div>
+                                    )}
+                                    {!employeeLoading &&
+                                      employeeResults.length === 0 && (
+                                        <div className="dropdown-item no-results">
+                                          <span>No employees found</span>
                                         </div>
                                       )}
-                                      {!employeeLoading &&
-                                        employeeResults.length === 0 && (
-                                          <div className="dropdown-item no-results">
-                                            <span>No employees found</span>
-                                          </div>
-                                        )}
-                                      {!employeeLoading &&
-                                        employeeResults.map((employee) => (
-                                          <div
-                                            key={employee.id}
-                                            className="dropdown-item employee-item"
-                                            onClick={(e) => {
-                                              e.preventDefault();
-                                              e.stopPropagation();
-                                              handleAssigneeChange(employee);
-                                            }}
-                                          >
-                                            <div className="employee-info">
-                                              <div className="employee-name">
-                                                {employee.employeeName}
-                                              </div>
-                                              <div className="employee-meta">
-                                                {employee.designation} •{" "}
-                                                {employee.departmentName}
-                                              </div>
+                                    {!employeeLoading &&
+                                      employeeResults.map((employee) => (
+                                        <div
+                                          key={employee.id}
+                                          className="dropdown-item employee-item"
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            handleAssigneeChange(employee);
+                                          }}
+                                        >
+                                          <div className="employee-info">
+                                            <div className="employee-name">
+                                              {employee.employeeName}
+                                            </div>
+                                            <div className="employee-meta">
+                                              {employee.designation} •{" "}
+                                              {employee.departmentName}
                                             </div>
                                           </div>
-                                        ))}
-                                    </div>
-                                  )}
-                              </div>
-                            )}
-                          </div>
-                          {isSavingChanges && (
-                            <div className="field-loader">
-                              <ButtonLoader variant="primary" />
+                                        </div>
+                                      ))}
+                                  </div>
+                                )}
                             </div>
                           )}
                         </div>
@@ -1981,30 +1856,23 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                     </label>
                     <div className="field-content">
                       {canEditTicket() ? (
-                        <div className="field-with-loader">
-                          <select
-                            value={selectedPriority}
-                            onChange={(e) =>
-                              handlePriorityChange(e.target.value)
-                            }
-                            className="enhanced-select"
-                            disabled={isSavingChanges}
-                          >
-                            <option value="">Select Priority...</option>
-                            {Object.entries(PRIORITY_LABELS).map(
-                              ([key, label]) => (
-                                <option key={key} value={key}>
-                                  {label}
-                                </option>
-                              )
-                            )}
-                          </select>
-                          {isSavingChanges && (
-                            <div className="field-loader">
-                              <ButtonLoader variant="primary" />
-                            </div>
+                        <select
+                          value={selectedPriority}
+                          onChange={(e) =>
+                            handlePriorityChange(e.target.value)
+                          }
+                          className="enhanced-select"
+                          disabled={isSavingChanges}
+                        >
+                          <option value="">Select Priority...</option>
+                          {Object.entries(PRIORITY_LABELS).map(
+                            ([key, label]) => (
+                              <option key={key} value={key}>
+                                {label}
+                              </option>
+                            )
                           )}
-                        </div>
+                        </select>
                       ) : (
                         <div className="field-display">
                           <span

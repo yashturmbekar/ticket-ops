@@ -34,7 +34,6 @@ import {
   FaFilePowerpoint,
   FaFile,
   FaTicketAlt,
-  FaSearch,
 } from "react-icons/fa";
 import { Loader, ButtonLoader } from "../components/common";
 import "../styles/getTicketDetails.css";
@@ -47,6 +46,8 @@ interface ApiTicketResponse {
   status: string;
   ticketCode: string;
   priority: string;
+  responseDueAt: string;
+  resolutionDueAt: string;
   raisedByEmployeeDetails?: {
     employeeName: string;
     id: number;
@@ -193,7 +194,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
     currentApiTicket: ApiTicketResponse,
     updates: Partial<{
       assignedDepartmentId: string;
-      assignedToEmployeeId: string | number;
+      assignedToEmployeeId: string | number | null;
       priority: string;
       status: string;
     }>
@@ -209,9 +210,12 @@ const TicketDetailsPageProfessional: React.FC = () => {
       assignedDepartmentId:
         updates.assignedDepartmentId || currentApiTicket.assignedDepartmentId,
       assignedToEmployeeId:
-        updates.assignedToEmployeeId || currentApiTicket.assignedToEmployeeId,
+        updates.assignedToEmployeeId !== undefined
+          ? updates.assignedToEmployeeId
+          : currentApiTicket.assignedToEmployeeId,
       isActive: true,
-      organizationId: 2001, // Default organization ID
+      responseDueAt: currentApiTicket.responseDueAt,
+      resolutionDueAt: currentApiTicket.resolutionDueAt,
     };
 
     // Remove undefined fields
@@ -293,6 +297,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
   };
 
   const handleAssigneeChange = async (employee: any) => {
+    console.log("handleAssigneeChange called with employee:", employee);
     if (!ticket || !id || !currentApiTicket) return;
 
     setIsSavingChanges(true);
@@ -300,10 +305,23 @@ const TicketDetailsPageProfessional: React.FC = () => {
     setShowAssigneeDropdown(false);
 
     try {
+      // Check if ticket was previously unassigned
+      const wasUnassigned = !currentApiTicket.assignedToEmployeeId;
+
       // Create ticket update payload with assignee change
-      const updatePayload = createTicketUpdatePayload(currentApiTicket, {
+      const updateData: any = {
         assignedToEmployeeId: employee.id,
-      });
+      };
+
+      // If ticket was unassigned, change status to Pending-Approval
+      if (wasUnassigned) {
+        updateData.status = "PENDING_APPROVAL";
+      }
+
+      const updatePayload = createTicketUpdatePayload(
+        currentApiTicket,
+        updateData
+      );
 
       console.log("Updating ticket assignee:", updatePayload);
       await updateTicket(updatePayload);
@@ -319,9 +337,12 @@ const TicketDetailsPageProfessional: React.FC = () => {
         updateEditValues(updatedTicket);
 
         if (notificationContext) {
+          const statusMessage = wasUnassigned
+            ? ` Status has been changed to Pending-Approval.`
+            : "";
           notificationContext.success(
             "Assignee Updated",
-            `Ticket has been assigned to ${employee.employeeName}.`
+            `Ticket has been assigned to ${employee.employeeName}.${statusMessage}`
           );
         }
       }
@@ -335,6 +356,20 @@ const TicketDetailsPageProfessional: React.FC = () => {
       }
     } finally {
       setIsSavingChanges(false);
+    }
+  };
+
+  const handleClearAssignee = () => {
+    // Only clear UI state, don't call API
+    setAssigneeSearchQuery(""); // Clear the search query
+    setShowAssigneeDropdown(true); // Show the dropdown for new selection
+
+    // Update local ticket state to show as unassigned in UI
+    if (ticket) {
+      setTicket({
+        ...ticket,
+        assignedTo: undefined,
+      });
     }
   };
 
@@ -473,7 +508,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (!target.closest(".assignee-search")) {
+      if (!target.closest(".assignee-search-container")) {
         setShowAssigneeDropdown(false);
       }
     };
@@ -1124,54 +1159,89 @@ const TicketDetailsPageProfessional: React.FC = () => {
                           <div className="professional-edit-field assignee-field">
                             <FaUserTie className="field-icon" />
                             <div className="assignee-search-container">
-                              <input
-                                type="text"
-                                value={assigneeSearchQuery}
-                                onChange={(e) => {
-                                  setAssigneeSearchQuery(e.target.value);
-                                  setShowAssigneeDropdown(true);
-                                }}
-                                onFocus={() => setShowAssigneeDropdown(true)}
-                                placeholder="Search and select employee..."
-                                className="professional-input"
-                                disabled={isSavingChanges}
-                              />
-                              <FaSearch className="search-icon" />
-                              {showAssigneeDropdown && assigneeSearchQuery && (
-                                <div className="professional-dropdown">
-                                  {employeeLoading && (
-                                    <div className="dropdown-item loading">
-                                      <ButtonLoader variant="primary" />
-                                      <span>Searching employees...</span>
-                                    </div>
-                                  )}
-                                  {!employeeLoading &&
-                                    employeeResults.length === 0 && (
-                                      <div className="dropdown-item no-results">
-                                        <span>No employees found</span>
+                              {/* Show assigned employee with clear button or search input */}
+                              {ticket.assignedTo && !showAssigneeDropdown ? (
+                                <div
+                                  className="assigned-employee-display"
+                                  onClick={() => setShowAssigneeDropdown(true)}
+                                  style={{ cursor: "pointer" }}
+                                  title="Click to change assignee"
+                                >
+                                  <span className="assigned-employee-name">
+                                    {ticket.assignedTo.employeeName}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    className="clear-assignee-btn"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleClearAssignee();
+                                    }}
+                                    title="Clear assignee"
+                                  >
+                                    <FaTimes />
+                                  </button>
+                                </div>
+                              ) : (
+                                <>
+                                  <input
+                                    type="text"
+                                    value={assigneeSearchQuery}
+                                    onChange={(e) => {
+                                      setAssigneeSearchQuery(e.target.value);
+                                      setShowAssigneeDropdown(true);
+                                    }}
+                                    onFocus={() =>
+                                      setShowAssigneeDropdown(true)
+                                    }
+                                    placeholder="Search and select employee..."
+                                    className="professional-input"
+                                    disabled={isSavingChanges}
+                                  />
+                                  {showAssigneeDropdown &&
+                                    assigneeSearchQuery && (
+                                      <div className="professional-dropdown">
+                                        {employeeLoading && (
+                                          <div className="dropdown-item loading">
+                                            <ButtonLoader variant="primary" />
+                                            <span>Searching employees...</span>
+                                          </div>
+                                        )}
+                                        {!employeeLoading &&
+                                          employeeResults.length === 0 && (
+                                            <div className="dropdown-item no-results">
+                                              <span>No employees found</span>
+                                            </div>
+                                          )}
+                                        {!employeeLoading &&
+                                          employeeResults.map((employee) => (
+                                            <div
+                                              key={employee.id}
+                                              className="dropdown-item employee-option"
+                                              onClick={(e) => {
+                                                console.log(
+                                                  "Employee clicked:",
+                                                  employee
+                                                );
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                handleAssigneeChange(employee);
+                                              }}
+                                            >
+                                              <div className="employee-details">
+                                                <div className="employee-name">
+                                                  {employee.employeeName}
+                                                </div>
+                                                <div className="employee-meta">
+                                                  {employee.designation} •{" "}
+                                                  {employee.departmentName}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          ))}
                                       </div>
                                     )}
-                                  {!employeeLoading &&
-                                    employeeResults.map((employee) => (
-                                      <div
-                                        key={employee.id}
-                                        className="dropdown-item employee-option"
-                                        onClick={() =>
-                                          handleAssigneeChange(employee)
-                                        }
-                                      >
-                                        <div className="employee-details">
-                                          <div className="employee-name">
-                                            {employee.employeeName}
-                                          </div>
-                                          <div className="employee-meta">
-                                            {employee.designation} •{" "}
-                                            {employee.departmentName}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    ))}
-                                </div>
+                                </>
                               )}
                             </div>
                             {isSavingChanges && (

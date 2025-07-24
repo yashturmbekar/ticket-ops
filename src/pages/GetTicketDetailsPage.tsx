@@ -305,7 +305,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
         "Sending complete ticket update for assignee change:",
         completeTicketUpdate
       );
-      await updateTicket(id, completeTicketUpdate);
+      await updateTicket(completeTicketUpdate);
 
       // Refresh ticket data
       const updatedTicketResponse = await getTicketById(id);

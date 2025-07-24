@@ -180,7 +180,7 @@ export const useSlaManagement = (): UseSlaManagementResult => {
         addNotification({
           type: "success",
           title: "Success",
-          message: "SLA policy created successfully",
+          message: `SLA policies created successfully for ${formData.prioritySlaSettings.length} priority levels`,
         });
 
         // Reset form and refresh policies list

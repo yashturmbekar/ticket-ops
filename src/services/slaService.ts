@@ -38,25 +38,24 @@ export class SlaService {
    * Create SLA policies for multiple priorities for a department
    */
   static async createSlaPolicy(data: SlaRuleFormData): Promise<SlaPolicy[]> {
-    const policies: SlaPolicy[] = [];
+    const payload = {
+      helpdeskDepartmentId: data.helpdeskDepartmentId,
+      ticketPrioritySlaRulesDTOS: data.prioritySlaSettings.map(
+        (prioritySla) => ({
+          priority: prioritySla.priority,
+          responseTimeMinutes: prioritySla.responseTimeMinutes,
+          resolutionTimeMinutes: prioritySla.resolutionTimeMinutes,
+          isActive: true,
+        })
+      ),
+    };
 
-    for (const prioritySla of data.prioritySlaSettings) {
-      const payload = {
-        helpdeskDepartmentId: data.helpdeskDepartmentId,
-        priority: prioritySla.priority,
-        responseTimeMinutes: prioritySla.responseTimeMinutes,
-        resolutionTimeMinutes: prioritySla.resolutionTimeMinutes,
-        isActive: true,
-      };
+    const response = await apiClient.post(
+      "/helpdesk-tickets-sla-policy",
+      payload
+    );
 
-      const response = await apiClient.post(
-        "/api/helpdesk-tickets-sla-policy",
-        payload
-      );
-      policies.push(response.data);
-    }
-
-    return policies;
+    return response;
   }
 
   /**

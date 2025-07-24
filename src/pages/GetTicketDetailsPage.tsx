@@ -1486,6 +1486,16 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                       <div
                                         key={index}
                                         className="comment-attachment"
+                                        style={isImage && fileData && fileType ? { cursor: "pointer" } : {}}
+                                        onClick={
+                                          isImage && fileData && fileType
+                                            ? () =>
+                                                setSelectedImage({
+                                                  src: `data:${fileType};base64,${fileData}`,
+                                                  alt: fileName,
+                                                })
+                                            : undefined
+                                        }
                                       >
                                         {isImage && fileData && fileType ? (
                                           <img
@@ -1496,19 +1506,26 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                               maxHeight: "100px",
                                               borderRadius: "4px",
                                               objectFit: "cover",
-                                              cursor: "pointer",
                                             }}
-                                            onClick={() =>
-                                              setSelectedImage({
-                                                src: `data:${fileType};base64,${fileData}`,
-                                                alt: fileName,
-                                              })
-                                            }
                                           />
                                         ) : (
                                           getFileIcon(fileName, 32)
                                         )}
-                                        <span className="file-name">
+                                        <span
+                                          className="file-name"
+                                          style={isImage && fileData && fileType ? { cursor: "pointer" } : {}}
+                                          onClick={
+                                            isImage && fileData && fileType
+                                              ? (e) => {
+                                                  e.stopPropagation();
+                                                  setSelectedImage({
+                                                    src: `data:${fileType};base64,${fileData}`,
+                                                    alt: fileName,
+                                                  });
+                                                }
+                                              : undefined
+                                          }
+                                        >
                                           {fileName}
                                         </span>
                                         <span className="file-size">
@@ -1516,7 +1533,8 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                         </span>
                                         <button
                                           className="download-btn"
-                                          onClick={() => {
+                                          onClick={(e) => {
+                                            e.stopPropagation();
                                             if (fileData && fileType) {
                                               const link =
                                                 document.createElement("a");

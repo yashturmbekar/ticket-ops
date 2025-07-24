@@ -28,14 +28,15 @@ interface DepartmentSearchItem {
 }
 
 export const DepartmentsPage: React.FC = () => {
+  // Removed unused filters state
+
   const { addNotification } = useNotifications();
+  const [allDepartments, setAllDepartments] = useState<DepartmentWithEmployees[]>([]);
   const [departments, setDepartments] = useState<DepartmentWithEmployees[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedDepartments, setExpandedDepartments] = useState<Set<string>>(
-    new Set()
-  );
-  
+  const [expandedDepartments, setExpandedDepartments] = useState<Set<string>>(new Set());
+
   // Confirmation modal state
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [departmentToDelete, setDepartmentToDelete] = useState<{
@@ -43,57 +44,49 @@ export const DepartmentsPage: React.FC = () => {
     name: string;
   } | null>(null);
 
-  // Load departments
-  const loadDepartments = React.useCallback(async () => {
-    try {
-      setLoading(true);
-
-      // Prepare search criteria for real API
-      const searchCriteria: Record<string, unknown> = {};
-
-      // Add search query if provided
-      if (searchQuery) {
-        searchCriteria.search = searchQuery;
-      }
-
-      // Call the new search API
-      const response = await searchHelpdeskDepartments(
-        searchCriteria,
-        0,
-        50,
-        "id,desc"
-      );
-
-      // Extract departments from response - API returns 'items' array
-      const responseData = response.data || response;
-      const departmentItems = responseData.items || [];
-
-      // Transform the data to include employees in department objects
-      const departmentsList: DepartmentWithEmployees[] = departmentItems.map(
-        (item: DepartmentSearchItem) => ({
-          ...item.department,
-          employees: item.employees || [],
-        })
-      );
-
-      console.log("Departments response:", response);
-      console.log("Transformed departments:", departmentsList);
-      setDepartments(departmentsList);
-    } catch (error) {
-      console.error("Error loading departments:", error);
-      addNotification({
-        type: "error",
-        title: "Failed to Load Departments",
-        message: "Could not load departments. Please try again.",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [searchQuery, addNotification]);
-
+  // Load all departments once
   useEffect(() => {
-    loadDepartments();
-  }, [loadDepartments]);
+    const fetchDepartments = async () => {
+      try {
+        setLoading(true);
+        const response = await searchHelpdeskDepartments({}, 0, 1000, "id,desc");
+        const responseData = response.data || response;
+        const departmentItems = responseData.items || [];
+        const departmentsList: DepartmentWithEmployees[] = departmentItems.map(
+          (item: DepartmentSearchItem) => ({
+            ...item.department,
+            employees: item.employees || [],
+          })
+        );
+        setAllDepartments(departmentsList);
+        setDepartments(departmentsList);
+      } catch (error) {
+        addNotification({
+          type: "error",
+          title: "Failed to Load Departments",
+          message: "Could not load departments. Please try again.",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDepartments();
+  }, [addNotification]);
+
+  // Client-side filter
+  useEffect(() => {
+    if (!searchQuery) {
+      setDepartments(allDepartments);
+    } else {
+      const q = searchQuery.toLowerCase();
+      setDepartments(
+        allDepartments.filter((dept) =>
+          dept.name.toLowerCase().includes(q)
+        )
+      );
+    }
+  }, [searchQuery, allDepartments]);
+
 
   const handleDeleteDepartment = (id: string, name: string) => {
     setDepartmentToDelete({ id, name });
@@ -110,7 +103,9 @@ export const DepartmentsPage: React.FC = () => {
         title: "✅ Department Deleted",
         message: `Department "${departmentToDelete.name}" has been deleted successfully.`,
       });
-      loadDepartments();
+      setAllDepartments((prev) =>
+        prev.filter((dept) => dept.id !== departmentToDelete.id)
+      );
     } catch (error) {
       console.error("Error deleting department:", error);
       addNotification({
@@ -151,6 +146,7 @@ export const DepartmentsPage: React.FC = () => {
     return <Loader centered text="Loading departments..." minHeight="60vh" />;
   }
 
+
   return (
     <div className="tickets-page">
       {/* Page Title */}
@@ -190,8 +186,7 @@ export const DepartmentsPage: React.FC = () => {
       {/* Results Info */}
       <div className="tickets-results-info">
         <div className="results-count">
-          Showing {departments.length} department
-          {departments.length !== 1 ? "s" : ""}
+          Showing {departments.length} department{departments.length !== 1 ? "s" : ""}
         </div>
       </div>
 
@@ -242,9 +237,8 @@ export const DepartmentsPage: React.FC = () => {
                       </td>
                       <td>
                         <span
-                          className={`status-badge ${
-                            department.isActive ? "active" : "inactive"
-                          }`}
+                          className={`status-badge ${department.isActive ? "active" : "inactive"
+                            }`}
                         >
                           {department.isActive ? "Active" : "Inactive"}
                         </span>
@@ -252,7 +246,7 @@ export const DepartmentsPage: React.FC = () => {
                       <td>
                         <div className="employees-info">
                           {department.employees &&
-                          department.employees.length > 0 ? (
+                            department.employees.length > 0 ? (
                             <div className="employee-names-list">
                               {(expandedDepartments.has(department.id)
                                 ? department.employees
@@ -275,9 +269,8 @@ export const DepartmentsPage: React.FC = () => {
                                 >
                                   {expandedDepartments.has(department.id)
                                     ? "Show Less"
-                                    : `+${
-                                        department.employees.length - 3
-                                      } more`}
+                                    : `+${department.employees.length - 3
+                                    } more`}
                                 </button>
                               )}
                             </div>
@@ -424,8 +417,8 @@ export const DepartmentsPage: React.FC = () => {
           Delete Department
         </div>
         <div className="modal-confirm-message">
-          Are you sure you want to delete <strong>"{departmentToDelete?.name}"</strong>? 
-          This action will permanently delete the department and cannot be undone. 
+          Are you sure you want to delete <strong>"{departmentToDelete?.name}"</strong>?
+          This action will permanently delete the department and cannot be undone.
           All associated employee assignments will be removed.
         </div>
       </Modal>

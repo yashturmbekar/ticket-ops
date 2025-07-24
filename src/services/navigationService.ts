@@ -164,7 +164,7 @@ export const navigationItems: NavigationItem[] = [
     path: "/settings",
     label: "Settings",
     icon: "settings",
-    requiredRoles: [UserRole.ORG_ADMIN, UserRole.CXO, UserRole.HELPDESK_ADMIN],
+    requiredRoles: [UserRole.ORG_ADMIN, UserRole.HELPDESK_ADMIN],
     description: "System configuration",
   },
 ];

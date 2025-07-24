@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   FaUser,
   FaBuilding,
@@ -54,6 +54,9 @@ export const TicketTile: React.FC<TicketTileProps> = ({
   onSelect,
   compact = false,
 }) => {
+  const [showTitleTooltip, setShowTitleTooltip] = useState(false);
+  const [showDescTooltip, setShowDescTooltip] = useState(false);
+
   const getPriorityColor = (priority: string): string => {
     switch (priority.toLowerCase()) {
       case "critical":
@@ -234,30 +237,43 @@ export const TicketTile: React.FC<TicketTileProps> = ({
         </div>
       </div>
 
-      {/* Title and Description */}
-      <div className="tile-content">
-        <h3 className="tile-title">{ticket.title}</h3>
-        <p className="tile-description">{ticket.description}</p>
+      {/* Title and Description - Priority Section */}
+      <div className="tile-content-priority">
+        <div
+          className="title-container"
+          onMouseEnter={() => setShowTitleTooltip(true)}
+          onMouseLeave={() => setShowTitleTooltip(false)}
+        >
+          <h3 className="tile-title">{ticket.title}</h3>
+          {showTitleTooltip && (
+            <div className="tooltip title-tooltip">{ticket.title}</div>
+          )}
+        </div>
+        <div
+          className="description-container"
+          onMouseEnter={() => setShowDescTooltip(true)}
+          onMouseLeave={() => setShowDescTooltip(false)}
+        >
+          <p className="tile-description">{ticket.description}</p>
+          {showDescTooltip && (
+            <div className="tooltip description-tooltip">
+              {ticket.description}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Assignment Info */}
-      <div className="assignment-info">
-        <div className="assignee-info">
-          <div className="assignee-avatar">
+      {/* Compact Assignment Info */}
+      <div className="assignment-info-compact">
+        <div className="assignee-info-compact">
+          <div className="assignee-avatar-small">
             <FaUser />
           </div>
-          <div className="assignee-details">
-            <span className="assignee-name">{assigneeName}</span>
-            {ticket.assignedToDetails?.designation && (
-              <span className="assignee-designation">
-                {ticket.assignedToDetails.designation}
-              </span>
-            )}
-          </div>
+          <span className="assignee-name-small">{assigneeName}</span>
         </div>
-        <div className="department-info">
+        <div className="department-info-compact">
           <FaBuilding />
-          <span className="department-name">{departmentName}</span>
+          <span className="department-name-small">{departmentName}</span>
         </div>
       </div>
 

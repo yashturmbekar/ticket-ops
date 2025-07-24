@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { createContext, useReducer, useEffect } from "react";
 import type { ReactNode } from "react";
-import type { User, UserRole, Permission } from "../types";
+import type { User, Permission } from "../types";
+import { UserRole } from "../types";
 import { AUTH_TOKEN_KEY, USER_DATA_KEY } from "../constants";
 import { login as loginApi } from "../services/authService";
 import { jwtDecode } from "jwt-decode";
@@ -99,6 +100,26 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export { AuthContext };
 
+// Helper function to map token roles to our UserRole enum
+const mapRoleFromToken = (tokenRole: string): UserRole => {
+  console.log("Mapping role from token:", tokenRole);
+
+  const roleMap: Record<string, UserRole> = {
+
+    // Organizational roles
+    cxo: UserRole.CXO,
+    hr: UserRole.HR,
+    employee: UserRole.EMPLOYEE,
+    manager: UserRole.MANAGER,
+    org_admin: UserRole.ORG_ADMIN,
+    "org-admin": UserRole.ORG_ADMIN,
+  };
+
+  // Normalize role: lowercase, trim, and replace underscores with hyphens for consistent lookup
+  const normalizedRole = tokenRole.toLowerCase().trim().replace(/_/g, "-");
+  return roleMap[normalizedRole] || UserRole.EMPLOYEE;
+};
+
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -133,6 +154,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const token = response.id_token;
         // Decode user info from JWT
         const decoded: any = jwtDecode(token);
+        // Extract role from rolePermissions.role field
+        const tokenRole = decoded.rolePermissions?.role;
         // You may need to map the decoded fields to your User type
         const user = {
           id: decoded.employeeId || decoded.sub || "",
@@ -140,7 +163,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           email: decoded.sub || "",
           firstName: decoded.firstName || "",
           lastName: decoded.lastName || "",
-          role: decoded.auth || "user",
+          role: mapRoleFromToken(tokenRole),
           department: decoded.department || "",
           manager: decoded.manager || "",
           phone: decoded.phone || "",
@@ -154,6 +177,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         };
         localStorage.setItem(AUTH_TOKEN_KEY, token);
         localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
+        console.log("User data:", user);
         dispatch({
           type: "LOGIN_SUCCESS",
           payload: { user, token },

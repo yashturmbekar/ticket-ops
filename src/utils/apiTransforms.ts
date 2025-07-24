@@ -16,6 +16,7 @@ export function transformApiTicketToTicket(
     priority: apiTicket.priority,
     assignedDepartmentId: apiTicket.assignedDepartmentId,
     createdBy: apiTicket.raiserEmployeeDetails.employeeName,
+    assignedDepartmentName: apiTicket.assignedDepartmentName,
     assignedTo:
       apiTicket.assignedToEmployeeDetails?.employeeName ||
       (apiTicket.assignedToEmployeeId

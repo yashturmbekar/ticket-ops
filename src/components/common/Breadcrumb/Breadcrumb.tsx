@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FaHome, FaChevronRight } from "react-icons/fa";
-import "./BreadcrumbModern.css";
+import "./Breadcrumb.css";
 
 interface BreadcrumbItem {
   label: string;
@@ -19,6 +19,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   customItems,
 }) => {
   const location = useLocation();
+  const [ticketCode, setTicketCode] = useState<string | null>(null);
 
   const routeMap: Record<string, string> = {
     "/": "Dashboard",
@@ -33,6 +34,33 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
     "/departments": "Departments",
     "/departments/create": "Create Department",
   };
+
+  // Check if we're on a ticket details page and get the ticket code
+  useEffect(() => {
+    const pathnames = location.pathname.split("/").filter((x) => x);
+    
+    if (
+      pathnames[0] === "tickets" &&
+      pathnames.length === 2 &&
+      pathnames[1] !== "create"
+    ) {
+      const ticketId = pathnames[1];
+      const storedTicketCode = sessionStorage.getItem(`ticketCode_${ticketId}`);
+      setTicketCode(storedTicketCode);
+      
+      // Set up an interval to check for ticket code updates
+      const interval = setInterval(() => {
+        const updatedTicketCode = sessionStorage.getItem(`ticketCode_${ticketId}`);
+        if (updatedTicketCode && updatedTicketCode !== ticketCode) {
+          setTicketCode(updatedTicketCode);
+        }
+      }, 100);
+
+      return () => clearInterval(interval);
+    } else {
+      setTicketCode(null);
+    }
+  }, [location.pathname, ticketCode]);
 
   const generateBreadcrumbs = (): BreadcrumbItem[] => {
     if (customItems) return customItems;
@@ -55,11 +83,8 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
           !routeMap[currentPath] && // Not a known route like "/tickets/create"
           pathname !== "create" // Explicitly exclude create route
         ) {
-          // This is a ticket details page, use the ticket code from session storage or custom prop
-          const storedTicketCode = sessionStorage.getItem(
-            `ticketCode_${pathname}`
-          );
-          const label = storedTicketCode || `Ticket ${pathname}`;
+          // Use the reactive ticket code state instead of directly accessing sessionStorage
+          const label = ticketCode || `Ticket ${pathname}`;
           breadcrumbs.push({
             label,
             path: isLast ? undefined : currentPath,

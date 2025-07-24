@@ -226,7 +226,7 @@
 /* Tiles View */
 .tickets-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--spacing-4);
 }
 
@@ -676,7 +676,7 @@
 /* Responsive Design */
 @media (max-width: 1200px) {
   .tickets-grid {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   }
 }
 

@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import {
-  Paper,
   Typography,
   Box,
   Button,
-  Divider,
   Alert,
   Stack,
 } from "@mui/material";

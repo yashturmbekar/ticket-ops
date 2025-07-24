@@ -80,24 +80,29 @@ export const getDisplayName = (
 };
 
 /**
- * Gets the display role/designation, preferring employee profile designation
+ * Gets the display role/designation, preferring role from decoded token
  * @param designation - Designation from employee profile
- * @param role - Role from user data
+ * @param role - Role from user data (decoded token)
  * @param roleLabels - Mapping of roles to display labels
- * @returns The best available role/designation
+ * @returns The best available role/designation, prioritizing token role
  */
 export const getDisplayRole = (
   designation?: string,
   role?: string,
   roleLabels?: Record<string, string>
 ): string => {
-  if (designation) {
-    return designation;
-  }
-
+  // Prioritize role from decoded token over designation
   if (role && roleLabels) {
     return roleLabels[role] || role;
   }
 
-  return role || "User";
+  if (role) {
+    return role;
+  }
+
+  if (designation) {
+    return designation;
+  }
+
+  return "User";
 };

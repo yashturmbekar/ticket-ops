@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Header } from "./Header";
-import SideNav from "./SideNavModern";
+import SideNavModern from "./SideNav";
 import { Breadcrumb } from "../common/Breadcrumb";
 import { FloatingActionButton } from "../common/FloatingActionButton";
 import "./AppLayout.css";
@@ -63,7 +63,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       />
 
       <div className="modern-app-body">
-        <SideNav
+        <SideNavModern
           isMobileMenuOpen={isMobileMenuOpen}
           isCollapsed={isCollapsed}
           onMobileMenuToggle={toggleMobileMenu}

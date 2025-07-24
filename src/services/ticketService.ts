@@ -38,6 +38,15 @@ export async function getTicketById(id: string) {
 }
 
 export async function createTicket(ticketData: Record<string, unknown>) {
+  // Use specialized retry method for tickets with attachments
+  if (
+    ticketData.attachments &&
+    Array.isArray(ticketData.attachments) &&
+    ticketData.attachments.length > 0
+  ) {
+    console.log("Creating ticket with attachments - using retry logic");
+    return apiClient.postWithRetry("/helpdesk-tickets", ticketData, 3);
+  }
   return apiClient.post("/helpdesk-tickets", ticketData);
 }
 
@@ -80,20 +89,29 @@ export async function searchTickets(
   );
 }
 
+export async function searchMyTickets(
+  searchData: Record<string, unknown>,
+  page = 0,
+  size = 10,
+  sort = "id,desc"
+) {
+  return apiClient.post(
+    `${endpoint}/my-tickets/search?page=${page}&size=${size}&sort=${sort}`,
+    searchData
+  );
+}
+
 export async function reopenTicket(id: string, reason?: string) {
   return apiClient.patch(`${endpoint}/${id}/reopen`, { reason });
 }
 
-export async function addComment(
-  ticketId: string,
-  comment: string
-) {
+export async function addComment(ticketId: string, comment: string) {
   return apiClient.post(`/helpdesk-ticket-comments`, {
     id: null,
     ticketId: ticketId,
     comment: comment,
     commenterEmployeeId: null,
-    isDeleted: false
+    isDeleted: false,
   });
 }
 
@@ -112,7 +130,7 @@ export async function updateComment(
     ticketId: ticketId,
     comment: content,
     commenterEmployeeId: commenterEmployeeId,
-    isDeleted: false
+    isDeleted: false,
   });
 }
 
@@ -120,14 +138,35 @@ export async function deleteComment(ticketId: string, commentId: string) {
   return apiClient.delete(`${endpoint}/${ticketId}/comments/${commentId}`);
 }
 
-export async function uploadAttachment(ticketId: string, file: File) {
-  // For file upload, use FormData directly with axios
-  const formData = new FormData();
-  formData.append("file", file);
-  return apiClient.post(`${endpoint}/${ticketId}/attachments`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
+
+export async function uploadAttachment(file: File, commentId: string) {
+  // Convert File to byte array
+  const fileData = await new Promise<number[]>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const arrayBuffer = reader.result as ArrayBuffer;
+      const uint8Array = new Uint8Array(arrayBuffer);
+      resolve(Array.from(uint8Array)); // convert Uint8Array to number[]
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+
+  const payload = {
+    id: null,
+    commentId,
+    fileName: file.name,
+    fileType: file.type,
+    fileSize: file.size,
+    fileData, // byte array (number[])
+  };
+
+  return apiClient.post(`/helpdesk/ticket-attachments`, payload, {
+    headers: { "Content-Type": "application/json" },
   });
 }
+
+
 
 export async function deleteAttachment(ticketId: string, attachmentId: string) {
   return apiClient.delete(
@@ -148,7 +187,7 @@ export async function getTicketHistory(id: string) {
 }
 
 export async function getMyTickets() {
-  return apiClient.get(`${endpoint}`);
+  return apiClient.get(`${endpoint}/my-tickets/search`);
 }
 
 export async function getAssignedTickets() {

@@ -5,12 +5,11 @@ import {
   FaSave,
   FaTimes,
   FaExclamationTriangle,
-  FaPlus,
   FaTrash,
   FaUser,
   FaSearch,
 } from "react-icons/fa";
-import { Loader, ButtonLoader } from "../components/common";
+import { Loader, ButtonLoader, Modal, Button } from "../components/common";
 import { useNotifications } from "../hooks/useNotifications";
 import {
   useEmployeeSearch,
@@ -19,10 +18,9 @@ import {
 import {
   getHelpdeskDepartmentWithEmployees,
   updateHelpdeskDepartment,
-  type HelpdeskDepartmentPayload,
   type Employee,
 } from "../services/helpdeskDepartmentService";
-import "../styles/createSimple.css";
+import "../styles/departmentActions.css";
 
 interface DepartmentFormData {
   name: string;
@@ -32,6 +30,7 @@ interface DepartmentFormData {
     isActive: boolean;
     employeeObj?: EmployeeSearchResult;
     searchQuery?: string;
+    originalId?: string; // Store the original UUID from API response
   }[];
 }
 
@@ -46,21 +45,20 @@ export const DepartmentsEditPage: React.FC = () => {
   } = useEmployeeSearch();
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [showDropdowns, setShowDropdowns] = useState<{
-    [key: number]: boolean;
-  }>({});
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Confirmation modal state
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState<{
+    index: number;
+    name: string;
+  } | null>(null);
 
   const [formData, setFormData] = useState<DepartmentFormData>({
     name: "",
     isActive: true,
-    employees: [
-      {
-        employeeId: "",
-        isActive: true,
-        employeeObj: undefined,
-        searchQuery: "",
-      },
-    ],
+    employees: [],
   });
 
   const [errors, setErrors] = useState<{
@@ -96,8 +94,9 @@ export const DepartmentsEditPage: React.FC = () => {
           ? employees.map((emp: Employee) => ({
               employeeId: emp.employeeId.toString(),
               isActive: emp.isActive,
+              originalId: emp.id, // Store the original UUID from API response
               employeeObj: {
-                id: emp.employeeId,
+                id: emp.employeeId, // Use employeeId for EmployeeSearchResult (number)
                 employeeName: emp.employeeProfilePicNameDTO.employeeName,
                 employeeId: emp.employeeId.toString(),
                 email: "", // Email not provided in new API response
@@ -106,14 +105,7 @@ export const DepartmentsEditPage: React.FC = () => {
               } as EmployeeSearchResult,
               searchQuery: emp.employeeProfilePicNameDTO.employeeName,
             }))
-          : [
-              {
-                employeeId: "",
-                isActive: true,
-                employeeObj: undefined,
-                searchQuery: "",
-              },
-            ];
+          : [];
 
         setFormData({
           name: department.name,
@@ -186,20 +178,25 @@ export const DepartmentsEditPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const payload: HelpdeskDepartmentPayload = {
+      // Build payload matching the sample structure
+      const payload = {
         department: {
+          id: id,
           name: formData.name.trim(),
           isActive: formData.isActive,
         },
         employees: formData.employees
           .filter((emp) => emp.employeeObj && emp.employeeId)
           .map((emp) => ({
+            // Use the original UUID id from the get API response
+            id: emp.originalId ?? "",
+            helpdeskDepartmentId: id,
             employeeId: parseInt(emp.employeeId),
             isActive: emp.isActive,
           })),
       };
 
-      await updateHelpdeskDepartment(id, payload);
+      await updateHelpdeskDepartment(payload);
 
       addNotification({
         type: "success",
@@ -229,37 +226,85 @@ export const DepartmentsEditPage: React.FC = () => {
     navigate(-1);
   };
 
-  const addEmployee = () => {
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    if (query) {
+      searchEmployees(query);
+      setShowDropdown(true);
+    } else {
+      setShowDropdown(false);
+    }
+  };
+
+  const handleEmployeeSelect = (employee: EmployeeSearchResult) => {
+    // Check if employee is already added
+    const isAlreadyAdded = formData.employees.some(
+      (emp) => emp.employeeId === employee.id.toString()
+    );
+
+    if (isAlreadyAdded) {
+      addNotification({
+        type: "warning",
+        title: "⚠️ Employee Already Added",
+        message: `${employee.employeeName} is already added to this department.`,
+      });
+      return;
+    }
+
+    // Add employee to the list
     setFormData((prev) => ({
       ...prev,
       employees: [
         ...prev.employees,
         {
-          employeeId: "",
+          employeeId: employee.id.toString(),
           isActive: true,
-          employeeObj: undefined,
-          searchQuery: "",
+          employeeObj: employee,
+          searchQuery: employee.employeeName,
+          originalId: undefined, // New employee, no original ID
         },
       ],
     }));
+
+    // Clear search
+    setSearchQuery("");
+    setShowDropdown(false);
   };
 
   const removeEmployee = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      employees: prev.employees.filter((_, i) => i !== index),
-    }));
+    const employeeName = formData.employees[index].employeeObj?.employeeName || "this employee";
+    setEmployeeToDelete({ index, name: employeeName });
+    setShowDeleteConfirmation(true);
   };
 
-  const updateEmployee = (
-    index: number,
-    field: keyof DepartmentFormData["employees"][0],
-    value: string | boolean | EmployeeSearchResult | undefined
-  ) => {
+  const confirmRemoveEmployee = () => {
+    if (!employeeToDelete) return;
+    
+    setFormData((prev) => ({
+      ...prev,
+      employees: prev.employees.filter((_, i) => i !== employeeToDelete.index),
+    }));
+    
+    addNotification({
+      type: "success",
+      title: "✅ Employee Removed",
+      message: `Employee "${employeeToDelete.name}" has been removed from the department.`,
+    });
+    
+    setShowDeleteConfirmation(false);
+    setEmployeeToDelete(null);
+  };
+
+  const cancelRemoveEmployee = () => {
+    setShowDeleteConfirmation(false);
+    setEmployeeToDelete(null);
+  };
+
+  const updateEmployeeStatus = (index: number, isActive: boolean) => {
     setFormData((prev) => ({
       ...prev,
       employees: prev.employees.map((emp, i) =>
-        i === index ? { ...emp, [field]: value } : emp
+        i === index ? { ...emp, isActive } : emp
       ),
     }));
   };
@@ -338,162 +383,129 @@ export const DepartmentsEditPage: React.FC = () => {
             </select>
           </div>
 
-          {/* Employees */}
+          {/* Employee Search Section */}
           <div className="create-form-group">
             <label className="create-form-label">
-              Department Employees
+              Add More Employees
               <span className="create-form-hint">
-                Assign employees to this department
+                Search and add additional employees to this department
               </span>
             </label>
 
-            <div className="employee-list">
-              {formData.employees.map((employee, index) => (
-                <div key={index} className="employee-item">
-                  <div className="employee-input-group">
-                    <div className="employee-search-field">
-                      <div className="employee-search-container">
-                        <FaSearch className="search-icon" />
-                        <input
-                          type="text"
-                          className="create-form-input"
-                          value={employee.searchQuery || ""}
-                          onChange={(e) => {
-                            const query = e.target.value;
-                            updateEmployee(index, "searchQuery", query);
-                            if (query) {
-                              searchEmployees(query);
-                              setShowDropdowns((prev) => ({
-                                ...prev,
-                                [index]: true,
-                              }));
-                            } else {
-                              setShowDropdowns((prev) => ({
-                                ...prev,
-                                [index]: false,
-                              }));
-                            }
-                          }}
-                          placeholder="Search employee by name..."
-                          autoComplete="off"
-                        />
+            <div className="employee-search-section">
+              <div className="employee-search-container">
+                <FaSearch className="search-icon" />
+                <input
+                  type="text"
+                  className="create-form-input"
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  placeholder="Search employee by name..."
+                  autoComplete="off"
+                />
 
-                        {/* Search Results Dropdown */}
-                        {showDropdowns[index] && employeeResults.length > 0 && (
-                          <div className="employee-search-dropdown">
-                            {employeeResults.map((result) => (
-                              <div
-                                key={result.id}
-                                className="employee-search-item"
-                                onClick={() => {
-                                  updateEmployee(index, "employeeObj", result);
-                                  updateEmployee(
-                                    index,
-                                    "employeeId",
-                                    result.id.toString()
-                                  );
-                                  updateEmployee(
-                                    index,
-                                    "searchQuery",
-                                    result.employeeName
-                                  );
-                                  setShowDropdowns((prev) => ({
-                                    ...prev,
-                                    [index]: false,
-                                  }));
-                                }}
-                              >
-                                <div className="employee-search-info">
-                                  <FaUser className="employee-icon" />
-                                  <div className="employee-details">
-                                    <div className="employee-name">
-                                      {result.employeeName}
-                                    </div>
-                                    <div className="employee-meta">
-                                      {result.departmentName} •{" "}
-                                      {result.designation}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-
-                            {employeeLoading && (
-                              <div className="employee-search-loading">
-                                <ButtonLoader variant="primary" />
-                                <span>Searching...</span>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Selected Employee Display */}
-                      {employee.employeeObj && (
-                        <div className="selected-employee">
+                {/* Search Results Dropdown */}
+                {showDropdown && employeeResults.length > 0 && (
+                  <div className="employee-search-dropdown">
+                    {employeeResults.map((result) => (
+                      <div
+                        key={result.id}
+                        className="employee-search-item"
+                        onClick={() => handleEmployeeSelect(result)}
+                      >
+                        <div className="employee-search-info">
                           <FaUser className="employee-icon" />
                           <div className="employee-details">
                             <div className="employee-name">
-                              {employee.employeeObj.employeeName}
+                              {result.employeeName}
                             </div>
                             <div className="employee-meta">
-                              {employee.employeeObj.departmentName} •{" "}
-                              {employee.employeeObj.designation}
+                              {result.departmentName} • {result.designation}
                             </div>
                           </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {employeeLoading && (
+                      <div className="employee-search-loading">
+                        <ButtonLoader variant="primary" />
+                        <span>Searching...</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Employee List Section */}
+          <div className="create-form-group">
+            <label className="create-form-label">
+              Department Employees ({formData.employees.length})
+              <span className="create-form-hint">
+                Employees assigned to this department
+              </span>
+            </label>
+
+            <div className="employee-list-section">
+              {formData.employees.length === 0 ? (
+                <div className="employee-list-empty">
+                  <FaUser className="empty-icon" />
+                  <p>No employees assigned to this department. Search above to add employees.</p>
+                </div>
+              ) : (
+                <div className="employee-list-table">
+                  <div className="employee-list-header">
+                    <div className="employee-header-name">Employee</div>
+                    <div className="employee-header-status">Status</div>
+                    <div className="employee-header-actions">Actions</div>
+                  </div>
+                  <div className="employee-list-body">
+                    {formData.employees.map((employee, index) => (
+                      <div key={index} className="employee-list-row">
+                        <div className="employee-info">
+                          <FaUser className="employee-icon" />
+                          <div className="employee-details">
+                            <div className="employee-name">
+                              {employee.employeeObj?.employeeName}
+                            </div>
+                            <div className="employee-meta">
+                              {employee.employeeObj?.departmentName} •{" "}
+                              {employee.employeeObj?.designation}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="employee-status">
+                          <select
+                            className="create-form-select"
+                            value={employee.isActive ? "true" : "false"}
+                            onChange={(e) =>
+                              updateEmployeeStatus(
+                                index,
+                                e.target.value === "true"
+                              )
+                            }
+                          >
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                          </select>
+                        </div>
+                        <div className="employee-actions">
                           <button
                             type="button"
-                            className="clear-employee"
-                            onClick={() => {
-                              updateEmployee(index, "employeeObj", undefined);
-                              updateEmployee(index, "employeeId", "");
-                              updateEmployee(index, "searchQuery", "");
-                            }}
+                            onClick={() => removeEmployee(index)}
+                            className="btn-icon btn-danger"
+                            title="Remove Employee"
                           >
-                            <FaTimes />
+                            <FaTrash />
                           </button>
                         </div>
-                      )}
-                    </div>
-
-                    <div className="employee-status-field">
-                      <select
-                        className="create-form-select"
-                        value={employee.isActive ? "true" : "false"}
-                        onChange={(e) =>
-                          updateEmployee(
-                            index,
-                            "isActive",
-                            e.target.value === "true"
-                          )
-                        }
-                      >
-                        <option value="true">Active</option>
-                        <option value="false">Inactive</option>
-                      </select>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => removeEmployee(index)}
-                      className="btn-icon btn-danger"
-                      disabled={formData.employees.length === 1}
-                      title="Remove Employee"
-                    >
-                      <FaTrash />
-                    </button>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-
-              <button
-                type="button"
-                onClick={addEmployee}
-                className="btn btn-outline"
-              >
-                <FaPlus />
-                <span>Add Employee</span>
-              </button>
+              )}
             </div>
 
             {errors.employees && (
@@ -538,8 +550,48 @@ export const DepartmentsEditPage: React.FC = () => {
           </div>
         </div>
       </form>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={showDeleteConfirmation}
+        onClose={cancelRemoveEmployee}
+        title="Confirm Employee Removal"
+        size="small"
+        className="modal-confirm"
+        footer={
+          <div className="modal-footer">
+            <Button
+              variant="secondary"
+              onClick={cancelRemoveEmployee}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="error"
+              onClick={confirmRemoveEmployee}
+              disabled={loading}
+              className="btn-delete-confirm"
+            >
+              Remove Employee
+            </Button>
+          </div>
+        }
+      >
+        <div className="modal-confirm-icon warning">
+          <FaExclamationTriangle />
+        </div>
+        <div className="modal-confirm-title">
+          Remove Employee from Department
+        </div>
+        <div className="modal-confirm-message">
+          Are you sure you want to remove <strong>"{employeeToDelete?.name}"</strong> from this department? 
+          This action will remove the employee from the department but will not delete their account.
+        </div>
+      </Modal>
     </div>
   );
 };
 
 export default DepartmentsEditPage;
+

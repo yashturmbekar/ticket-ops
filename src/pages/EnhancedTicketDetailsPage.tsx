@@ -113,14 +113,47 @@ const formatRelativeTime = (dateString: string): string => {
 
 const getEnhancedTimeline = (statusHistory: any[], comments: any[]) => {
   const timelineItems = [
-    ...statusHistory.map((item: any) => ({
-      ...item,
-      type: "status",
-      timestamp: item.changedAt || item.createdAt,
-    })),
+    ...statusHistory.map((item: any) => {
+      // Create more descriptive status messages
+      let statusMessage = "";
+      const status = item.status || item.newStatus || "Unknown";
+      
+      switch (status.toLowerCase()) {
+        case "new":
+          statusMessage = "Ticket Created - New support request submitted and queued for review";
+          break;
+        case "open":
+          statusMessage = "Ticket Opened - Support request is now being actively reviewed";
+          break;
+        case "in progress":
+        case "in_progress":
+          statusMessage = "Work Started - Technical team has begun working on this ticket";
+          break;
+        case "resolved":
+          statusMessage = "Issue Resolved - Problem has been fixed and solution implemented";
+          break;
+        case "closed":
+          statusMessage = "Ticket Closed - Support request completed and verified";
+          break;
+        case "on hold":
+        case "on_hold":
+          statusMessage = "Placed On Hold - Ticket temporarily paused pending additional information";
+          break;
+        default:
+          statusMessage = `Status Updated - Ticket status changed to ${status}`;
+      }
+      
+      return {
+        ...item,
+        type: "status",
+        text: statusMessage,
+        timestamp: item.changedAt || item.createdAt,
+      };
+    }),
     ...comments.map((item: any) => ({
       ...item,
       type: "comment",
+      text: item.comment || item.text || "Comment added",
       timestamp: item.createdAt,
     })),
   ];
@@ -1129,7 +1162,7 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                       </span>
                     </div>
                     <div className="sla-detail-item">
-                      <span className="sla-detail-label">Status:</span>
+                      <span className="sla-detail-label">SLA Status:</span>
                       <span
                         className={`sla-status-indicator ${getSLAStatus(
                           calculateSLAProgress(
@@ -1146,6 +1179,26 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                         ).toUpperCase()}
                       </span>
                     </div>
+                    <div className="sla-detail-item">
+                      <span className="sla-detail-label">Created:</span>
+                      <span className="sla-time-info">
+                        {formatRelativeTime(ticket.dateCreated)}
+                      </span>
+                    </div>
+                    <div className="sla-detail-item">
+                      <span className="sla-detail-label">Last Update:</span>
+                      <span className="sla-time-info">
+                        {formatRelativeTime(ticket.dateModified)}
+                      </span>
+                    </div>
+                    {ticket.dueDate && (
+                      <div className="sla-detail-item">
+                        <span className="sla-detail-label">Due Date:</span>
+                        <span className="sla-time-info">
+                          {formatRelativeTime(ticket.dueDate)}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1262,28 +1315,46 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                   <span className="comment-count">
                     {comments.length} Comments
                   </span>
-                  <span className="status-count">Activity Timeline</span>
+                  <span className="status-count">
+                    {(() => {
+                      // Count status changes (creation + current status change if not OPEN)
+                      let statusChangeCount = 1; // Always have ticket creation
+                      if (ticket.status !== 'OPEN') statusChangeCount++;
+                      return `${statusChangeCount} Status Changes`;
+                    })()}
+                  </span>
                 </div>
               </div>
               <div className="card-content">
                 <div className="timeline">
                   {(() => {
-                    // Mock status history for demonstration - in real app this would come from API
-                    const mockStatusHistory = [
-                      {
-                        id: "1",
-                        fromStatus: "OPEN",
-                        toStatus: "IN_PROGRESS",
-                        changedAt: new Date(
-                          Date.now() - 2 * 60 * 60 * 1000
-                        ).toISOString(),
-                        changedBy: "IT Admin",
-                        reason: "Started working on the issue",
-                      },
-                    ];
+                    // Generate status history from ticket creation and current status
+                    const statusHistory = [];
+                    
+                    // Add ticket creation status
+                    statusHistory.push({
+                      id: `creation-${ticket.id}`,
+                      fromStatus: null,
+                      toStatus: 'OPEN',
+                      changedAt: ticket.dateCreated,
+                      changedBy: ticket.requestedBy.employeeName,
+                      reason: 'Ticket created'
+                    });
+                    
+                    // If ticket status is not OPEN, add a status change
+                    if (ticket.status !== 'OPEN') {
+                      statusHistory.push({
+                        id: `status-change-${ticket.id}`,
+                        fromStatus: 'OPEN',
+                        toStatus: ticket.status,
+                        changedAt: ticket.dateModified,
+                        changedBy: ticket.assignedTo?.employeeName || 'System',
+                        reason: `Status changed to ${ticket.status.replace('_', ' ')}`
+                      });
+                    }
 
                     const enhancedTimeline = getEnhancedTimeline(
-                      mockStatusHistory,
+                      statusHistory,
                       comments
                     );
 
@@ -1312,36 +1383,15 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                             <div className="activity-info">
                               {item.type === "status" ? (
                                 <>
-                                  <span className="activity-type">
-                                    Status Changed
-                                  </span>
-                                  <span className="status-change">
-                                    {item.fromStatus && (
-                                      <span
-                                        className={`status-badge ${item.fromStatus
-                                          .toLowerCase()
-                                          .replace("_", "-")}`}
-                                      >
-                                        {item.fromStatus.replace("_", " ")}
-                                      </span>
-                                    )}
-                                    {item.fromStatus && (
-                                      <span className="status-arrow">→</span>
-                                    )}
-                                    <span
-                                      className={`status-badge ${item.toStatus
-                                        .toLowerCase()
-                                        .replace("_", "-")}`}
-                                    >
-                                      {item.toStatus.replace("_", " ")}
-                                    </span>
+                                  <span className="activity-description">
+                                    {item.text}
                                   </span>
                                 </>
                               ) : (
                                 <>
-                                  <span className="activity-type">Comment</span>
+                                  <span className="activity-type">Comment Added</span>
                                   <span className="author-name">
-                                    {item.author}
+                                    by {item.author}
                                   </span>
                                   {canEditComment(item) && (
                                     <button
@@ -1508,14 +1558,9 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                               </>
                             ) : (
                               <div className="status-change-details">
-                                {item.changedBy && (
+                                {(item.changedBy || item.author) && (
                                   <p className="changed-by">
-                                    Changed by: {item.changedBy}
-                                  </p>
-                                )}
-                                {item.reason && (
-                                  <p className="change-reason">
-                                    Reason: {item.reason}
+                                    Changed by: {item.changedBy || item.author}
                                   </p>
                                 )}
                               </div>
@@ -1642,8 +1687,7 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                 </div>
               </div>
               <div className="card-content">
-                <div className="assignment-fields">
-                  {/* Department */}
+                <div className="assignment-fields">{/* Department */}
                   <div className="field-group">
                     <label className="field-label">
                       <FaBuilding className="label-icon" />
@@ -1880,49 +1924,6 @@ const EnhancedTicketDetailsPage: React.FC = () => {
                         <div className="field-display">
                           <span>{ticket.assetTag}</span>
                         </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Timeline Info Card */}
-            <div className="enhanced-card timeline-info-card">
-              <div className="card-header">
-                <div className="header-title">
-                  <FaHistory className="header-icon" />
-                  <h2>Timeline</h2>
-                </div>
-              </div>
-              <div className="card-content">
-                <div className="timeline-info">
-                  <div className="info-item">
-                    <FaCalendarAlt className="info-icon" />
-                    <div className="info-content">
-                      <span className="info-label">Created</span>
-                      <span className="info-value">
-                        {formatDate(ticket.dateCreated)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="info-item">
-                    <FaClock className="info-icon" />
-                    <div className="info-content">
-                      <span className="info-label">Last Modified</span>
-                      <span className="info-value">
-                        {formatDate(ticket.dateModified)}
-                      </span>
-                    </div>
-                  </div>
-                  {ticket.dueDate && (
-                    <div className="info-item">
-                      <FaExclamationTriangle className="info-icon" />
-                      <div className="info-content">
-                        <span className="info-label">Due Date</span>
-                        <span className="info-value">
-                          {formatDate(ticket.dueDate)}
-                        </span>
                       </div>
                     </div>
                   )}

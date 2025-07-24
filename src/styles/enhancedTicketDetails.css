@@ -1487,21 +1487,28 @@ textarea:focus-visible {
 
 .sla-details {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--enhanced-space-3);
+  grid-template-columns: 1fr;
+  gap: var(--enhanced-space-2);
   padding-top: var(--enhanced-space-3);
   border-top: 1px solid var(--enhanced-border-light);
 }
 
 .sla-detail-item {
   display: flex;
-  flex-direction: column;
-  gap: var(--enhanced-space-1);
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--enhanced-space-2);
 }
 
 .sla-detail-label {
   font-size: 0.75rem;
   color: var(--enhanced-text-secondary);
+  font-weight: 500;
+}
+
+.sla-time-info {
+  font-size: 0.75rem;
+  color: var(--enhanced-text-primary);
   font-weight: 500;
 }
 
@@ -1610,6 +1617,23 @@ textarea:focus-visible {
   align-items: center;
   gap: var(--enhanced-space-3);
   flex-wrap: wrap;
+}
+
+.activity-description {
+  font-weight: 600;
+  color: var(--enhanced-text-primary);
+  font-size: 0.875rem;
+}
+
+.status-change-details {
+  margin-top: var(--enhanced-space-2);
+}
+
+.changed-by {
+  font-size: 0.75rem;
+  color: var(--enhanced-text-secondary);
+  margin: 0;
+  font-style: italic;
 }
 
 .activity-type {

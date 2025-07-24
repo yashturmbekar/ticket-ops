@@ -738,7 +738,7 @@ export const TicketsPage: React.FC = () => {
                     department: ticket.assignedDepartmentName,
                     createdAt: ticket.createdAt.toISOString(),
                     slaDeadline: ticket.slaDeadline?.toISOString(),
-                    commentCount: ticket.comments?.length || 0,
+                    commentCount: ticket.totalCommentsCount,
                     attachmentCount: ticket.attachments?.length || 0,
                     tags: ticket.tags,
                   }}

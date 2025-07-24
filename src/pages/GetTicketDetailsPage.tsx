@@ -825,8 +825,43 @@ const TicketDetailsPageProfessional: React.FC = () => {
     const files = event.target.files;
     if (files && files.length > 0) {
       const newFiles = Array.from(files);
-      setCommentAttachments((prev) => [...prev, ...newFiles]);
-      console.log("Files selected:", newFiles);
+      const validFiles: File[] = [];
+      let totalSize = 0;
+
+      for (const file of newFiles) {
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit per file
+          if (notificationContext) {
+            notificationContext.error(
+              "File Size Exceeded",
+              `File "${file.name}" exceeds 10MB limit. Please choose a smaller file.`
+            );
+          }
+          continue;
+        }
+        totalSize += file.size;
+        if (totalSize > 30 * 1024 * 1024) { // 30MB total limit
+          if (notificationContext) {
+            notificationContext.error(
+              "Total File Size Exceeded",
+              "The total size of attachments for this comment exceeds 30MB. Please reduce the size of some files or remove them."
+            );
+          }
+          break;
+        }
+        if (validFiles.length >= 3) { // Max 3 attachments
+          if (notificationContext) {
+            notificationContext.error(
+              "Too Many Attachments",
+              "You can only attach a maximum of 3 files per comment."
+            );
+          }
+          break;
+        }
+        validFiles.push(file);
+      }
+
+      setCommentAttachments((prev) => [...prev, ...validFiles]);
+      console.log("Files selected:", validFiles);
     }
     // Reset the input value so the same file can be selected again if needed
     event.target.value = "";
@@ -909,6 +944,36 @@ const TicketDetailsPageProfessional: React.FC = () => {
         return "#6c757d";
     }
   };
+
+  // ✅ Correct: hooks at the top level
+  const [commentAttachmentPreviews, setCommentAttachmentPreviews] = React.useState<string[]>([]);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    const loadPreviews = async () => {
+      const newPreviews: string[] = [];
+      await Promise.all(
+        commentAttachments.map((file, i) => {
+          return new Promise<void>((resolve) => {
+            if (file.type.startsWith("image/")) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                if (isMounted) newPreviews[i] = e.target?.result as string;
+                resolve();
+              };
+              reader.readAsDataURL(file);
+            } else {
+              newPreviews[i] = "";
+              resolve();
+            }
+          });
+        })
+      );
+      if (isMounted) setCommentAttachmentPreviews(newPreviews);
+    };
+    loadPreviews();
+    return () => { isMounted = false; };
+  }, [commentAttachments]);
 
   if (loading) {
     return (
@@ -1491,6 +1556,16 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                       <div
                                         key={index}
                                         className="comment-attachment"
+                                        style={isImage && fileData && fileType ? { cursor: "pointer" } : {}}
+                                        onClick={
+                                          isImage && fileData && fileType
+                                            ? () =>
+                                                setSelectedImage({
+                                                  src: `data:${fileType};base64,${fileData}`,
+                                                  alt: fileName,
+                                                })
+                                            : undefined
+                                        }
                                       >
                                         {isImage && fileData && fileType ? (
                                           <img
@@ -1501,19 +1576,26 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                               maxHeight: "100px",
                                               borderRadius: "4px",
                                               objectFit: "cover",
-                                              cursor: "pointer",
                                             }}
-                                            onClick={() =>
-                                              setSelectedImage({
-                                                src: `data:${fileType};base64,${fileData}`,
-                                                alt: fileName,
-                                              })
-                                            }
                                           />
                                         ) : (
                                           getFileIcon(fileName, 32)
                                         )}
-                                        <span className="file-name">
+                                        <span
+                                          className="file-name"
+                                          style={isImage && fileData && fileType ? { cursor: "pointer" } : {}}
+                                          onClick={
+                                            isImage && fileData && fileType
+                                              ? (e) => {
+                                                  e.stopPropagation();
+                                                  setSelectedImage({
+                                                    src: `data:${fileType};base64,${fileData}`,
+                                                    alt: fileName,
+                                                  });
+                                                }
+                                              : undefined
+                                          }
+                                        >
                                           {fileName}
                                         </span>
                                         <span className="file-size">
@@ -1521,7 +1603,8 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                         </span>
                                         <button
                                           className="download-btn"
-                                          onClick={() => {
+                                          onClick={(e) => {
+                                            e.stopPropagation();
                                             if (fileData && fileType) {
                                               const link =
                                                 document.createElement("a");
@@ -1604,25 +1687,65 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
                   {commentAttachments.length > 0 && (
                     <div className="selected-files">
-                      {commentAttachments.map((file, index) => (
-                        <div key={index} className="selected-file">
-                          <div className="file-preview">
-                            {getFileIcon(file.name)}
-                            <div className="file-info">
-                              <div className="file-name">{file.name}</div>
-                              <div className="file-size">
-                                {formatFileSize(file.size)}
+                      {commentAttachments.map((file, index) => {
+                        const isImage = file.type.startsWith("image/");
+                        const imagePreview = commentAttachmentPreviews[index];
+                        return (
+                          <div key={index} className="selected-file">
+                            <div
+                              className="file-preview"
+                              style={isImage && imagePreview ? { cursor: "pointer" } : {}}
+                              onClick={
+                                isImage && imagePreview
+                                  ? () =>
+                                      setSelectedImage({
+                                        src: imagePreview,
+                                        alt: file.name,
+                                      })
+                                  : undefined
+                              }
+                            >
+                              {isImage && imagePreview ? (
+                                <img
+                                  src={imagePreview}
+                                  alt={file.name}
+                                  style={{
+                                    maxWidth: "60px",
+                                    maxHeight: "60px",
+                                    borderRadius: "4px",
+                                    objectFit: "cover",
+                                  }}
+                                />
+                              ) : (
+                                getFileIcon(file.name)
+                              )}
+                              <div className="file-info">
+                                <div
+                                  className="file-name"
+                                  style={isImage && imagePreview ? { cursor: "pointer" } : {}}
+                                  onClick={
+                                    isImage && imagePreview
+                                      ? (e) => {
+                                          e.stopPropagation();
+                                          setSelectedImage({ src: imagePreview, alt: file.name });
+                                        }
+                                      : undefined
+                                  }
+                                >
+                                  {file.name}
+                                </div>
+                                <div className="file-size">{formatFileSize(file.size)}</div>
                               </div>
                             </div>
+                            <button
+                              onClick={() => removeCommentAttachment(index)}
+                              className="remove-file"
+                            >
+                              <FaTimes />
+                            </button>
                           </div>
-                          <button
-                            onClick={() => removeCommentAttachment(index)}
-                            className="remove-file"
-                          >
-                            <FaTimes />
-                          </button>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>

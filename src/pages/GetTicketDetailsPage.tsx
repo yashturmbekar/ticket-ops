@@ -188,29 +188,40 @@ const TicketDetailsPageProfessional: React.FC = () => {
     search: searchEmployees,
   } = useEmployeeSearch();
 
-  // Helper function to create complete ticket object for API
-  const createCompleteTicketForUpdate = (
-    _currentTicket: TicketData,
+  // Helper function to create ticket update payload
+  const createTicketUpdatePayload = (
     currentApiTicket: ApiTicketResponse,
-    updates: Partial<ApiTicketResponse>
-  ): Record<string, unknown> => {
-    // Start with the current API ticket as base
-    const baseTicket = { ...currentApiTicket };
-
-    // Apply the updates to the base ticket
-    const updatedTicket = {
-      ...baseTicket,
-      ...updates,
-      // Always update modification time
-      lastModifiedDate: new Date().toISOString(),
+    updates: Partial<{
+      assignedDepartmentId: string;
+      assignedToEmployeeId: string | number;
+      priority: string;
+      status: string;
+    }>
+  ) => {
+    // Create minimal update payload with only the fields that can be updated
+    const updatePayload: any = {
+      id: currentApiTicket.id,
+      title: currentApiTicket.title,
+      description: currentApiTicket.description,
+      status: updates.status || currentApiTicket.status,
+      priority: updates.priority || currentApiTicket.priority,
+      raisedByEmployeeId: currentApiTicket.raisedByEmployeeDetails?.id,
+      assignedDepartmentId:
+        updates.assignedDepartmentId || currentApiTicket.assignedDepartmentId,
+      assignedToEmployeeId:
+        updates.assignedToEmployeeId || currentApiTicket.assignedToEmployeeId,
+      isActive: true,
+      organizationId: 2001, // Default organization ID
     };
 
-    // Ensure critical fields are never changed
-    updatedTicket.id = currentApiTicket.id;
-    updatedTicket.ticketCode = currentApiTicket.ticketCode;
-    updatedTicket.createdDate = currentApiTicket.createdDate;
+    // Remove undefined fields
+    Object.keys(updatePayload).forEach((key) => {
+      if (updatePayload[key] === undefined || updatePayload[key] === null) {
+        delete updatePayload[key];
+      }
+    });
 
-    return updatedTicket as Record<string, unknown>;
+    return updatePayload;
   };
 
   // Permission checking functions
@@ -243,18 +254,13 @@ const TicketDetailsPageProfessional: React.FC = () => {
     setSelectedDepartmentId(departmentId);
 
     try {
-      // Create complete ticket object with department update
-      const completeTicketUpdate = createCompleteTicketForUpdate(
-        ticket,
-        currentApiTicket,
-        { assignedDepartmentId: departmentId }
-      );
+      // Create ticket update payload with department change
+      const updatePayload = createTicketUpdatePayload(currentApiTicket, {
+        assignedDepartmentId: departmentId,
+      });
 
-      console.log(
-        "Sending complete ticket update for department change:",
-        completeTicketUpdate
-      );
-      await updateTicket(completeTicketUpdate);
+      console.log("Updating ticket department:", updatePayload);
+      await updateTicket(updatePayload);
 
       // Refresh ticket data
       const updatedTicketResponse = await getTicketById(id);
@@ -294,18 +300,13 @@ const TicketDetailsPageProfessional: React.FC = () => {
     setShowAssigneeDropdown(false);
 
     try {
-      // Create complete ticket object with assignee update
-      const completeTicketUpdate = createCompleteTicketForUpdate(
-        ticket,
-        currentApiTicket,
-        { assignedToEmployeeId: employee.id }
-      );
+      // Create ticket update payload with assignee change
+      const updatePayload = createTicketUpdatePayload(currentApiTicket, {
+        assignedToEmployeeId: employee.id,
+      });
 
-      console.log(
-        "Sending complete ticket update for assignee change:",
-        completeTicketUpdate
-      );
-      await updateTicket(completeTicketUpdate);
+      console.log("Updating ticket assignee:", updatePayload);
+      await updateTicket(updatePayload);
 
       // Refresh ticket data
       const updatedTicketResponse = await getTicketById(id);
@@ -344,18 +345,13 @@ const TicketDetailsPageProfessional: React.FC = () => {
     setSelectedPriority(priority);
 
     try {
-      // Create complete ticket object with priority update
-      const completeTicketUpdate = createCompleteTicketForUpdate(
-        ticket,
-        currentApiTicket,
-        { priority }
-      );
+      // Create ticket update payload with priority change
+      const updatePayload = createTicketUpdatePayload(currentApiTicket, {
+        priority,
+      });
 
-      console.log(
-        "Sending complete ticket update for priority change:",
-        completeTicketUpdate
-      );
-      await updateTicket(completeTicketUpdate);
+      console.log("Updating ticket priority:", updatePayload);
+      await updateTicket(updatePayload);
 
       // Refresh ticket data
       const updatedTicketResponse = await getTicketById(id);

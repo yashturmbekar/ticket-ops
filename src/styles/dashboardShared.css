@@ -3,9 +3,9 @@
 
 /* Variables */
 :root {
-  --dashboard-primary: #2563eb;
-  --dashboard-primary-light: #3b82f6;
-  --dashboard-primary-dark: #1d4ed8;
+  --dashboard-primary: #ff5d5d;
+  --dashboard-primary-light: #ff7575;
+  --dashboard-primary-dark: #e04545;
   --dashboard-success: #10b981;
   --dashboard-warning: #f59e0b;
   --dashboard-error: #ef4444;
@@ -586,5 +586,109 @@
   }
   100% {
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+/* Modern Tab Navigation Styles */
+.modern-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--dashboard-border);
+  margin: 1rem 0 1.5rem 0;
+  gap: 0.25rem;
+}
+
+.modern-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--dashboard-text-secondary);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  min-height: 44px;
+}
+
+.modern-tab:hover {
+  color: var(--dashboard-primary);
+  background: rgba(255, 93, 93, 0.05);
+}
+
+.modern-tab.active {
+  color: var(--dashboard-primary);
+  border-bottom-color: var(--dashboard-primary);
+  background: rgba(255, 93, 93, 0.08);
+}
+
+.modern-tab svg {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.modern-tab span:first-of-type {
+  font-weight: 500;
+}
+
+.tab-count {
+  background: var(--dashboard-primary);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.375rem;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.modern-tab:not(.active) .tab-count {
+  background: var(--dashboard-text-muted);
+}
+
+.modern-tab-content {
+  margin-top: 1rem;
+}
+
+/* Responsive Tab Design */
+@media (max-width: 768px) {
+  .modern-tabs {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .modern-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .modern-tab {
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 0.625rem 0.875rem;
+  }
+
+  .modern-tab span:first-of-type {
+    display: none;
+  }
+
+  .modern-tab svg {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modern-tab {
+    padding: 0.5rem 0.75rem;
+    gap: 0.375rem;
+  }
+
+  .tab-count {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.3rem;
   }
 }

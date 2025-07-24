@@ -29,10 +29,30 @@
 
 /* Role-based Tabs */
 .tickets-tabs {
-  display: flex;
-  gap: var(--spacing-1);
   margin-bottom: var(--spacing-6);
   border-bottom: 2px solid var(--color-border);
+}
+
+.tabs-header {
+  margin-bottom: var(--spacing-4);
+}
+
+.tabs-header h3 {
+  margin: 0 0 var(--spacing-1) 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.tabs-header p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.tabs-buttons {
+  display: flex;
+  gap: var(--spacing-1);
 }
 
 .tab-button {
@@ -66,6 +86,23 @@
   font-size: var(--font-size-base);
 }
 
+.tab-count {
+  background: var(--color-background-tertiary);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 2px 6px;
+  border-radius: var(--border-radius-full);
+  min-width: 20px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.tab-button.active .tab-count {
+  background: var(--color-primary);
+  color: white;
+}
+
 /* Page Header */
 .tickets-page-header {
   display: flex;
@@ -82,19 +119,63 @@
   flex: 1;
 }
 
+.title-with-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
 .tickets-page-title {
-  margin: 0 0 var(--spacing-2) 0;
+  margin: 0;
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   line-height: var(--line-height-tight);
 }
 
+.role-badge {
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.role-badge.admin {
+  background: var(--color-danger-alpha);
+  color: var(--color-danger);
+}
+
+.role-badge.manager {
+  background: var(--color-warning-alpha);
+  color: var(--color-warning);
+}
+
+.role-badge.agent {
+  background: var(--color-info-alpha);
+  color: var(--color-info);
+}
+
+.role-badge.employee {
+  background: var(--color-success-alpha);
+  color: var(--color-success);
+}
+
 .tickets-page-subtitle {
-  margin: 0;
+  margin: 0 0 var(--spacing-1) 0;
   font-size: var(--font-size-base);
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-normal);
+}
+
+.role-description {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  font-style: italic;
 }
 
 .tickets-page-actions {

@@ -2,7 +2,7 @@ import React from "react";
 import { AdminDashboard } from "./AdminDashboard";
 import { ManagerDashboard } from "./ManagerDashboard";
 import { EmployeeDashboard } from "./EmployeeDashboard";
-import { HelpdeskDashboard } from "./HelpdeskDashboard";
+import { HelpdeskDepartmentDashboard } from "./HelpdeskDepartmentDashboard";
 import { useAuth } from "../../hooks/useAuth";
 import { UserRole } from "../../types";
 
@@ -25,7 +25,7 @@ export const RoleDashboard: React.FC = () => {
     case UserRole.HR:
       return <EmployeeDashboard />;
     case UserRole.HELPDESK_DEPARTMENT:
-      return <HelpdeskDashboard />;
+      return <HelpdeskDepartmentDashboard />;
     case UserRole.EMPLOYEE:
       return <EmployeeDashboard />;
     default:

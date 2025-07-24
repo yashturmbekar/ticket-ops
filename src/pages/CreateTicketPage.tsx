@@ -152,13 +152,26 @@ export const CreateTicketPage: React.FC = () => {
 
     try {
       // Convert files to byte arrays with progress handling
-      const byteArrays: Array<{fileName: string; fileData: number[]; fileSize: number; fileType: string}> = [];
-      
+      const byteArrays: Array<{
+        fileName: string;
+        fileData: number[];
+        fileSize: number;
+        fileType: string;
+      }> = [];
+
       for (let i = 0; i < formData.attachments.length; i++) {
         const file = formData.attachments[i];
-        setOperationStatus(`Processing file ${i + 1}/${formData.attachments.length}: ${file.name}`);
+        setOperationStatus(
+          `Processing file ${i + 1}/${formData.attachments.length}: ${
+            file.name
+          }`
+        );
         try {
-          console.log(`Processing file ${i + 1}/${formData.attachments.length}: ${file.name}`);
+          console.log(
+            `Processing file ${i + 1}/${formData.attachments.length}: ${
+              file.name
+            }`
+          );
           const fileData = await fileToByteArray(file);
           byteArrays.push({
             fileName: file.name,
@@ -168,7 +181,9 @@ export const CreateTicketPage: React.FC = () => {
           });
         } catch (fileError) {
           console.error(`Failed to process file ${file.name}:`, fileError);
-          throw new Error(`Failed to process attachment "${file.name}". Please try with a different file.`);
+          throw new Error(
+            `Failed to process attachment "${file.name}". Please try with a different file.`
+          );
         }
       }
 
@@ -186,22 +201,25 @@ export const CreateTicketPage: React.FC = () => {
       };
 
       console.log(`Submitting ticket with ${byteArrays.length} attachments`);
-      
+
       // Show additional warning for large uploads
       const totalSize = byteArrays.reduce((sum, att) => sum + att.fileSize, 0);
-      if (totalSize > 5 * 1024 * 1024) { // 5MB
+      if (totalSize > 5 * 1024 * 1024) {
+        // 5MB
         console.log(`Large upload detected: ${totalSize} bytes`);
-        setOperationStatus("Uploading large files... This may take a few minutes.");
-        
+        setOperationStatus(
+          "Uploading large files... This may take a few minutes."
+        );
+
         // Show user notification for large uploads
         addNotification({
           type: "info",
           title: "🔄 Large Upload Detected",
-          message: "Your files are being processed. This may take a few minutes for large attachments.",
+          message:
+            "Your files are being processed. This may take a few minutes for large attachments.",
         });
       }
 
-      // Call API with retry logic
       setOperationStatus("Submitting to server...");
       const response = await createTicket(ticketData);
       console.log("Ticket created successfully:", response);
@@ -221,32 +239,55 @@ export const CreateTicketPage: React.FC = () => {
       navigate("/tickets");
     } catch (error: unknown) {
       console.error("Error creating ticket:", error);
-      
-      let errorMessage = "There was an error creating your support ticket. Please try again.";
+
+      let errorMessage =
+        "There was an error creating your support ticket. Please try again.";
       let errorTitle = "❌ Failed to Create Ticket";
-      
+
       // Handle different types of errors
       const axiosError = error as ApiError;
-      if (axiosError?.response?.status === 413 || axiosError?.message?.includes('413') || axiosError?.message?.includes('Payload Too Large')) {
+      if (
+        axiosError?.response?.status === 413 ||
+        axiosError?.message?.includes("413") ||
+        axiosError?.message?.includes("Payload Too Large")
+      ) {
         errorTitle = "❌ Files Too Large";
-        errorMessage = "The attachment files are too large for the server. Please reduce file sizes or remove some attachments.";
-      } else if (axiosError?.response?.status === 408 || axiosError?.code === 'ECONNABORTED' || axiosError?.message?.includes('timeout')) {
+        errorMessage =
+          "The attachment files are too large for the server. Please reduce file sizes or remove some attachments.";
+      } else if (
+        axiosError?.response?.status === 408 ||
+        axiosError?.code === "ECONNABORTED" ||
+        axiosError?.message?.includes("timeout")
+      ) {
         errorTitle = "❌ Operation Timed Out";
-        errorMessage = "The ticket creation took longer than expected. This may be due to large files or network issues. The system has already attempted multiple retries. Please try again with smaller files or check your internet connection.";
+        errorMessage =
+          "The ticket creation took longer than expected. Please try again with smaller files or check your internet connection.";
       } else if (axiosError?.response?.status === 400) {
         errorTitle = "❌ Invalid Request";
-        errorMessage = axiosError?.response?.data?.message || "Please check your inputs and try again.";
+        errorMessage =
+          axiosError?.response?.data?.message ||
+          "Please check your inputs and try again.";
       } else if (axiosError?.response?.status === 500) {
         errorTitle = "❌ Server Error";
-        errorMessage = "The server encountered an error processing your request. The system has automatically retried the operation. Please try again later or contact support if the issue persists.";
-      } else if (axiosError?.response?.status === 502 || axiosError?.response?.status === 503 || axiosError?.response?.status === 504) {
+        errorMessage =
+          "The server encountered an error processing your request. Please try again later or contact support if the issue persists.";
+      } else if (
+        axiosError?.response?.status === 502 ||
+        axiosError?.response?.status === 503 ||
+        axiosError?.response?.status === 504
+      ) {
         errorTitle = "❌ Service Temporarily Unavailable";
-        errorMessage = "The service is temporarily unavailable. The system has automatically retried the operation. Please wait a moment and try again.";
-      } else if (axiosError?.message?.includes('Network Error') || axiosError?.message?.includes('ERR_NETWORK')) {
+        errorMessage =
+          "The service is temporarily unavailable. Please wait a moment and try again.";
+      } else if (
+        axiosError?.message?.includes("Network Error") ||
+        axiosError?.message?.includes("ERR_NETWORK")
+      ) {
         errorTitle = "❌ Network Error";
-        errorMessage = "Unable to connect to the server. Please check your internet connection and try again.";
+        errorMessage =
+          "Unable to connect to the server. Please check your internet connection and try again.";
       }
-      
+
       addNotification({
         type: "error",
         title: errorTitle,
@@ -290,7 +331,7 @@ export const CreateTicketPage: React.FC = () => {
         const validFiles = filesToAdd.filter(file => file.size <= maxFileSize);
 
         if (oversizedFiles.length > 0) {
-          const oversizedNames = oversizedFiles.map(f => f.name).join(', ');
+          const oversizedNames = oversizedFiles.map((f) => f.name).join(", ");
           addNotification({
             type: "error",
             title: "❌ Files Too Large",
@@ -305,8 +346,14 @@ export const CreateTicketPage: React.FC = () => {
         }
 
         // Validate total payload size (prevent API failures)
-        const currentTotalSize = formData.attachments.reduce((sum, file) => sum + file.size, 0);
-        const newFilesSize = validFiles.reduce((sum, file) => sum + file.size, 0);
+        const currentTotalSize = formData.attachments.reduce(
+          (sum, file) => sum + file.size,
+          0
+        );
+        const newFilesSize = validFiles.reduce(
+          (sum, file) => sum + file.size,
+          0
+        );
         const totalSize = currentTotalSize + newFilesSize;
         const maxTotalSize = 30 * 1024 * 1024; // 30MB total limit
 
@@ -328,9 +375,6 @@ export const CreateTicketPage: React.FC = () => {
             message: `Only ${availableSlots} file(s) could be added. Maximum of 3 attachments allowed.`,
           });
         }
-
-        // Simulate file processing delay for better UX
-        await new Promise((resolve) => setTimeout(resolve, 500));
 
         setFormData((prev) => ({
           ...prev,
@@ -431,12 +475,14 @@ export const CreateTicketPage: React.FC = () => {
             </div>
             <h3 className="ticket-loading-title">Creating Ticket</h3>
             <p className="ticket-loading-message">
-              {operationStatus || "Please wait while we process your request..."}
+              {operationStatus ||
+                "Please wait while we process your request..."}
             </p>
             <div className="ticket-loading-spinner"></div>
             {operationStatus.includes("large files") && (
               <p className="ticket-loading-submessage">
-                Large files may take several minutes to process. Please don't close this window.
+                Large files may take several minutes to process. Please don't
+                close this window.
               </p>
             )}
           </div>

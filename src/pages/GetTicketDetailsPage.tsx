@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -963,18 +964,20 @@ const TicketDetailsPageProfessional: React.FC = () => {
                           {/* Attachments for this comment, with preview and download */}
                           {comment.attachments && comment.attachments.length > 0 && (
                             <div className="comment-attachments">
-                              {comment.attachments.map((attachment, index) => {
-                                // Only use available fields: filename, size
-                                const ext = attachment.filename.split('.').pop()?.toLowerCase();
-                                const isImage = ["jpg","jpeg","png","gif","bmp"].includes(ext || "");
+                              {comment.attachments.map((attachment: any, index) => {
+                                // Defensive: Only use fileName, fileType, fileSize, fileData if present
+                                const fileName = 'fileName' in attachment ? attachment.fileName : attachment.filename;
+                                const fileType = 'fileType' in attachment ? attachment.fileType : '';
+                                const fileSize = 'fileSize' in attachment ? attachment.fileSize : attachment.size || 0;
+                                const fileData = 'fileData' in attachment ? attachment.fileData : '';
+                                const ext = fileName?.split(".").pop()?.toLowerCase();
+                                const isImage = (fileType && fileType.startsWith("image/")) || ["jpg","jpeg","png","gif","bmp"].includes(ext || "");
                                 return (
                                   <div key={index} className="comment-attachment">
-                                    {isImage ? (
+                                    {isImage && fileData && fileType ? (
                                       <img
-                                        src={
-                                          `/api/tickets/${id}/comments/${comment.id}/attachments/${attachment.filename}`
-                                        }
-                                        alt={attachment.filename}
+                                        src={`data:${fileType};base64,${fileData}`}
+                                        alt={fileName}
                                         style={{
                                           maxWidth: "100px",
                                           maxHeight: "100px",
@@ -984,27 +987,29 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                         }}
                                         onClick={() =>
                                           setSelectedImage({
-                                            src: `/api/tickets/${id}/comments/${comment.id}/attachments/${attachment.filename}`,
-                                            alt: attachment.filename,
+                                            src: `data:${fileType};base64,${fileData}`,
+                                            alt: fileName,
                                           })
                                         }
                                       />
                                     ) : (
-                                      getFileIcon(attachment.filename, 32)
+                                      getFileIcon(fileName, 32)
                                     )}
-                                    <span className="file-name">{attachment.filename}</span>
-                                    <span className="file-size">({formatFileSize(attachment.size)})</span>
+                                    <span className="file-name">{fileName}</span>
+                                    <span className="file-size">({formatFileSize(fileSize)})</span>
                                     <button
                                       className="download-btn"
                                       onClick={() => {
-                                        // Download using anchor for now
-                                        const link = document.createElement("a");
-                                        link.href = `/api/tickets/${id}/comments/${comment.id}/attachments/${attachment.filename}`;
-                                        link.download = attachment.filename;
-                                        document.body.appendChild(link);
-                                        link.click();
-                                        document.body.removeChild(link);
+                                        if (fileData && fileType) {
+                                          const link = document.createElement("a");
+                                          link.href = `data:${fileType};base64,${fileData}`;
+                                          link.download = fileName;
+                                          document.body.appendChild(link);
+                                          link.click();
+                                          document.body.removeChild(link);
+                                        }
                                       }}
+                                      disabled={!fileData || !fileType}
                                     >
                                       <FaDownload />
                                     </button>

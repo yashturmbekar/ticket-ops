@@ -74,7 +74,10 @@ export const CreateTicketPage: React.FC = () => {
   const [operationStatus, setOperationStatus] = useState<string>("");
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   // Add state for selectedImage
-  const [selectedImage, setSelectedImage] = useState<{ src: string; alt: string } | null>(null);
+  const [selectedImage, setSelectedImage] = useState<{
+    src: string;
+    alt: string;
+  } | null>(null);
 
   const [formData, setFormData] = useState<TicketFormData>({
     title: "",
@@ -220,7 +223,7 @@ export const CreateTicketPage: React.FC = () => {
         });
       }
 
-      setOperationStatus("Submitting to server...");
+      setOperationStatus("Creating your ticket...");
       const response = await createTicket(ticketData);
       console.log("Ticket created successfully:", response);
 
@@ -327,8 +330,12 @@ export const CreateTicketPage: React.FC = () => {
 
         // Validate file sizes (1MB = 1024 * 1024 bytes)
         const maxFileSize = 10 * 1024 * 1024; // 10MB per file
-        const oversizedFiles = filesToAdd.filter(file => file.size > maxFileSize);
-        const validFiles = filesToAdd.filter(file => file.size <= maxFileSize);
+        const oversizedFiles = filesToAdd.filter(
+          (file) => file.size > maxFileSize
+        );
+        const validFiles = filesToAdd.filter(
+          (file) => file.size <= maxFileSize
+        );
 
         if (oversizedFiles.length > 0) {
           const oversizedNames = oversizedFiles.map((f) => f.name).join(", ");
@@ -361,7 +368,8 @@ export const CreateTicketPage: React.FC = () => {
           addNotification({
             type: "error",
             title: "❌ Total Size Limit Exceeded",
-            message: "The total size of all attachments cannot exceed 30MB. Please remove some files or choose smaller files.",
+            message:
+              "The total size of all attachments cannot exceed 30MB. Please remove some files or choose smaller files.",
           });
           setUploadingFiles(false);
           e.target.value = "";
@@ -444,7 +452,9 @@ export const CreateTicketPage: React.FC = () => {
             src={imagePreview}
             alt={file.name}
             className="create-file-image-preview"
-            onClick={() => setSelectedImage({ src: imagePreview, alt: file.name })}
+            onClick={() =>
+              setSelectedImage({ src: imagePreview, alt: file.name })
+            }
           />
         )}
         <div className="create-file-info">
@@ -466,26 +476,27 @@ export const CreateTicketPage: React.FC = () => {
 
   return (
     <div className="create-page">
-      {/* Clean Ticket Loading Animation */}
+      {/* Enhanced Ticket Loading Animation - Backdrop Only */}
       {loading && (
         <div className="ticket-loading-backdrop">
-          <div className="ticket-loading-content">
-            <div className="ticket-loading-icon">
-              <FaTicketAlt />
+          <div className="ticket-loading-animation-container">
+            <div className="ticket-loading-moving-group">
+              <div className="ticket-loading-icon">
+                <FaTicketAlt />
+              </div>
+              <h3 className="ticket-loading-title">Creating Ticket</h3>
             </div>
-            <h3 className="ticket-loading-title">Creating Ticket</h3>
-            <p className="ticket-loading-message">
-              {operationStatus ||
-                "Please wait while we process your request..."}
-            </p>
-            <div className="ticket-loading-spinner"></div>
-            {operationStatus.includes("large files") && (
-              <p className="ticket-loading-submessage">
-                Large files may take several minutes to process. Please don't
-                close this window.
-              </p>
-            )}
           </div>
+          <p className="ticket-loading-message">
+            {operationStatus || "Please wait while we process your request..."}
+          </p>
+          <div className="ticket-loading-progress"></div>
+          {operationStatus.includes("large files") && (
+            <p className="ticket-loading-submessage">
+              Large files may take several minutes to process. Please don't
+              close this window.
+            </p>
+          )}
         </div>
       )}
 
@@ -606,7 +617,8 @@ export const CreateTicketPage: React.FC = () => {
             <label className="create-form-label">
               Attachments
               <span className="create-form-hint">
-                Screenshots, error logs, or other relevant files (Max 10 MB per file, 30 MB total)
+                Screenshots, error logs, or other relevant files (Max 10 MB per
+                file, 30 MB total)
               </span>
             </label>
             <div className="create-form-group">
@@ -716,8 +728,14 @@ export const CreateTicketPage: React.FC = () => {
       </form>
       {selectedImage && (
         <div className="image-modal" onClick={() => setSelectedImage(null)}>
-          <div className="image-modal-content" onClick={e => e.stopPropagation()}>
-            <button className="image-modal-close" onClick={() => setSelectedImage(null)}>
+          <div
+            className="image-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="image-modal-close"
+              onClick={() => setSelectedImage(null)}
+            >
               <FaTimes />
             </button>
             <img src={selectedImage.src} alt={selectedImage.alt} />

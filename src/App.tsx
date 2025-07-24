@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
@@ -237,7 +236,7 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <Router>
+    <div>
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
@@ -652,7 +651,7 @@ const AppContent: React.FC = () => {
       />
 
       <NotificationContainer />
-    </Router>
+    </div>
   );
 };
 

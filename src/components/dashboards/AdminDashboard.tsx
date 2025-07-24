@@ -6,7 +6,6 @@ import {
   FaExclamationTriangle,
   FaClock,
   FaArrowUp,
-  FaFilter,
   FaChartLine,
   FaBolt,
   FaEye,
@@ -390,10 +389,6 @@ export const AdminDashboard: React.FC = () => {
         <div className="modern-section-header">
           <h2 className="modern-section-title">Active Tickets</h2>
           <div className="modern-section-actions">
-            <button className="btn btn-secondary btn-sm">
-              <FaFilter />
-              <span>Advanced Filters</span>
-            </button>
             <button
               className="btn btn-secondary btn-sm"
               onClick={() => navigate("/tickets")}

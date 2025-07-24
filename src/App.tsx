@@ -236,34 +236,34 @@ const AppContent: React.FC = () => {
   };
 
 
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = localStorage.getItem('it-ticket-auth-token');
-    const urlParams = new URLSearchParams(window.location.search);
-    const queryToken = urlParams.get("token");
-    const userEmail = urlParams.get("email");
 
-    if (!token && queryToken && userEmail) {
-      const userData = {
-        username: userEmail,
-        email: userEmail,
-      };
-      localStorage.setItem("it-ticket-auth-token", queryToken);
-      localStorage.setItem("it-ticket-user-data", JSON.stringify(userData));
 
-      // Clear the token from URL
-      window.history.replaceState({}, document.title, "/dashboard");
 
-      // Redirect to dashboard
-      navigate("/dashboard");
-    }
-  }, [navigate]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
   return (
-    <>
+    <Router>
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
@@ -666,46 +666,27 @@ const AppContent: React.FC = () => {
       />
 
       <NotificationContainer />
-    </>
+    </Router>
   );
 };
 
 const App: React.FC = () => {
-  // useEffect(() => {
-  //   const token = localStorage.getItem('it-ticket-auth-token');
-  //   const urlParams = new URLSearchParams(window.location.search);
-  //   const queryToken = urlParams.get("token");
-  //   const userEmail = urlParams.get("email");
+  useEffect(() => {
+    // Handle token from URL parameters on app initialization
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryToken = urlParams.get("token");
+    const userEmail = urlParams.get("email");
 
-  //   if (!token && queryToken) {
-  //     const userData = {
-  //       "username": userEmail,
-  //       "email": userEmail,
-  //     }
-  //     localStorage.setItem("it-ticket-auth-token", queryToken);
-  //     localStorage.setItem("it-ticket-user-data", JSON.stringify(userData));
-  //   }
-  // }, []);
-  // const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   const token = localStorage.getItem('it-ticket-auth-token');
-  //   const urlParams = new URLSearchParams(window.location.search);
-  //   const queryToken = urlParams.get("token");
-  //   const userEmail = urlParams.get("email");
-
-  //   if (!token && queryToken && userEmail) {
-  //     const userData = {
-  //       username: userEmail,
-  //       email: userEmail,
-  //     };
-  //     localStorage.setItem("it-ticket-auth-token", queryToken);
-  //     localStorage.setItem("it-ticket-user-data", JSON.stringify(userData));
-
-  //     // Redirect to dashboard after login token is set
-  //     navigate("/dashboard"); // Change this path to your actual landing page
-  //   }
-  // }, [navigate]);
+    if (!token && queryToken) {
+      const userData = {
+        username: userEmail,
+        email: userEmail,
+      };
+      localStorage.setItem(AUTH_TOKEN_KEY, queryToken);
+      localStorage.setItem(USER_DATA_KEY, JSON.stringify(userData));
+    }
+  }, []);
   return (
     <ThemeProvider>
       <AuthProvider>

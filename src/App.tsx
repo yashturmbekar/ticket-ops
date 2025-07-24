@@ -16,6 +16,7 @@ import AppLayout from "./components/layout/AppLayout";
 import { TicketsPage } from "./pages/TicketsDashboardPage.tsx";
 import { CreateTicketPage } from "./pages/CreateTicketPage";
 import TicketDetailsPageProfessional from "./pages/GetTicketDetailsPage.tsx";
+import EnhancedTicketDetailsPage from "./pages/EnhancedTicketDetailsPage.tsx";
 import { AssetsPage } from "./pages/AssetsPage.tsx";
 import { UsersPage } from "./pages/UsersPage.tsx";
 import { KnowledgePage } from "./pages/KnowledgePage.tsx";
@@ -504,6 +505,16 @@ const AppContent: React.FC = () => {
             <ProtectedRoute>
               <LayoutWrapper>
                 <TicketDetailsPageProfessional />
+              </LayoutWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tickets/:id/enhanced"
+          element={
+            <ProtectedRoute>
+              <LayoutWrapper>
+                <EnhancedTicketDetailsPage />
               </LayoutWrapper>
             </ProtectedRoute>
           }

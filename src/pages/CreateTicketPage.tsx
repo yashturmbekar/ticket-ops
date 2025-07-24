@@ -40,9 +40,9 @@ interface ApiError {
 const fileToByteArray = (file: File): Promise<number[]> => {
   return new Promise((resolve, reject) => {
     // Check file size before processing
-    const maxSize = 1024 * 1024; // 1MB
+    const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
-      reject(new Error(`File ${file.name} exceeds the 1MB limit`));
+      reject(new Error(`File ${file.name} exceeds the 10MB limit`));
       return;
     }
 
@@ -73,6 +73,8 @@ export const CreateTicketPage: React.FC = () => {
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [operationStatus, setOperationStatus] = useState<string>("");
   const [categories, setCategories] = useState<CategoryOption[]>([]);
+  // Add state for selectedImage
+  const [selectedImage, setSelectedImage] = useState<{ src: string; alt: string } | null>(null);
 
   const [formData, setFormData] = useState<TicketFormData>({
     title: "",
@@ -283,7 +285,7 @@ export const CreateTicketPage: React.FC = () => {
         const filesToAdd = files.slice(0, availableSlots);
 
         // Validate file sizes (1MB = 1024 * 1024 bytes)
-        const maxFileSize = 1024 * 1024; // 1MB per file
+        const maxFileSize = 10 * 1024 * 1024; // 10MB per file
         const oversizedFiles = filesToAdd.filter(file => file.size > maxFileSize);
         const validFiles = filesToAdd.filter(file => file.size <= maxFileSize);
 
@@ -292,7 +294,7 @@ export const CreateTicketPage: React.FC = () => {
           addNotification({
             type: "error",
             title: "❌ Files Too Large",
-            message: `The following files exceed the 1MB limit and cannot be attached: ${oversizedNames}`,
+            message: `The following files exceed the 10MB limit and cannot be attached: ${oversizedNames}`,
           });
         }
 
@@ -306,13 +308,13 @@ export const CreateTicketPage: React.FC = () => {
         const currentTotalSize = formData.attachments.reduce((sum, file) => sum + file.size, 0);
         const newFilesSize = validFiles.reduce((sum, file) => sum + file.size, 0);
         const totalSize = currentTotalSize + newFilesSize;
-        const maxTotalSize = 2.5 * 1024 * 1024; // 2.5MB total limit
+        const maxTotalSize = 30 * 1024 * 1024; // 30MB total limit
 
         if (totalSize > maxTotalSize) {
           addNotification({
             type: "error",
             title: "❌ Total Size Limit Exceeded",
-            message: "The total size of all attachments cannot exceed 2.5MB. Please remove some files or choose smaller files.",
+            message: "The total size of all attachments cannot exceed 30MB. Please remove some files or choose smaller files.",
           });
           setUploadingFiles(false);
           e.target.value = "";
@@ -398,6 +400,7 @@ export const CreateTicketPage: React.FC = () => {
             src={imagePreview}
             alt={file.name}
             className="create-file-image-preview"
+            onClick={() => setSelectedImage({ src: imagePreview, alt: file.name })}
           />
         )}
         <div className="create-file-info">
@@ -557,7 +560,7 @@ export const CreateTicketPage: React.FC = () => {
             <label className="create-form-label">
               Attachments
               <span className="create-form-hint">
-                Screenshots, error logs, or other relevant files (Max 1 MB per file, 2.5 MB total)
+                Screenshots, error logs, or other relevant files (Max 10 MB per file, 30 MB total)
               </span>
             </label>
             <div className="create-form-group">
@@ -602,7 +605,7 @@ export const CreateTicketPage: React.FC = () => {
                         ? "Please wait..."
                         : formData.attachments.length >= 3
                         ? `${formData.attachments.length}/3 files attached`
-                        : "Max 1 MB per file | Total limit: 2.5 MB"}
+                        : "Max 10 MB per file | Total limit: 30 MB"}
                     </small>
                   </label>
                 </div>
@@ -665,6 +668,17 @@ export const CreateTicketPage: React.FC = () => {
           </div>
         </div>
       </form>
+      {selectedImage && (
+        <div className="image-modal" onClick={() => setSelectedImage(null)}>
+          <div className="image-modal-content" onClick={e => e.stopPropagation()}>
+            <button className="image-modal-close" onClick={() => setSelectedImage(null)}>
+              <FaTimes />
+            </button>
+            <img src={selectedImage.src} alt={selectedImage.alt} />
+            <div className="image-modal-title">{selectedImage.alt}</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

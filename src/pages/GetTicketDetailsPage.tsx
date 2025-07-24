@@ -513,8 +513,43 @@ const TicketDetailsPageProfessional: React.FC = () => {
     const files = event.target.files;
     if (files && files.length > 0) {
       const newFiles = Array.from(files);
-      setCommentAttachments((prev) => [...prev, ...newFiles]);
-      console.log("Files selected:", newFiles);
+      const validFiles: File[] = [];
+      let totalSize = 0;
+
+      for (const file of newFiles) {
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit per file
+          if (notificationContext) {
+            notificationContext.error(
+              "File Size Exceeded",
+              `File "${file.name}" exceeds 10MB limit. Please choose a smaller file.`
+            );
+          }
+          continue;
+        }
+        totalSize += file.size;
+        if (totalSize > 30 * 1024 * 1024) { // 30MB total limit
+          if (notificationContext) {
+            notificationContext.error(
+              "Total File Size Exceeded",
+              "The total size of attachments for this comment exceeds 30MB. Please reduce the size of some files or remove them."
+            );
+          }
+          break;
+        }
+        if (validFiles.length >= 3) { // Max 3 attachments
+          if (notificationContext) {
+            notificationContext.error(
+              "Too Many Attachments",
+              "You can only attach a maximum of 3 files per comment."
+            );
+          }
+          break;
+        }
+        validFiles.push(file);
+      }
+
+      setCommentAttachments((prev) => [...prev, ...validFiles]);
+      console.log("Files selected:", validFiles);
     }
     // Reset the input value so the same file can be selected again if needed
     event.target.value = "";

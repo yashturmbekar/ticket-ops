@@ -33,7 +33,7 @@ import { UserRole, Permission } from "./types";
 import { AUTH_TOKEN_KEY, USER_DATA_KEY } from "./constants";
 import { jwtDecode } from "jwt-decode";
 import "./styles/globals.css";
-import { RoleDashboard } from "./components/dashboards/RoleDashboard";
+import { DashboardPage } from "./pages/DashboardPage";
 
 // Interfaces for JWT token structure
 interface DecodedToken {
@@ -474,7 +474,7 @@ const AppContent: React.FC = () => {
           element={
             <ProtectedRoute>
               <LayoutWrapper>
-                <RoleDashboard />
+                <DashboardPage />
               </LayoutWrapper>
             </ProtectedRoute>
           }

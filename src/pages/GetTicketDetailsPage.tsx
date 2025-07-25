@@ -34,9 +34,171 @@ import {
   FaFilePowerpoint,
   FaFile,
   FaTicketAlt,
+  FaEdit,
+  FaTag,
+  FaHistory,
 } from "react-icons/fa";
 import { Loader, ButtonLoader } from "../components/common";
 import "../styles/getTicketDetails.css";
+
+// Enhanced SLA Helper Functions
+const calculateSLAProgress = (
+  createdAt: string,
+  priority: string,
+  slaType: "response" | "resolution"
+): number => {
+  const now = new Date().getTime();
+  const created = new Date(createdAt).getTime();
+  const elapsed = now - created;
+
+  // SLA times in hours by priority - different for response and resolution
+  const slaHours = {
+    response: {
+      CRITICAL: 1, // 1 hour response time for critical
+      HIGH: 4, // 4 hours for high
+      MEDIUM: 8, // 8 hours for medium
+      LOW: 24, // 24 hours for low
+    },
+    resolution: {
+      CRITICAL: 4, // 4 hours resolution time for critical
+      HIGH: 8, // 8 hours for high
+      MEDIUM: 24, // 24 hours for medium
+      LOW: 72, // 72 hours for low
+    },
+  };
+
+  const targetHours =
+    slaHours[slaType][priority as keyof (typeof slaHours)[typeof slaType]] ||
+    24;
+  const targetMs = targetHours * 60 * 60 * 1000;
+
+  return Math.min((elapsed / targetMs) * 100, 100);
+};
+
+const getSLAStatus = (progress: number): "good" | "warning" | "critical" => {
+  if (progress < 70) return "good";
+  if (progress < 90) return "warning";
+  return "critical";
+};
+
+const formatTimeRemaining = (
+  createdAt: string,
+  priority: string,
+  slaType: "response" | "resolution"
+): string => {
+  const now = new Date().getTime();
+  const created = new Date(createdAt).getTime();
+  const elapsed = now - created;
+
+  const slaHours = {
+    response: {
+      CRITICAL: 1,
+      HIGH: 4,
+      MEDIUM: 8,
+      LOW: 24,
+    },
+    resolution: {
+      CRITICAL: 4,
+      HIGH: 8,
+      MEDIUM: 24,
+      LOW: 72,
+    },
+  };
+
+  const targetHours =
+    slaHours[slaType][priority as keyof (typeof slaHours)[typeof slaType]] ||
+    24;
+  const targetMs = targetHours * 60 * 60 * 1000;
+  const remaining = targetMs - elapsed;
+
+  if (remaining <= 0) return "SLA Breach";
+
+  const hours = Math.floor(remaining / (1000 * 60 * 60));
+  const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m remaining`;
+  }
+  return `${minutes}m remaining`;
+};
+
+const formatRelativeTime = (dateString: string): string => {
+  const now = new Date();
+  const date = new Date(dateString);
+  const diffMs = now.getTime() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMinutes < 1) return "Just now";
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+
+  return date.toLocaleDateString();
+};
+
+const getEnhancedTimeline = (statusHistory: any[], comments: any[]) => {
+  const timelineItems = [
+    ...statusHistory.map((item: any) => {
+      // Create more descriptive status messages
+      let statusMessage = "";
+      const status =
+        item.toStatus || item.status || item.newStatus || "Unknown";
+
+      switch (status.toLowerCase()) {
+        case "new":
+          statusMessage =
+            "Ticket Created - New support request submitted and queued for review";
+          break;
+        case "open":
+          statusMessage =
+            "Ticket Opened - Support request is now being actively reviewed";
+          break;
+        case "in progress":
+        case "in_progress":
+          statusMessage =
+            "Work Started - Technical team has begun working on this ticket";
+          break;
+        case "resolved":
+          statusMessage =
+            "Issue Resolved - Problem has been fixed and solution implemented";
+          break;
+        case "closed":
+          statusMessage =
+            "Ticket Closed - Support request completed and verified";
+          break;
+        case "on hold":
+        case "on_hold":
+          statusMessage =
+            "Placed On Hold - Ticket temporarily paused pending additional information";
+          break;
+        default:
+          statusMessage = `Status Updated - Ticket status changed to ${status.replace(
+            "_",
+            " "
+          )}`;
+      }
+
+      return {
+        ...item,
+        type: "status",
+        text: statusMessage,
+        timestamp: item.changedAt || item.createdAt,
+      };
+    }),
+    ...comments.map((item: any) => ({
+      ...item,
+      type: "comment",
+      text: item.comment || item.text || "Comment added",
+      timestamp: item.createdAt,
+    })),
+  ];
+
+  return timelineItems.sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  );
+};
 
 // API Response interface matching the backend structure
 interface ApiTicketResponse {
@@ -77,6 +239,10 @@ interface ApiTicketResponse {
   attachments?: Array<{
     filename: string;
     size: number;
+    fileType?: string;
+    fileData?: string;
+    fileSize?: number;
+    fileName?: string;
   }>;
   comments?: Array<{
     id: string;
@@ -96,11 +262,15 @@ interface ApiTicketResponse {
     attachments?: Array<{
       filename: string;
       size: number;
+      fileType?: string;
+      fileData?: string;
+      fileSize?: number;
+      fileName?: string;
     }>;
   }>;
 }
 
-// Simplified interfaces for the professional implementation
+// Simplified interfaces for the enhanced implementation
 interface TicketData {
   id: string;
   ticketCode: string;
@@ -145,6 +315,10 @@ interface CommentData {
   attachments?: Array<{
     filename: string;
     size: number;
+    fileType?: string;
+    fileData?: string;
+    fileSize?: number;
+    fileName?: string;
   }>;
 }
 
@@ -182,7 +356,9 @@ const TicketDetailsPageProfessional: React.FC = () => {
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("");
   const [selectedPriority, setSelectedPriority] = useState<string>("");
   const [assigneeSearchQuery, setAssigneeSearchQuery] = useState("");
-  const [showAssigneeDropdown, setShowAssigneeDropdown] = useState(false); // Employee search hook
+  const [showAssigneeDropdown, setShowAssigneeDropdown] = useState(false);
+
+  // Employee search hook
   const {
     results: employeeResults,
     loading: employeeLoading,
@@ -199,7 +375,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
       status: string;
     }>
   ) => {
-    // Create minimal update payload with only the fields that can be updated
     const updatePayload: any = {
       id: currentApiTicket.id,
       title: currentApiTicket.title,
@@ -218,7 +393,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
       resolutionDueAt: currentApiTicket.resolutionDueAt,
     };
 
-    // Remove undefined fields
     Object.keys(updatePayload).forEach((key) => {
       if (updatePayload[key] === undefined || updatePayload[key] === null) {
         delete updatePayload[key];
@@ -232,7 +406,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
   const canEditTicket = (): boolean => {
     if (!user || !ticket) return false;
 
-    // ORG_ADMIN and HELPDESK_ADMIN can edit all tickets
     if (
       user.role === UserRole.ORG_ADMIN ||
       user.role === UserRole.HELPDESK_ADMIN
@@ -240,9 +413,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
       return true;
     }
 
-    // MANAGER can only edit if ticket is assigned to them
     if (user.role === UserRole.MANAGER) {
-      // Check if this manager is assigned to the ticket
       const userFullName = `${user.firstName} ${user.lastName}`;
       return ticket.assignedTo?.employeeName === userFullName;
     }
@@ -250,7 +421,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
     return false;
   };
 
-  // Immediate update handlers
+  // Update handlers (keeping same logic as original)
   const handleDepartmentChange = async (departmentId: string) => {
     if (!ticket || !id || !departmentId || !currentApiTicket) return;
 
@@ -258,15 +429,11 @@ const TicketDetailsPageProfessional: React.FC = () => {
     setSelectedDepartmentId(departmentId);
 
     try {
-      // Create ticket update payload with department change
       const updatePayload = createTicketUpdatePayload(currentApiTicket, {
         assignedDepartmentId: departmentId,
       });
 
-      console.log("Updating ticket department:", updatePayload);
       await updateTicket(updatePayload);
-
-      // Refresh ticket data
       const updatedTicketResponse = await getTicketById(id);
       const updatedTicket: ApiTicketResponse = updatedTicketResponse;
 
@@ -297,7 +464,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
   };
 
   const handleAssigneeChange = async (employee: any) => {
-    console.log("handleAssigneeChange called with employee:", employee);
     if (!ticket || !id || !currentApiTicket) return;
 
     setIsSavingChanges(true);
@@ -305,15 +471,11 @@ const TicketDetailsPageProfessional: React.FC = () => {
     setShowAssigneeDropdown(false);
 
     try {
-      // Check if ticket was previously unassigned
       const wasUnassigned = !currentApiTicket.assignedToEmployeeId;
-
-      // Create ticket update payload with assignee change
       const updateData: any = {
         assignedToEmployeeId: employee.id,
       };
 
-      // If ticket was unassigned, change status to Pending-Approval
       if (wasUnassigned) {
         updateData.status = "PENDING_APPROVAL";
       }
@@ -322,11 +484,8 @@ const TicketDetailsPageProfessional: React.FC = () => {
         currentApiTicket,
         updateData
       );
-
-      console.log("Updating ticket assignee:", updatePayload);
       await updateTicket(updatePayload);
 
-      // Refresh ticket data
       const updatedTicketResponse = await getTicketById(id);
       const updatedTicket: ApiTicketResponse = updatedTicketResponse;
 
@@ -360,11 +519,9 @@ const TicketDetailsPageProfessional: React.FC = () => {
   };
 
   const handleClearAssignee = () => {
-    // Only clear UI state, don't call API
-    setAssigneeSearchQuery(""); // Clear the search query
-    setShowAssigneeDropdown(true); // Show the dropdown for new selection
+    setAssigneeSearchQuery("");
+    setShowAssigneeDropdown(true);
 
-    // Update local ticket state to show as unassigned in UI
     if (ticket) {
       setTicket({
         ...ticket,
@@ -380,15 +537,11 @@ const TicketDetailsPageProfessional: React.FC = () => {
     setSelectedPriority(priority);
 
     try {
-      // Create ticket update payload with priority change
       const updatePayload = createTicketUpdatePayload(currentApiTicket, {
         priority,
       });
 
-      console.log("Updating ticket priority:", updatePayload);
       await updateTicket(updatePayload);
-
-      // Refresh ticket data
       const updatedTicketResponse = await getTicketById(id);
       const updatedTicket: ApiTicketResponse = updatedTicketResponse;
 
@@ -543,7 +696,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
       .sort(
         (a, b) =>
           new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      ); // Sort by newest first
+      );
   };
 
   // Function to check if current user can edit a comment
@@ -553,19 +706,17 @@ const TicketDetailsPageProfessional: React.FC = () => {
     return comment.commenterEmployeeId === parseInt(user.id);
   };
 
-  // Function to start editing a comment
+  // Comment editing functions
   const startEditComment = (commentId: string, currentContent: string) => {
     setEditingCommentId(commentId);
     setEditingCommentText(currentContent);
   };
 
-  // Function to cancel editing
   const cancelEditComment = () => {
     setEditingCommentId(null);
     setEditingCommentText("");
   };
 
-  // Function to update a comment
   const handleUpdateComment = async () => {
     if (!editingCommentId || !editingCommentText.trim() || !id) return;
 
@@ -578,7 +729,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
         user?.id ? parseInt(user.id) : undefined
       );
 
-      // Refresh ticket data to get updated comments
       const updatedTicketResponse = await getTicketById(id);
       const updatedTicket: ApiTicketResponse = updatedTicketResponse;
 
@@ -587,11 +737,9 @@ const TicketDetailsPageProfessional: React.FC = () => {
         setComments(updatedComments);
       }
 
-      // Clear editing state
       setEditingCommentId(null);
       setEditingCommentText("");
 
-      // Show success notification
       if (notificationContext) {
         notificationContext.success(
           "Comment Updated",
@@ -601,7 +749,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
     } catch (error) {
       console.error("Error updating comment:", error);
 
-      // Show error notification
       if (notificationContext) {
         notificationContext.error(
           "Error Updating Comment",
@@ -623,37 +770,22 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
       try {
         const ticketResponse = await getTicketById(id);
-
-        console.log("ticketResponse ticket:", ticketResponse);
-
-        // Get the single ticket from API response - guaranteed to have exactly one ticket
         const foundTicket: ApiTicketResponse = ticketResponse;
+
         if (foundTicket) {
-          // Transform API response using helper function
           const transformedTicket = transformTicketData(foundTicket);
           setTicket(transformedTicket);
           setCurrentApiTicket(foundTicket);
-
-          // Initialize edit values with current ticket data
           updateEditValues(foundTicket);
 
-          // Store ticket code in session storage for breadcrumb
           sessionStorage.setItem(
             `ticketCode_${id}`,
             transformedTicket.ticketCode
           );
 
-          // Transform and set comments from ticket response
-
-          // If no comments exist, add a system comment
-
           const transformedComments = transformComments(foundTicket.comments);
-
-          // If no comments exist, add a system comment
-
           setComments(transformedComments);
         } else {
-          console.error("Ticket not found");
           setTicket(null);
         }
       } catch (error) {
@@ -677,7 +809,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
     if (selectedImage) {
       document.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden"; // Prevent background scrolling
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
@@ -686,6 +818,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
     };
   }, [selectedImage]);
 
+  // Utility functions
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
@@ -697,12 +830,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
-  function formatFileSize2(size: number): string {
-    if (!size) return "0 B";
-    const i = Math.floor(Math.log(size) / Math.log(1024));
-    const sizes = ["B", "KB", "MB", "GB"];
-    return `${(size / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
-  }
 
   const getFileIcon = (filename: string, size?: number) => {
     const ext = filename?.split(".").pop()?.toLowerCase();
@@ -745,30 +872,25 @@ const TicketDetailsPageProfessional: React.FC = () => {
     }
   };
 
+  // Comment handling functions
   const handleAddComment = async () => {
     if (!newComment.trim() || !id) return;
 
     setIsAddingComment(true);
     try {
-      // 1. Add the comment first and get the new comment ID
       const response = await addComment(id, newComment.trim());
+      const newCommentId = response?.id;
 
-      console.log("Comment added successfully:", response);
-
-      const newCommentId = response?.id; // adjust this based on your actual API response structure
       if (!newCommentId) {
         throw new Error("Comment ID not returned from addComment API");
       }
 
-      // 2. Upload attachments if any
       const uploadedAttachments: Array<{ filename: string; size: number }> = [];
 
       if (commentAttachments.length > 0) {
         for (const file of commentAttachments) {
           try {
-            // ✅ Now passing correct commentId instead of ticketId
-            const uploadResponse = await uploadAttachment(file, newCommentId);
-            console.log("File uploaded successfully:", uploadResponse);
+            await uploadAttachment(file, newCommentId);
             uploadedAttachments.push({
               filename: file.name,
               size: file.size,
@@ -785,7 +907,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
         }
       }
 
-      // 3. Refresh ticket data to get updated comments
       const updatedTicketResponse = await getTicketById(id);
       const updatedTicket: ApiTicketResponse = updatedTicketResponse;
 
@@ -794,11 +915,9 @@ const TicketDetailsPageProfessional: React.FC = () => {
         setComments(updatedComments);
       }
 
-      // Clear the form
       setNewComment("");
       setCommentAttachments([]);
 
-      // Success notification
       if (notificationContext) {
         const message =
           uploadedAttachments.length > 0
@@ -829,7 +948,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
       let totalSize = 0;
 
       for (const file of newFiles) {
-        if (file.size > 10 * 1024 * 1024) { // 10MB limit per file
+        if (file.size > 10 * 1024 * 1024) {
           if (notificationContext) {
             notificationContext.error(
               "File Size Exceeded",
@@ -839,7 +958,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
           continue;
         }
         totalSize += file.size;
-        if (totalSize > 30 * 1024 * 1024) { // 30MB total limit
+        if (totalSize > 30 * 1024 * 1024) {
           if (notificationContext) {
             notificationContext.error(
               "Total File Size Exceeded",
@@ -848,7 +967,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
           }
           break;
         }
-        if (validFiles.length >= 3) { // Max 3 attachments
+        if (validFiles.length >= 3) {
           if (notificationContext) {
             notificationContext.error(
               "Too Many Attachments",
@@ -861,9 +980,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
       }
 
       setCommentAttachments((prev) => [...prev, ...validFiles]);
-      console.log("Files selected:", validFiles);
     }
-    // Reset the input value so the same file can be selected again if needed
     event.target.value = "";
   };
 
@@ -894,12 +1011,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
         <img
           src={`data:${fileType};base64,${fileData}`}
           alt={fileName}
-          style={{
-            maxWidth: "120px",
-            maxHeight: "120px",
-            borderRadius: "4px",
-            objectFit: "cover",
-          }}
+          className="attachment-preview-image"
           onClick={() =>
             setSelectedImage({
               src: `data:${fileType};base64,${fileData}`,
@@ -909,44 +1021,12 @@ const TicketDetailsPageProfessional: React.FC = () => {
         />
       );
     }
-    // For non-image files, show the appropriate file icon
     return getFileIcon(fileName, 40);
   }
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority.toLowerCase()) {
-      case "critical":
-        return "#dc3545";
-      case "high":
-        return "#fd7e14";
-      case "medium":
-        return "#ffc107";
-      case "low":
-        return "#28a745";
-      default:
-        return "#6c757d";
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "open":
-        return "#007bff";
-      case "in progress":
-        return "#17a2b8";
-      case "resolved":
-        return "#28a745";
-      case "closed":
-        return "#6c757d";
-      case "on hold":
-        return "#ffc107";
-      default:
-        return "#6c757d";
-    }
-  };
-
-  // ✅ Correct: hooks at the top level
-  const [commentAttachmentPreviews, setCommentAttachmentPreviews] = React.useState<string[]>([]);
+  // Comment attachment previews
+  const [commentAttachmentPreviews, setCommentAttachmentPreviews] =
+    React.useState<string[]>([]);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -972,7 +1052,9 @@ const TicketDetailsPageProfessional: React.FC = () => {
       if (isMounted) setCommentAttachmentPreviews(newPreviews);
     };
     loadPreviews();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [commentAttachments]);
 
   if (loading) {
@@ -983,7 +1065,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
   if (!ticket) {
     return (
-      <div className="ticket-details-error">
+      <div className="enhanced-ticket-error">
         <FaExclamationTriangle />
         <span>Ticket not found</span>
       </div>
@@ -991,679 +1073,558 @@ const TicketDetailsPageProfessional: React.FC = () => {
   }
 
   return (
-    <div className="ticket-details-page-professional">
-      {/* Page Header */}
-      <div className="create-page-header">
-        <div className="create-page-title-section">
-          <div className="create-page-icon">
-            <FaTicketAlt />
+    <div className="enhanced-ticket-details-page">
+      {/* Main Content */}
+      <div className="enhanced-page-content">
+        {/* Page Header - Inside content grid width */}
+        <div className="enhanced-page-header">
+          <div className="header-title-section">
+            <div className="page-icon">
+              <FaTicketAlt />
+            </div>
+            <div className="page-title-text">
+              <h1 className="page-title">Ticket Details</h1>
+              <p className="page-subtitle">
+                View and manage ticket information and progress
+              </p>
+            </div>
           </div>
-          <div className="create-page-title-text">
-            <h1 className="create-page-title">Ticket Details</h1>
-            <p className="create-page-subtitle">
-              View and manage ticket information
-            </p>
+          <div className="header-actions">
+            <div className="ticket-status-badges">
+              <span
+                className={`status-badge status-${ticket.status
+                  .toLowerCase()
+                  .replace("_", "-")}`}
+              >
+                {ticket.status.replace("_", " ")}
+              </span>
+              <span
+                className={`priority-badge priority-${ticket.priority.toLowerCase()}`}
+              >
+                {ticket.priority} Priority
+              </span>
+            </div>
           </div>
         </div>
-        <div className="create-page-actions"></div>
-      </div>
 
-      <div className="page-content">
-        <div className="content-container">
-          {/* Single Comprehensive Ticket Information Section */}
-          <div className="card ticket-comprehensive-card">
-            <div className="card-header">
-              <div className="header-content">
-                <h2>Ticket Information</h2>
-                <div className="header-badges">
-                  <span
-                    className="status-badge"
-                    style={{ backgroundColor: getStatusColor(ticket.status) }}
-                  >
-                    {ticket.status}
-                  </span>
-                  <span
-                    className="priority-badge"
-                    style={{
-                      backgroundColor: getPriorityColor(ticket.priority),
-                    }}
-                  >
-                    {ticket.priority} Priority
-                  </span>
+        <div className="content-grid">
+          {/* Left Column - Main Information */}
+          <div className="main-column">
+            {/* Requester Information Card - MOVED TO TOP */}
+            <div className="enhanced-card requester-card">
+              <div className="card-header">
+                <div className="header-title">
+                  <FaUser className="header-icon" />
+                  <h2>Requester Information</h2>
+                </div>
+              </div>
+              <div className="card-content">
+                <div className="requester-profile">
+                  <div className="profile-avatar">
+                    {ticket.requestedBy.profilePic ? (
+                      <img
+                        src={`data:${ticket.requestedBy.profilePic};base64,${ticket.requestedBy.profilePic}`}
+                        alt={ticket.requestedBy.employeeName}
+                        className="avatar-image"
+                      />
+                    ) : (
+                      <div className="avatar-placeholder">
+                        {ticket.requestedBy.employeeName
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="profile-info">
+                    <h3 className="profile-name">
+                      {ticket.requestedBy.employeeName}
+                    </h3>
+                    <p className="profile-designation">
+                      {ticket.requestedBy.designation}
+                    </p>
+                    <div className="profile-meta">
+                      <div className="meta-item">
+                        <FaCalendarAlt className="meta-icon" />
+                        <span>
+                          Created: {formatRelativeTime(ticket.dateCreated)}
+                        </span>
+                      </div>
+                      <div className="meta-item">
+                        <FaClock className="meta-icon" />
+                        <span>
+                          Updated: {formatRelativeTime(ticket.dateModified)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="card-content">
-              {/* Simple Ticket Information Display */}
-              <div className="simple-ticket-info">
-                <div className="ticket-code-simple">{ticket.ticketCode}</div>
 
-                <div className="ticket-field title-field">
-                  <span className="field-label">Title</span>
-                  <span className="field-value">{ticket.title}</span>
-                </div>
-
-                <div className="ticket-field">
-                  <span className="field-label">Description</span>
-                  <span className="field-value">{ticket.description}</span>
+            {/* Ticket Overview Card - TICKET CODE, TITLE, DESCRIPTION */}
+            <div className="enhanced-card ticket-overview-card">
+              <div className="card-header">
+                <div className="header-title">
+                  <FaTicketAlt className="header-icon" />
+                  <h2>Ticket Overview</h2>
                 </div>
               </div>
-              {/* All Ticket Information in One Grid */}
-              <div className="comprehensive-info-grid">
-                {/* Requester Information */}
-                <div className="info-section requester-info-section">
-                  <h3>Requester Information</h3>
-                  <div className="info-items">
-                    <div className="info-item requester-info-item">
-                      <label>Requested By</label>
-                      <div className="info-value requester-info-value">
-                        <div className="requester-avatar">
-                          {ticket.requestedBy.profilePic ? (
-                            <img
-                              src={
-                                ticket.requestedBy.profilePic &&
-                                ticket.requestedBy.profilePic
-                                  ? `data:${ticket.requestedBy.profilePic};base64,${ticket.requestedBy.profilePic}`
-                                  : ""
-                              }
-                              alt={ticket.requestedBy.employeeName}
-                              style={{
-                                width: "48px",
-                                height: "48px",
-                                borderRadius: "50%",
-                                objectFit: "cover",
-                                border: "2px solid #e3e7ef",
-                                background: "#f5f7fa",
-                              }}
-                              className="profile-pic"
-                            />
-                          ) : (
-                            <div className="avatar-initials">
-                              {/* Show initials if available, fallback to icon */}
-                              {ticket.requestedBy.employeeName ? (
-                                ticket.requestedBy.employeeName
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")
-                                  .toUpperCase()
-                              ) : (
-                                <FaUser />
-                              )}
-                            </div>
-                          )}
-                        </div>
-                        <div className="requester-details">
-                          <div className="primary-text requester-name">
-                            {ticket.requestedBy.employeeName}
-                          </div>
-                          <div className="secondary-text requester-role">
-                            {ticket.requestedBy.designation}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Assignment & Status */}
-                <div className="info-section assignment-status-section">
-                  <h3>Assignment & Status</h3>
-                  <div className="info-items">
-                    <div className="info-item">
-                      <label>Assigned Department</label>
-                      <div className="info-value">
-                        {canEditTicket() ? (
-                          <div className="professional-edit-field">
-                            <FaBuilding className="field-icon" />
-                            <select
-                              value={selectedDepartmentId}
-                              onChange={(e) =>
-                                handleDepartmentChange(e.target.value)
-                              }
-                              className="professional-select"
-                              disabled={isSavingChanges}
-                            >
-                              <option value="">Select Department...</option>
-                              {departments
-                                .filter((dept) => dept.isActive)
-                                .map((department) => (
-                                  <option
-                                    key={department.id}
-                                    value={department.id}
-                                  >
-                                    {department.name}
-                                  </option>
-                                ))}
-                            </select>
-                            {isSavingChanges && (
-                              <div className="saving-indicator">
-                                <ButtonLoader variant="primary" />
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="readonly-field">
-                            <FaBuilding className="field-icon" />
-                            <span className="field-text">
-                              {ticket.department}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="info-item">
-                      <label>Assigned To</label>
-                      <div className="info-value">
-                        {canEditTicket() ? (
-                          <div className="professional-edit-field assignee-field">
-                            <FaUserTie className="field-icon" />
-                            <div className="assignee-search-container">
-                              {/* Show assigned employee with clear button or search input */}
-                              {ticket.assignedTo && !showAssigneeDropdown ? (
-                                <div
-                                  className="assigned-employee-display"
-                                  onClick={() => setShowAssigneeDropdown(true)}
-                                  style={{ cursor: "pointer" }}
-                                  title="Click to change assignee"
-                                >
-                                  <span className="assigned-employee-name">
-                                    {ticket.assignedTo.employeeName}
-                                  </span>
-                                  <button
-                                    type="button"
-                                    className="clear-assignee-btn"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleClearAssignee();
-                                    }}
-                                    title="Clear assignee"
-                                  >
-                                    <FaTimes />
-                                  </button>
-                                </div>
-                              ) : (
-                                <>
-                                  <input
-                                    type="text"
-                                    value={assigneeSearchQuery}
-                                    onChange={(e) => {
-                                      setAssigneeSearchQuery(e.target.value);
-                                      setShowAssigneeDropdown(true);
-                                    }}
-                                    onFocus={() =>
-                                      setShowAssigneeDropdown(true)
-                                    }
-                                    placeholder="Search and select employee..."
-                                    className="professional-input"
-                                    disabled={isSavingChanges}
-                                  />
-                                  {showAssigneeDropdown &&
-                                    assigneeSearchQuery && (
-                                      <div className="professional-dropdown">
-                                        {employeeLoading && (
-                                          <div className="dropdown-item loading">
-                                            <ButtonLoader variant="primary" />
-                                            <span>Searching employees...</span>
-                                          </div>
-                                        )}
-                                        {!employeeLoading &&
-                                          employeeResults.length === 0 && (
-                                            <div className="dropdown-item no-results">
-                                              <span>No employees found</span>
-                                            </div>
-                                          )}
-                                        {!employeeLoading &&
-                                          employeeResults.map((employee) => (
-                                            <div
-                                              key={employee.id}
-                                              className="dropdown-item employee-option"
-                                              onClick={(e) => {
-                                                console.log(
-                                                  "Employee clicked:",
-                                                  employee
-                                                );
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                handleAssigneeChange(employee);
-                                              }}
-                                            >
-                                              <div className="employee-details">
-                                                <div className="employee-name">
-                                                  {employee.employeeName}
-                                                </div>
-                                                <div className="employee-meta">
-                                                  {employee.designation} •{" "}
-                                                  {employee.departmentName}
-                                                </div>
-                                              </div>
-                                            </div>
-                                          ))}
-                                      </div>
-                                    )}
-                                </>
-                              )}
-                            </div>
-                            {isSavingChanges && (
-                              <div className="saving-indicator">
-                                <ButtonLoader variant="primary" />
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="readonly-field">
-                            {ticket.assignedTo ? (
-                              <>
-                                <FaUserTie className="field-icon" />
-                                <div className="assignee-info">
-                                  <div className="primary-text">
-                                    {ticket.assignedTo.employeeName}
-                                  </div>
-                                  <div className="secondary-text">
-                                    {ticket.assignedTo.designation}
-                                  </div>
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                <FaUserTie className="field-icon unassigned-icon" />
-                                <span className="field-text unassigned">
-                                  Unassigned
-                                </span>
-                              </>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="info-item">
-                      <label>Status</label>
-                      <div className="info-value">
-                        <div className="readonly-field">
-                          <span
-                            className="status-badge professional-badge"
-                            style={{
-                              backgroundColor: getStatusColor(ticket.status),
-                            }}
-                          >
-                            {ticket.status}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="info-item">
-                      <label>Priority</label>
-                      <div className="info-value">
-                        {canEditTicket() ? (
-                          <div className="professional-edit-field">
-                            <FaExclamationTriangle className="field-icon" />
-                            <select
-                              value={selectedPriority}
-                              onChange={(e) =>
-                                handlePriorityChange(e.target.value)
-                              }
-                              className="professional-select priority-select"
-                              disabled={isSavingChanges}
-                            >
-                              <option value="">Select Priority...</option>
-                              {Object.entries(PRIORITY_LABELS).map(
-                                ([key, label]) => (
-                                  <option key={key} value={key}>
-                                    {label}
-                                  </option>
-                                )
-                              )}
-                            </select>
-                            {isSavingChanges && (
-                              <div className="saving-indicator">
-                                <ButtonLoader variant="primary" />
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="readonly-field">
-                            <span
-                              className="priority-badge professional-badge"
-                              style={{
-                                backgroundColor: getPriorityColor(
-                                  ticket.priority
-                                ),
-                              }}
-                            >
-                              {ticket.priority} Priority
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {ticket.assetTag && (
-                      <div className="info-item">
-                        <label>Asset Tag</label>
-                        <div className="info-value">
-                          <div className="readonly-field">
-                            <span className="field-text">
-                              {ticket.assetTag}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Timeline Information */}
-                <div className="info-section">
-                  <h3>Timeline</h3>
-                  <div className="info-items">
-                    <div className="info-item">
-                      <label>Created</label>
-                      <div className="info-value">
-                        <FaCalendarAlt />
-                        <span>{formatDate(ticket.dateCreated)}</span>
-                      </div>
-                    </div>
-
-                    <div className="info-item">
-                      <label>Last Modified</label>
-                      <div className="info-value">
-                        <FaClock />
-                        <span>{formatDate(ticket.dateModified)}</span>
-                      </div>
-                    </div>
-
-                    {ticket.dueDate && (
-                      <div className="info-item">
-                        <label>Due Date</label>
-                        <div className="info-value">
-                          <FaCalendarAlt />
-                          <span>{formatDate(ticket.dueDate)}</span>
-                        </div>
-                      </div>
-                    )}
+              <div className="card-content">
+                <div className="ticket-main-info">
+                  <div className="ticket-code-display">{ticket.ticketCode}</div>
+                  <h1 className="ticket-title">{ticket.title}</h1>
+                  <div className="ticket-description">
+                    <p>{ticket.description}</p>
                   </div>
                 </div>
               </div>
-              {/* Attachments with Preview */}
-              {ticket.attachments && ticket.attachments.length > 0 && (
-                <div className="attachments-section card-section">
-                  <h3>Attachments ({ticket.attachments.length})</h3>
+            </div>
+
+            {/* Attachments Card - MOVED AFTER TICKET OVERVIEW */}
+            {ticket.attachments && ticket.attachments.length > 0 && (
+              <div className="enhanced-card attachments-card">
+                <div className="card-header">
+                  <div className="header-title">
+                    <FaPaperclip className="header-icon" />
+                    <h2>Attachments ({ticket.attachments.length})</h2>
+                  </div>
+                </div>
+                <div className="card-content">
                   <div className="attachments-grid">
                     {ticket.attachments.map((attachment, index) => (
-                      <div key={index} className="attachment-card">
+                      <div key={index} className="attachment-item">
+                        <div
+                          className="attachment-name"
+                          title={attachment.fileName}
+                        >
+                          {attachment.fileName}
+                        </div>
                         <div className="attachment-preview">
                           {getAttachmentPreview(
                             attachment.fileName,
                             attachment.fileData,
                             attachment.fileType
                           )}
-                        </div>
-                        <div className="attachment-info">
-                          <div
-                            className="attachment-name"
-                            title={attachment.fileName}
-                          >
-                            {attachment.fileName}
-                          </div>
-                          <div className="attachment-size">
-                            {formatFileSize2(attachment.fileSize)}
-                          </div>
                           <button
-                            onClick={() =>
+                            className="download-attachment-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
                               downloadAttachment(
                                 attachment.fileName,
                                 attachment.fileData,
                                 attachment.fileType
-                              )
-                            }
-                            className="download-btn"
+                              );
+                            }}
+                            title="Download attachment"
                           >
                             <FaDownload />
-                            Download
                           </button>
+                        </div>
+                        <div className="attachment-size">
+                          {formatFileSize(attachment.fileSize)}
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Activity Timeline */}
-              <div className="activity-section card-section">
-                <div className="activity-header">
-                  <h3>Activity Timeline</h3>
-                  <div className="activity-stats">
-                    <span>{comments.length} Comments</span>
+            {/* Simplified SLA Card - MORE EFFECTIVE */}
+            <div className="enhanced-card sla-card">
+              <div className="card-header">
+                <div className="header-title">
+                  <FaClock className="header-icon" />
+                  <h2>SLA Status</h2>
+                </div>
+              </div>
+              <div className="card-content">
+                <div className="sla-overview">
+                  {/* Primary SLA - Resolution Time */}
+                  <div className="sla-main-section">
+                    <div className="sla-header">
+                      <span className="sla-title">Resolution Time</span>
+                      <span
+                        className={`sla-status-badge ${getSLAStatus(
+                          calculateSLAProgress(
+                            ticket.dateCreated,
+                            ticket.priority,
+                            "resolution"
+                          )
+                        )}`}
+                      >
+                        {getSLAStatus(
+                          calculateSLAProgress(
+                            ticket.dateCreated,
+                            ticket.priority,
+                            "resolution"
+                          )
+                        ).toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="sla-time-display">
+                      {formatTimeRemaining(
+                        ticket.dateCreated,
+                        ticket.priority,
+                        "resolution"
+                      )}
+                    </div>
+                    <div className="sla-progress-bar">
+                      <div
+                        className={`sla-progress-fill ${getSLAStatus(
+                          calculateSLAProgress(
+                            ticket.dateCreated,
+                            ticket.priority,
+                            "resolution"
+                          )
+                        )}`}
+                        style={{
+                          width: `${calculateSLAProgress(
+                            ticket.dateCreated,
+                            ticket.priority,
+                            "resolution"
+                          )}%`,
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  {/* Quick Info */}
+                  <div className="sla-quick-info">
+                    <div className="sla-info-item">
+                      <span className="sla-info-label">Priority</span>
+                      <span
+                        className={`priority-badge priority-${ticket.priority.toLowerCase()}`}
+                      >
+                        {
+                          PRIORITY_LABELS[
+                            ticket.priority as keyof typeof PRIORITY_LABELS
+                          ]
+                        }
+                      </span>
+                    </div>
+                    <div className="sla-info-item">
+                      <span className="sla-info-label">Created</span>
+                      <span className="sla-info-value">
+                        {formatRelativeTime(ticket.dateCreated)}
+                      </span>
+                    </div>
                   </div>
                 </div>
+              </div>
+            </div>
 
-                <div className="activity-timeline">
-                  {comments.map((comment) => (
-                    <div key={comment.id} className="timeline-item">
-                      <div className="timeline-avatar">
-                        <FaUser />
-                      </div>
-                      <div className="timeline-content">
-                        <div className="timeline-header">
-                          <div className="author-info">
-                            <span className="author-name">
-                              {comment.author}
-                            </span>
-                          </div>
-                          <div className="timeline-actions">
-                            <span className="timestamp">
-                              {formatDate(comment.timestamp)}
-                            </span>
-                            {canEditComment(comment) && (
-                              <div className="comment-actions">
-                                <button
-                                  className="edit-comment-btn"
-                                  onClick={() =>
-                                    startEditComment(
-                                      comment.id,
-                                      comment.content
-                                    )
-                                  }
-                                  title="Edit comment"
-                                >
-                                  Edit
-                                </button>
-                              </div>
-                            )}
-                          </div>
+            {/* Enhanced Activity Timeline Card */}
+            <div className="enhanced-card activity-card">
+              <div className="card-header">
+                <div className="header-title">
+                  <FaHistory className="header-icon" />
+                  <h2>Activity Timeline</h2>
+                </div>
+                <div className="activity-stats">
+                  <span className="comment-count">
+                    {comments.length} Comments
+                  </span>
+                  <span className="status-count">
+                    {(() => {
+                      // Count status changes (creation + current status change if not OPEN)
+                      let statusChangeCount = 1; // Always have ticket creation
+                      if (ticket.status !== "OPEN") statusChangeCount++;
+                      return `${statusChangeCount} Status Changes`;
+                    })()}
+                  </span>
+                </div>
+              </div>
+              <div className="card-content">
+                <div className="timeline">
+                  {(() => {
+                    // Generate status history from ticket creation and current status
+                    const statusHistory = [];
+
+                    // Add ticket creation status
+                    statusHistory.push({
+                      id: `creation-${ticket.id}`,
+                      fromStatus: null,
+                      toStatus: "OPEN",
+                      changedAt: ticket.dateCreated,
+                      changedBy: ticket.requestedBy.employeeName,
+                      reason: "Ticket created",
+                    });
+
+                    // If ticket status is not OPEN, add a status change
+                    if (ticket.status !== "OPEN") {
+                      statusHistory.push({
+                        id: `status-change-${ticket.id}`,
+                        fromStatus: "OPEN",
+                        toStatus: ticket.status,
+                        changedAt: ticket.dateModified,
+                        changedBy: ticket.assignedTo?.employeeName || "System",
+                        reason: `Status changed to ${ticket.status.replace(
+                          "_",
+                          " "
+                        )}`,
+                      });
+                    }
+
+                    const enhancedTimeline = getEnhancedTimeline(
+                      statusHistory,
+                      comments
+                    );
+
+                    if (enhancedTimeline.length === 0) {
+                      return (
+                        <div className="empty-timeline">
+                          <FaHistory className="empty-icon" />
+                          <h3>No activity yet</h3>
+                          <p>
+                            Activity will appear here as the ticket progresses!
+                          </p>
                         </div>
-                        <div className="timeline-body">
-                          {editingCommentId === comment.id ? (
-                            <div className="edit-comment-form">
-                              <textarea
-                                value={editingCommentText}
-                                onChange={(e) =>
-                                  setEditingCommentText(e.target.value)
-                                }
-                                rows={3}
-                                className="edit-comment-input"
-                              />
-                              <div className="edit-comment-actions">
-                                <button
-                                  onClick={handleUpdateComment}
-                                  disabled={
-                                    !editingCommentText.trim() ||
-                                    isUpdatingComment
-                                  }
-                                  className="save-comment-btn"
-                                >
-                                  {isUpdatingComment ? (
-                                    <>
-                                      <ButtonLoader variant="white" />
-                                      <span>Saving...</span>
-                                    </>
-                                  ) : (
-                                    "Save"
+                      );
+                    }
+
+                    return enhancedTimeline.map((item, index) => (
+                      <div
+                        key={`${item.type}-${item.id || index}`}
+                        className={`timeline-item ${item.type}-item`}
+                      >
+                        <div className={`timeline-avatar ${item.type}-avatar`}>
+                          {item.type === "status" ? <FaTag /> : <FaUser />}
+                        </div>
+                        <div className="timeline-content">
+                          <div className="timeline-header">
+                            <div className="activity-info">
+                              {item.type === "status" ? (
+                                <>
+                                  <span className="activity-description">
+                                    {item.text}
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="activity-type">
+                                    Comment Added
+                                  </span>
+                                  <span className="author-name">
+                                    by {item.author}
+                                  </span>
+                                  {canEditComment(item) && (
+                                    <button
+                                      className="edit-comment-btn"
+                                      onClick={() =>
+                                        startEditComment(item.id, item.content)
+                                      }
+                                      title="Edit comment"
+                                    >
+                                      <FaEdit />
+                                    </button>
                                   )}
-                                </button>
-                                <button
-                                  onClick={cancelEditComment}
-                                  disabled={isUpdatingComment}
-                                  className="cancel-comment-btn"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
+                                </>
+                              )}
                             </div>
-                          ) : (
-                            <p>{comment.content}</p>
-                          )}
-                          {/* Attachments for this comment, with preview and download */}
-                          {comment.attachments &&
-                            comment.attachments.length > 0 && (
-                              <div className="comment-attachments">
-                                {comment.attachments.map(
-                                  (attachment: any, index) => {
-                                    // Defensive: Only use fileName, fileType, fileSize, fileData if present
-                                    const fileName =
-                                      "fileName" in attachment
-                                        ? attachment.fileName
-                                        : attachment.filename;
-                                    const fileType =
-                                      "fileType" in attachment
-                                        ? attachment.fileType
-                                        : "";
-                                    const fileSize =
-                                      "fileSize" in attachment
-                                        ? attachment.fileSize
-                                        : attachment.size || 0;
-                                    const fileData =
-                                      "fileData" in attachment
-                                        ? attachment.fileData
-                                        : "";
-                                    const ext = fileName
-                                      ?.split(".")
-                                      .pop()
-                                      ?.toLowerCase();
-                                    const isImage =
-                                      (fileType &&
-                                        fileType.startsWith("image/")) ||
-                                      [
-                                        "jpg",
-                                        "jpeg",
-                                        "png",
-                                        "gif",
-                                        "bmp",
-                                      ].includes(ext || "");
-                                    return (
-                                      <div
-                                        key={index}
-                                        className="comment-attachment"
-                                        style={isImage && fileData && fileType ? { cursor: "pointer" } : {}}
-                                        onClick={
-                                          isImage && fileData && fileType
-                                            ? () =>
-                                                setSelectedImage({
-                                                  src: `data:${fileType};base64,${fileData}`,
-                                                  alt: fileName,
-                                                })
-                                            : undefined
+                            <span
+                              className="activity-time"
+                              title={formatDate(item.timestamp)}
+                            >
+                              {formatRelativeTime(item.timestamp)}
+                            </span>
+                          </div>
+
+                          <div className="timeline-body">
+                            {item.type === "comment" ? (
+                              <>
+                                {editingCommentId === item.id ? (
+                                  <div className="edit-comment-form">
+                                    <textarea
+                                      value={editingCommentText}
+                                      onChange={(e) =>
+                                        setEditingCommentText(e.target.value)
+                                      }
+                                      rows={3}
+                                      className="edit-comment-input"
+                                    />
+                                    <div className="edit-actions">
+                                      <button
+                                        onClick={handleUpdateComment}
+                                        disabled={
+                                          !editingCommentText.trim() ||
+                                          isUpdatingComment
                                         }
+                                        className="save-btn"
                                       >
-                                        {isImage && fileData && fileType ? (
-                                          <img
-                                            src={`data:${fileType};base64,${fileData}`}
-                                            alt={fileName}
-                                            style={{
-                                              maxWidth: "100px",
-                                              maxHeight: "100px",
-                                              borderRadius: "4px",
-                                              objectFit: "cover",
-                                            }}
-                                          />
+                                        {isUpdatingComment ? (
+                                          <>
+                                            <ButtonLoader variant="white" />
+                                            Save
+                                          </>
                                         ) : (
-                                          getFileIcon(fileName, 32)
+                                          "Save"
                                         )}
-                                        <span
-                                          className="file-name"
-                                          style={isImage && fileData && fileType ? { cursor: "pointer" } : {}}
-                                          onClick={
-                                            isImage && fileData && fileType
-                                              ? (e) => {
+                                      </button>
+                                      <button
+                                        onClick={cancelEditComment}
+                                        disabled={isUpdatingComment}
+                                        className="cancel-btn"
+                                      >
+                                        Cancel
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <p className="comment-content">
+                                    {item.content}
+                                  </p>
+                                )}
+
+                                {/* Comment Attachments */}
+                                {item.attachments &&
+                                  item.attachments.length > 0 && (
+                                    <div className="comment-attachments">
+                                      {item.attachments.map(
+                                        (
+                                          attachment: any,
+                                          attachIndex: number
+                                        ) => {
+                                          const fileName =
+                                            "fileName" in attachment
+                                              ? attachment.fileName
+                                              : attachment.filename;
+                                          const fileType =
+                                            "fileType" in attachment
+                                              ? attachment.fileType
+                                              : "";
+                                          const fileSize =
+                                            "fileSize" in attachment
+                                              ? attachment.fileSize
+                                              : attachment.size || 0;
+                                          const fileData =
+                                            "fileData" in attachment
+                                              ? attachment.fileData
+                                              : "";
+                                          const ext = fileName
+                                            ?.split(".")
+                                            .pop()
+                                            ?.toLowerCase();
+                                          const isImage =
+                                            (fileType &&
+                                              fileType.startsWith("image/")) ||
+                                            [
+                                              "jpg",
+                                              "jpeg",
+                                              "png",
+                                              "gif",
+                                              "bmp",
+                                            ].includes(ext || "");
+
+                                          return (
+                                            <div
+                                              key={attachIndex}
+                                              className="comment-attachment-item"
+                                            >
+                                              {isImage &&
+                                              fileData &&
+                                              fileType ? (
+                                                <img
+                                                  src={`data:${fileType};base64,${fileData}`}
+                                                  alt={fileName}
+                                                  className="attachment-image"
+                                                  onClick={() =>
+                                                    setSelectedImage({
+                                                      src: `data:${fileType};base64,${fileData}`,
+                                                      alt: fileName,
+                                                    })
+                                                  }
+                                                />
+                                              ) : (
+                                                getFileIcon(fileName, 24)
+                                              )}
+                                              <div className="attachment-details">
+                                                <span className="attachment-name">
+                                                  {fileName}
+                                                </span>
+                                                <span className="attachment-size">
+                                                  ({formatFileSize(fileSize)})
+                                                </span>
+                                              </div>
+                                              <button
+                                                className="download-attachment-btn"
+                                                onClick={(e) => {
                                                   e.stopPropagation();
-                                                  setSelectedImage({
-                                                    src: `data:${fileType};base64,${fileData}`,
-                                                    alt: fileName,
-                                                  });
+                                                  if (fileData && fileType) {
+                                                    downloadAttachment(
+                                                      fileName,
+                                                      fileData,
+                                                      fileType
+                                                    );
+                                                  }
+                                                }}
+                                                disabled={
+                                                  !fileData || !fileType
                                                 }
-                                              : undefined
-                                          }
-                                        >
-                                          {fileName}
-                                        </span>
-                                        <span className="file-size">
-                                          ({formatFileSize(fileSize)})
-                                        </span>
-                                        <button
-                                          className="download-btn"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            if (fileData && fileType) {
-                                              const link =
-                                                document.createElement("a");
-                                              link.href = `data:${fileType};base64,${fileData}`;
-                                              link.download = fileName;
-                                              document.body.appendChild(link);
-                                              link.click();
-                                              document.body.removeChild(link);
-                                            }
-                                          }}
-                                          disabled={!fileData || !fileType}
-                                        >
-                                          <FaDownload />
-                                        </button>
-                                      </div>
-                                    );
-                                  }
+                                              >
+                                                <FaDownload />
+                                              </button>
+                                            </div>
+                                          );
+                                        }
+                                      )}
+                                    </div>
+                                  )}
+                              </>
+                            ) : (
+                              <div className="status-change-details">
+                                {(item.changedBy || item.author) && (
+                                  <p className="changed-by">
+                                    Changed by: {item.changedBy || item.author}
+                                  </p>
                                 )}
                               </div>
                             )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ));
+                  })()}
                 </div>
               </div>
+            </div>
 
-              {/* Add Comment Section */}
-              <div className="comment-composer card-section">
-                <div className="composer-header">
-                  <h3>Add Comment</h3>
+            {/* Add Comment Card */}
+            <div className="enhanced-card comment-composer-card">
+              <div className="card-header">
+                <div className="header-title">
+                  <FaEdit className="header-icon" />
+                  <h2>Add Comment</h2>
                 </div>
+              </div>
+              <div className="card-content">
+                <div className="comment-form">
+                  <textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                        e.preventDefault();
+                        handleAddComment();
+                      }
+                    }}
+                    placeholder="Add a comment... (Ctrl+Enter to submit)"
+                    rows={4}
+                    className="comment-textarea"
+                  />
 
-                <div className="composer-content">
-                  <div className="comment-input">
-                    <textarea
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-                          e.preventDefault();
-                          handleAddComment();
-                        }
-                      }}
-                      placeholder="Add a comment..."
-                      rows={4}
-                    />
-                  </div>
-
-                  <div className="composer-toolbar">
+                  <div className="comment-toolbar">
                     <div className="toolbar-left">
-                      <label className="attachment-button">
+                      <label className="attachment-btn">
                         <FaPaperclip />
-                        <span>Attach Files</span>
+                        Attach Files
                         <input
                           type="file"
                           multiple
                           onChange={handleCommentAttachment}
-                          style={{ display: "none" }}
+                          className="file-input-hidden"
                         />
                       </label>
                     </div>
@@ -1671,12 +1632,12 @@ const TicketDetailsPageProfessional: React.FC = () => {
                       <button
                         onClick={handleAddComment}
                         disabled={!newComment.trim() || isAddingComment}
-                        className="submit-button"
+                        className="submit-comment-btn"
                       >
                         {isAddingComment ? (
                           <>
                             <ButtonLoader variant="white" />
-                            <span>Adding...</span>
+                            Adding...
                           </>
                         ) : (
                           "Add Comment"
@@ -1685,6 +1646,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
                     </div>
                   </div>
 
+                  {/* Selected Files Preview */}
                   {commentAttachments.length > 0 && (
                     <div className="selected-files">
                       {commentAttachments.map((file, index) => {
@@ -1692,54 +1654,32 @@ const TicketDetailsPageProfessional: React.FC = () => {
                         const imagePreview = commentAttachmentPreviews[index];
                         return (
                           <div key={index} className="selected-file">
-                            <div
-                              className="file-preview"
-                              style={isImage && imagePreview ? { cursor: "pointer" } : {}}
-                              onClick={
-                                isImage && imagePreview
-                                  ? () =>
-                                      setSelectedImage({
-                                        src: imagePreview,
-                                        alt: file.name,
-                                      })
-                                  : undefined
-                              }
-                            >
+                            <div className="file-preview">
                               {isImage && imagePreview ? (
                                 <img
                                   src={imagePreview}
                                   alt={file.name}
-                                  style={{
-                                    maxWidth: "60px",
-                                    maxHeight: "60px",
-                                    borderRadius: "4px",
-                                    objectFit: "cover",
-                                  }}
+                                  className="preview-image"
+                                  onClick={() =>
+                                    setSelectedImage({
+                                      src: imagePreview,
+                                      alt: file.name,
+                                    })
+                                  }
                                 />
                               ) : (
                                 getFileIcon(file.name)
                               )}
                               <div className="file-info">
-                                <div
-                                  className="file-name"
-                                  style={isImage && imagePreview ? { cursor: "pointer" } : {}}
-                                  onClick={
-                                    isImage && imagePreview
-                                      ? (e) => {
-                                          e.stopPropagation();
-                                          setSelectedImage({ src: imagePreview, alt: file.name });
-                                        }
-                                      : undefined
-                                  }
-                                >
-                                  {file.name}
+                                <div className="file-name">{file.name}</div>
+                                <div className="file-size">
+                                  {formatFileSize(file.size)}
                                 </div>
-                                <div className="file-size">{formatFileSize(file.size)}</div>
                               </div>
                             </div>
                             <button
                               onClick={() => removeCommentAttachment(index)}
-                              className="remove-file"
+                              className="remove-file-btn"
                             >
                               <FaTimes />
                             </button>
@@ -1752,12 +1692,258 @@ const TicketDetailsPageProfessional: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Right Column - Assignment & Info */}
+          <div className="sidebar-column">
+            {/* Assignment Card */}
+            <div
+              className={`enhanced-card assignment-card ${
+                canEditTicket() ? "editable-heartbeat" : ""
+              }`}
+            >
+              {isSavingChanges && (
+                <div className="card-loader-overlay">
+                  <div className="moving-loader-container">
+                    <FaTicketAlt className="full-card-moving-ticket" />
+                    <span className="moving-text">Updating ticket...</span>
+                  </div>
+                </div>
+              )}
+              <div className="card-header">
+                <div className="header-title">
+                  <FaUserTie className="header-icon" />
+                  <h2>Assignment & Status</h2>
+                </div>
+              </div>
+              <div className="card-content">
+                {}
+                <div className="assignment-fields">
+                  {/* Department */}
+                  <div className="field-group">
+                    <label className="field-label">
+                      <FaBuilding className="label-icon" />
+                      Department
+                    </label>
+                    <div className="field-content">
+                      {canEditTicket() ? (
+                        <select
+                          value={selectedDepartmentId}
+                          onChange={(e) =>
+                            handleDepartmentChange(e.target.value)
+                          }
+                          className="enhanced-select"
+                          disabled={isSavingChanges}
+                        >
+                          <option value="">Select Department...</option>
+                          {departments
+                            .filter((dept) => dept.isActive)
+                            .map((department) => (
+                              <option key={department.id} value={department.id}>
+                                {department.name}
+                              </option>
+                            ))}
+                        </select>
+                      ) : (
+                        <div className="field-display">
+                          <FaBuilding className="display-icon" />
+                          <span>{ticket.department}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Assignee */}
+                  <div className="field-group">
+                    <label className="field-label">
+                      <FaUserTie className="label-icon" />
+                      Assigned To
+                    </label>
+                    <div className="field-content">
+                      {canEditTicket() ? (
+                        <div className="assignee-search">
+                          {ticket.assignedTo && !showAssigneeDropdown ? (
+                            <div
+                              className="assigned-display"
+                              onClick={() => setShowAssigneeDropdown(true)}
+                            >
+                              <span className="assigned-name">
+                                {ticket.assignedTo.employeeName}
+                              </span>
+                              <button
+                                type="button"
+                                className="clear-assignee-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleClearAssignee();
+                                }}
+                                title="Clear assignee"
+                              >
+                                <FaTimes />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="assignee-search-container">
+                              <input
+                                type="text"
+                                value={assigneeSearchQuery}
+                                onChange={(e) => {
+                                  setAssigneeSearchQuery(e.target.value);
+                                  setShowAssigneeDropdown(true);
+                                }}
+                                onFocus={() => setShowAssigneeDropdown(true)}
+                                placeholder="Search and select employee..."
+                                className="enhanced-input"
+                                disabled={isSavingChanges}
+                              />
+                              {showAssigneeDropdown && assigneeSearchQuery && (
+                                <div className="search-dropdown">
+                                  {employeeLoading && (
+                                    <div className="dropdown-item loading">
+                                      <ButtonLoader variant="primary" />
+                                      <span>Searching employees...</span>
+                                    </div>
+                                  )}
+                                  {!employeeLoading &&
+                                    employeeResults.length === 0 && (
+                                      <div className="dropdown-item no-results">
+                                        <span>No employees found</span>
+                                      </div>
+                                    )}
+                                  {!employeeLoading &&
+                                    employeeResults.map((employee) => (
+                                      <div
+                                        key={employee.id}
+                                        className="dropdown-item employee-item"
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          handleAssigneeChange(employee);
+                                        }}
+                                      >
+                                        <div className="employee-info">
+                                          <div className="employee-name">
+                                            {employee.employeeName}
+                                          </div>
+                                          <div className="employee-meta">
+                                            {employee.designation} •{" "}
+                                            {employee.departmentName}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="field-display">
+                          {ticket.assignedTo ? (
+                            <>
+                              <FaUserTie className="display-icon" />
+                              <div className="assignee-info">
+                                <div className="assignee-name">
+                                  {ticket.assignedTo.employeeName}
+                                </div>
+                                <div className="assignee-designation">
+                                  {ticket.assignedTo.designation}
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <FaUserTie className="display-icon unassigned" />
+                              <span className="unassigned-text">
+                                Unassigned
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Priority */}
+                  <div className="field-group">
+                    <label className="field-label">
+                      <FaExclamationTriangle className="label-icon" />
+                      Priority
+                    </label>
+                    <div className="field-content">
+                      {canEditTicket() ? (
+                        <select
+                          value={selectedPriority}
+                          onChange={(e) => handlePriorityChange(e.target.value)}
+                          className="enhanced-select"
+                          disabled={isSavingChanges}
+                        >
+                          <option value="">Select Priority...</option>
+                          {Object.entries(PRIORITY_LABELS).map(
+                            ([key, label]) => (
+                              <option key={key} value={key}>
+                                {label}
+                              </option>
+                            )
+                          )}
+                        </select>
+                      ) : (
+                        <div className="field-display">
+                          <span
+                            className={`priority-badge priority-${ticket.priority.toLowerCase()}`}
+                          >
+                            {ticket.priority} Priority
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Status */}
+                  <div className="field-group">
+                    <label className="field-label">
+                      <FaClock className="label-icon" />
+                      Status
+                    </label>
+                    <div className="field-content">
+                      <div className="field-display">
+                        <span
+                          className={`status-badge status-${ticket.status
+                            .toLowerCase()
+                            .replace("_", "-")}`}
+                        >
+                          {ticket.status.replace("_", " ")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Asset Tag */}
+                  {ticket.assetTag && (
+                    <div className="field-group">
+                      <label className="field-label">
+                        <FaTag className="label-icon" />
+                        Asset Tag
+                      </label>
+                      <div className="field-content">
+                        <div className="field-display">
+                          <span>{ticket.assetTag}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Image Modal */}
       {selectedImage && (
-        <div className="image-modal" onClick={() => setSelectedImage(null)}>
+        <div
+          className="enhanced-image-modal"
+          onClick={() => setSelectedImage(null)}
+        >
           <div
             className="image-modal-content"
             onClick={(e) => e.stopPropagation()}

@@ -366,6 +366,14 @@ const TicketDetailsPageProfessional: React.FC = () => {
     search: searchEmployees,
   } = useEmployeeSearch();
 
+  // 1. Extend selectedImage state to selectedAttachment (to support all file types)
+  const [selectedAttachment, setSelectedAttachment] = useState<{
+    src: string;
+    alt: string;
+    type: string;
+    name: string;
+  } | null>(null);
+
   // Helper function to create ticket update payload
   const createTicketUpdatePayload = (
     currentApiTicket: ApiTicketResponse,
@@ -873,6 +881,15 @@ const TicketDetailsPageProfessional: React.FC = () => {
     }
   };
 
+  // Add this helper function near the top of the component
+  function getAttachmentSize(attachment: any): number {
+    const size = Number(attachment.fileSize);
+    if (!isNaN(size) && size > 0) return size;
+    const altSize = Number(attachment.size);
+    if (!isNaN(altSize) && altSize > 0) return altSize;
+    return 0;
+  }
+
   // Comment handling functions
   const handleAddComment = async () => {
     if (!newComment.trim() || !id) return;
@@ -1000,29 +1017,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }
-
-  function getAttachmentPreview(
-    fileName: string,
-    fileData: string,
-    fileType: string
-  ) {
-    if (fileType.startsWith("image/")) {
-      return (
-        <img
-          src={`data:${fileType};base64,${fileData}`}
-          alt={fileName}
-          className="attachment-preview-image"
-          onClick={() =>
-            setSelectedImage({
-              src: `data:${fileType};base64,${fileData}`,
-              alt: fileName,
-            })
-          }
-        />
-      );
-    }
-    return getFileIcon(fileName, 40);
   }
 
   // Comment attachment previews
@@ -1200,40 +1194,66 @@ const TicketDetailsPageProfessional: React.FC = () => {
                 </div>
                 <div className="card-content">
                   <div className="attachments-grid">
-                    {ticket.attachments.map((attachment, index) => (
-                      <div key={index} className="attachment-item">
-                        <div
-                          className="attachment-name"
-                          title={attachment.fileName}
-                        >
-                          {attachment.fileName}
-                        </div>
-                        <div className="attachment-preview">
-                          {getAttachmentPreview(
-                            attachment.fileName,
-                            attachment.fileData,
-                            attachment.fileType
-                          )}
+                    {ticket.attachments.map((attachment, index) => {
+                      const fileName = attachment.fileName;
+                      const fileType = attachment.fileType;
+                      const fileData = attachment.fileData;
+                      const ext: any = fileName?.split(".").pop()?.toLowerCase();
+                      const isImage = fileType && fileType.startsWith("image/");
+                      const isPdf = fileType === "application/pdf" || ext === "pdf";
+                      const isText = fileType?.startsWith("text/") || ["txt", "log"].includes(ext);
+                      const size = getAttachmentSize(attachment);
+                      return (
+                        <div key={index} className="attachment-item">
+                          <div className="attachment-name" title={fileName}>{fileName}</div>
+                          <div
+                            className="attachment-preview"
+                            onClick={() => {
+                              if (isImage && fileData && fileType) {
+                                setSelectedAttachment({ src: `data:${fileType};base64,${fileData}`, alt: fileName, type: fileType, name: fileName });
+                              } else if (isPdf && fileData && fileType) {
+                                setSelectedAttachment({ src: `data:${fileType};base64,${fileData}`, alt: fileName, type: fileType, name: fileName });
+                              } else if (isText && fileData && fileType) {
+                                setSelectedAttachment({ src: fileData, alt: fileName, type: fileType, name: fileName });
+                              }
+                            }}
+                            style={(isImage || isPdf || isText) ? { cursor: "pointer" } : {}}
+                            role={(isImage || isPdf || isText) ? "button" : undefined}
+                            tabIndex={(isImage || isPdf || isText) ? 0 : undefined}
+                            onKeyDown={(e) => {
+                              if ((e.key === "Enter" || e.key === " ") && (isImage || isPdf || isText) && fileData && fileType) {
+                                setSelectedAttachment({ src: isText ? fileData : `data:${fileType};base64,${fileData}`, alt: fileName, type: fileType, name: fileName });
+                              }
+                            }}
+                          >
+                            {isImage && fileData && fileType ? (
+                              <img src={`data:${fileType};base64,${fileData}`} alt={fileName} className="attachment-preview-image" style={{ pointerEvents: "none" }} />
+                            ) : isPdf && fileData && fileType ? (
+                              <FaFilePdf className="file-icon pdf" size={40} />
+                            ) : isText && fileData && fileType ? (
+                              <FaFileAlt className="file-icon text" size={40} />
+                            ) : (
+                              getFileIcon(fileName, 40)
+                            )}
+                          </div>
                           <button
                             className="download-attachment-btn"
                             onClick={(e) => {
                               e.stopPropagation();
                               downloadAttachment(
-                                attachment.fileName,
-                                attachment.fileData,
-                                attachment.fileType
+                                fileName || "",
+                                fileData || "",
+                                fileType || ""
                               );
                             }}
                             title="Download attachment"
                           >
                             <FaDownload />
                           </button>
+                          <div className="attachment-size">{formatFileSize(size)}</div>
                         </div>
-                        <div className="attachment-size">
-                          {formatFileSize(attachment.fileSize)}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -1524,6 +1544,8 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                               "gif",
                                               "bmp",
                                             ].includes(ext || "");
+                                          const isPdf = fileType === "application/pdf" || ext === "pdf";
+                                          const isText = fileType?.startsWith("text/") || ["txt", "log"].includes(ext);
 
                                           // Make the whole card clickable for images
                                           return (
@@ -1532,21 +1554,19 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                               className="comment-attachment-item"
                                               onClick={() => {
                                                 if (isImage && fileData && fileType) {
-                                                  setSelectedImage({
-                                                    src: `data:${fileType};base64,${fileData}`,
-                                                    alt: fileName,
-                                                  });
+                                                  setSelectedAttachment({ src: `data:${fileType};base64,${fileData}`, alt: fileName, type: fileType, name: fileName });
+                                                } else if (isPdf && fileData && fileType) {
+                                                  setSelectedAttachment({ src: `data:${fileType};base64,${fileData}`, alt: fileName, type: fileType, name: fileName });
+                                                } else if (isText && fileData && fileType) {
+                                                  setSelectedAttachment({ src: fileData, alt: fileName, type: fileType, name: fileName });
                                                 }
                                               }}
-                                              role={isImage ? "button" : undefined}
-                                              tabIndex={isImage ? 0 : undefined}
-                                              style={isImage ? { cursor: "pointer" } : {}}
-                                              onKeyDown={isImage ? (e => {
+                                              role={(isImage || isPdf || isText) ? "button" : undefined}
+                                              tabIndex={(isImage || isPdf || isText) ? 0 : undefined}
+                                              style={(isImage || isPdf || isText) ? { cursor: "pointer" } : {}}
+                                              onKeyDown={isImage || isPdf || isText ? (e => {
                                                 if ((e.key === "Enter" || e.key === " ") && fileData && fileType) {
-                                                  setSelectedImage({
-                                                    src: `data:${fileType};base64,${fileData}`,
-                                                    alt: fileName,
-                                                  });
+                                                  setSelectedAttachment({ src: isText ? fileData : `data:${fileType};base64,${fileData}`, alt: fileName, type: fileType, name: fileName });
                                                 }
                                               }) : undefined}
                                             >
@@ -1557,6 +1577,10 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                                   className="attachment-image"
                                                   style={{ pointerEvents: "none" }}
                                                 />
+                                              ) : isPdf && fileData && fileType ? (
+                                                <FaFilePdf className="file-icon pdf" size={24} />
+                                              ) : isText && fileData && fileType ? (
+                                                <FaFileAlt className="file-icon text" size={24} />
                                               ) : (
                                                 getFileIcon(fileName, 24)
                                               )}
@@ -1679,9 +1703,11 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                   alt={file.name}
                                   className="preview-image"
                                   onClick={() =>
-                                    setSelectedImage({
+                                    setSelectedAttachment({
                                       src: imagePreview,
                                       alt: file.name,
+                                      type: file.type,
+                                      name: file.name,
                                     })
                                   }
                                 />
@@ -1957,23 +1983,39 @@ const TicketDetailsPageProfessional: React.FC = () => {
       </div>
 
       {/* Image Modal */}
-      {selectedImage && (
-        <div
-          className="enhanced-image-modal"
-          onClick={() => setSelectedImage(null)}
-        >
-          <div
-            className="image-modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              className="image-modal-close"
-              onClick={() => setSelectedImage(null)}
-            >
+      {selectedAttachment && (
+        <div className="enhanced-image-modal" onClick={() => setSelectedAttachment(null)}>
+          <div className="image-modal-content" onClick={e => e.stopPropagation()}>
+            <button className="image-modal-close" onClick={() => setSelectedAttachment(null)}>
               <FaTimes />
             </button>
-            <img src={selectedImage.src} alt={selectedImage.alt} />
-            <div className="image-modal-title">{selectedImage.alt}</div>
+            {/* Render preview by type */}
+            {selectedAttachment.type.startsWith("image/") ? (
+              <img src={selectedAttachment.src} alt={selectedAttachment.alt} />
+            ) : selectedAttachment.type === "application/pdf" || selectedAttachment.name.toLowerCase().endsWith(".pdf") ? (
+              <iframe
+                src={selectedAttachment.src}
+                title={selectedAttachment.alt}
+                style={{ width: "80vw", height: "80vh", border: 0 }}
+              />
+            ) : selectedAttachment.type.startsWith("text/") || ["txt", "log"].some(ext => selectedAttachment.name.toLowerCase().endsWith(ext)) ? (
+              <pre className="text-preview-modal" style={{ maxWidth: "80vw", maxHeight: "70vh", overflow: "auto", background: "#f8f8f8", padding: 16, borderRadius: 8 }}>
+                {(() => {
+                  try {
+                    // Try to decode base64
+                    return atob(selectedAttachment.src);
+                  } catch {
+                    return "Unable to preview text file.";
+                  }
+                })()}
+              </pre>
+            ) : (
+              <div style={{ padding: 32, textAlign: "center" }}>
+                <FaFileAlt size={48} style={{ marginBottom: 16 }} />
+                <div>Preview not supported for this file type.<br />Please download to view.</div>
+              </div>
+            )}
+            <div className="image-modal-title">{selectedAttachment.alt}</div>
           </div>
         </div>
       )}

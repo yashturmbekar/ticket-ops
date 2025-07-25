@@ -87,20 +87,20 @@ const getDashboardConfig = (role: UserRole): DashboardConfig => {
         showMyTickets: true,
         tabOptions: [
           {
-            key: "organization",
-            label: "Organization Tickets",
-            icon: <FaBuilding />,
-          },
-          {
             key: "my",
             label: "My Tickets",
             icon: <FaUser />,
+          },
+          {
+            key: "organization",
+            label: "Organization Tickets",
+            icon: <FaBuilding />,
           },
         ],
         statsConfig: [
           {
             key: "totalTickets",
-            label: "Total Tickets 123",
+            label: "Total Tickets",
             icon: <FaTicketAlt />,
             color: "#3498db",
             description: "All tickets in the system",
@@ -134,20 +134,6 @@ const getDashboardConfig = (role: UserRole): DashboardConfig => {
             description: "Tickets exceeding SLA",
           },
           {
-            key: "todayTickets",
-            label: "Today",
-            icon: <FaCalendarCheck />,
-            color: "#17a2b8",
-            description: "Tickets created today",
-          },
-          {
-            key: "weeklyTickets",
-            label: "This Week",
-            icon: <FaChartLine />,
-            color: "#6610f2",
-            description: "Tickets this week",
-          },
-          {
             key: "teamEfficiency",
             label: "Team Efficiency",
             icon: <FaChartBar />,
@@ -164,14 +150,14 @@ const getDashboardConfig = (role: UserRole): DashboardConfig => {
         showMyTickets: true,
         tabOptions: [
           {
-            key: "assigned",
-            label: "Assigned Tickets",
-            icon: <FaTasks />,
-          },
-          {
             key: "my",
             label: "My Tickets",
             icon: <FaUser />,
+          },
+          {
+            key: "assigned",
+            label: "Assigned Tickets",
+            icon: <FaTasks />,
           },
         ],
         statsConfig: [
@@ -242,6 +228,16 @@ const getDashboardConfig = (role: UserRole): DashboardConfig => {
             label: "My Tickets",
             icon: <FaUser />,
           },
+          {
+            key: "assigned",
+            label: "Assigned Tickets",
+            icon: <FaTasks />,
+          },
+          {
+            key: "department",
+            label: "Department Tickets",
+            icon: <FaBuilding />,
+          },
         ],
         statsConfig: [
           {
@@ -278,13 +274,6 @@ const getDashboardConfig = (role: UserRole): DashboardConfig => {
             icon: <FaExclamationTriangle />,
             color: "#e74c3c",
             description: "High priority tickets",
-          },
-          {
-            key: "todayTickets",
-            label: "Today",
-            icon: <FaCalendarCheck />,
-            color: "#17a2b8",
-            description: "Tickets created today",
           },
           {
             key: "avgResolutionTime",
@@ -338,6 +327,20 @@ const getDashboardConfig = (role: UserRole): DashboardConfig => {
             icon: <FaExclamationTriangle />,
             color: "#e74c3c",
             description: "My critical tickets",
+          },
+          {
+            key: "todayTickets",
+            label: "Today",
+            icon: <FaCalendarCheck />,
+            color: "#17a2b8",
+            description: "Tickets created today",
+          },
+          {
+            key: "avgResolutionTime",
+            label: "Avg Resolution Time",
+            icon: <FaBusinessTime />,
+            color: "#6610f2",
+            description: "Average resolution time",
           },
         ],
       };
@@ -501,7 +504,7 @@ export const UnifiedDashboard: React.FC = () => {
           );
         }
 
-        // Fetch assigned tickets for managers
+        // Fetch assigned tickets for managers and helpdesk department
         if (dashboardConfig.showAssignedTickets) {
           promises.push(searchAssignedTickets({}, 0, 12, "createdDate,desc"));
         }

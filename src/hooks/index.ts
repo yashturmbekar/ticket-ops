@@ -7,6 +7,7 @@ export { useEmployeeProfile } from "./useEmployeeProfile";
 export { usePermissions } from "./usePermissions";
 export { useNavigation } from "./useNavigation";
 export { useSlaManagement } from "./useSlaManagement";
+export { useSlaPoliciesDisplay } from "./useSlaPoliciesDisplay";
 export {
   useApi,
   usePaginatedApi,

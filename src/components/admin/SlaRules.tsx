@@ -3,17 +3,29 @@ import {
   FaPlus, 
   FaSearch, 
   FaSave, 
-  FaTimes 
+  FaTimes,
+  FaShieldAlt,
+  FaClock,
+  FaBuilding,
+  FaFileContract,
+  FaExclamationTriangle,
+  FaCheckCircle,
+  FaHourglassHalf,
+  FaStopwatch,
+  FaCalendarAlt,
+  FaLayerGroup,
+  FaUsers
 } from "react-icons/fa";
-import { Card } from "../common/Card";
 import { Button } from "../common/Button";
+import { Modal } from "../common/Modal";
 import { FormField, Input, Select } from "../common/Form";
+import { Loader } from "../common/Loader";
 import { useSlaManagement } from "../../hooks/useSlaManagement";
 import { SlaPoliciesDisplay } from "./SlaPoliciesDisplay";
 import "./SlaRules.css";
 
 export const SlaRules: React.FC = () => {
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [filters, setFilters] = useState({
     search: '',
     status: ''
@@ -32,12 +44,54 @@ export const SlaRules: React.FC = () => {
     priorities,
   } = useSlaManagement();
 
+  // Handle cancel - reset form and close modal
+  const handleCancel = () => {
+    handleReset();
+    setShowCreateModal(false);
+  };
+
+  // Handle form submission
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await handleSubmit(e);
+    if (!loading) {
+      setShowCreateModal(false);
+    }
+  };
+
+  // Priority icons mapping
+  const getPriorityIcon = (priority: string) => {
+    const iconMap: Record<string, React.ReactNode> = {
+      LOW: <FaCheckCircle />,
+      MEDIUM: <FaHourglassHalf />,
+      HIGH: <FaExclamationTriangle />,
+      CRITICAL: <FaStopwatch />,
+      URGENT: <FaClock />
+    };
+    return iconMap[priority] || <FaClock />;
+  };
+
+  // Priority colors mapping
+  const getPriorityColor = (priority: string) => {
+    const colorMap: Record<string, string> = {
+      LOW: "#28a745",
+      MEDIUM: "#ffc107", 
+      HIGH: "#fd7e14",
+      CRITICAL: "#dc3545",
+      URGENT: "#6f42c1"
+    };
+    return colorMap[priority] || "#6c757d";
+  };
+
   return (
     <div className="sla-page">
       {/* Page Header */}
       <div className="sla-page-header">
         <div className="sla-page-title-section">
           <div className="title-with-badge">
+            <div className="title-icon">
+              <FaShieldAlt />
+            </div>
             <h1 className="sla-page-title">SLA Policies</h1>
           </div>
           <p className="sla-page-subtitle">Manage and configure Service Level Agreement policies</p>
@@ -46,49 +100,87 @@ export const SlaRules: React.FC = () => {
         <div className="sla-page-actions">
           <Button
             variant="primary"
-            onClick={() => setShowCreateForm(!showCreateForm)}
+            onClick={() => setShowCreateModal(true)}
             className="create-sla-btn"
           >
             <FaPlus />
-            <span>{showCreateForm ? "Cancel" : "Create Policy"}</span>
+            <span>Create Policy</span>
           </Button>
         </div>
       </div>
 
-      {/* Create Form Section */}
-      {showCreateForm && (
-        <Card className="sla-create-form-card">
-          <div className="sla-create-form-header">
-            <h2>Create New SLA Policy</h2>
-            <p>Configure Service Level Agreement policies for helpdesk departments</p>
+      {/* Create SLA Modal */}
+      <Modal
+        isOpen={showCreateModal}
+        onClose={handleCancel}
+        title="Create New SLA Policy"
+        size="xl"
+        className="sla-create-modal"
+      >
+        <div className="modal-content-wrapper">
+          {/* Modal Header Banner */}
+          <div className="modal-header-banner">
+            <div className="banner-content">
+              <div className="banner-icon">
+                <FaFileContract />
+              </div>
+              <div className="banner-text">
+                <h3>Configure Service Level Agreement</h3>
+                <p>Set up response and resolution times for helpdesk departments</p>
+              </div>
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="sla-rules-form">
-            <div className="form-grid">
-              <FormField label="Helpdesk Department" required>
-                <Select
-                  value={formData.helpdeskDepartmentId}
-                  onChange={(e) => handleDepartmentChange(e.target.value)}
-                  options={[
-                    { value: "", label: "Select Department" },
-                    ...departmentOptions,
-                  ]}
-                  disabled={departmentsLoading}
-                  placeholder={
-                    departmentsLoading
-                      ? "Loading departments..."
-                      : "Select Department"
-                  }
-                />
-              </FormField>
+          <form onSubmit={handleFormSubmit} className="sla-modal-form">
+            {/* Department Selection */}
+            <div className="form-section">
+              <div className="section-header">
+                <div className="section-icon">
+                  <FaBuilding />
+                </div>
+                <div className="section-content">
+                  <h4 className="section-title">Helpdesk Department</h4>
+                  <p className="section-description">Select the department for SLA configuration</p>
+                </div>
+              </div>
+              
+              <div className="form-field-wrapper">
+                <FormField label="Department" required>
+                  <div className="select-with-icon">
+                    <FaUsers className="select-icon" />
+                    <Select
+                      value={formData.helpdeskDepartmentId}
+                      onChange={(e) => handleDepartmentChange(e.target.value)}
+                      options={[
+                        { value: "", label: "Select Department" },
+                        ...departmentOptions,
+                      ]}
+                      disabled={departmentsLoading}
+                      placeholder={
+                        departmentsLoading
+                          ? "Loading departments..."
+                          : "Choose a department"
+                      }
+                    />
+                  </div>
+                </FormField>
+              </div>
             </div>
 
+            {/* Priority Settings */}
             {formData.helpdeskDepartmentId && (
-              <div className="priority-settings-section">
-                <h3 className="priority-settings-title">Priority SLA Settings</h3>
-                <p className="priority-settings-description">
-                  Configure response and resolution times for each priority level
-                </p>
+              <div className="form-section">
+                <div className="section-header">
+                  <div className="section-icon">
+                    <FaLayerGroup />
+                  </div>
+                  <div className="section-content">
+                    <h4 className="section-title">Priority SLA Settings</h4>
+                    <p className="section-description">
+                      Configure response and resolution times for each priority level
+                    </p>
+                  </div>
+                </div>
 
                 <div className="priority-grid">
                   {priorities.map((priority) => {
@@ -100,57 +192,84 @@ export const SlaRules: React.FC = () => {
                     return (
                       <div key={priority} className="priority-card">
                         <div className="priority-header">
-                          <h4
-                            className={`priority-title priority-${priority.toLowerCase()}`}
+                          <div 
+                            className="priority-icon"
+                            style={{ backgroundColor: `${getPriorityColor(priority)}20` }}
                           >
-                            {priority}
-                          </h4>
+                            <div 
+                              className="priority-icon-inner"
+                              style={{ color: getPriorityColor(priority) }}
+                            >
+                              {getPriorityIcon(priority)}
+                            </div>
+                          </div>
+                          <div className="priority-info">
+                            <h5
+                              className="priority-title"
+                              style={{ color: getPriorityColor(priority) }}
+                            >
+                              {priority}
+                            </h5>
+                            <div className="priority-badge" style={{ backgroundColor: getPriorityColor(priority) }}>
+                              {priority}
+                            </div>
+                          </div>
                         </div>
 
                         <div className="priority-fields">
-                          <FormField label="Response Time (Minutes)" required>
-                            <Input
-                              type="number"
-                              value={prioritySla.responseTimeMinutes}
-                              onChange={(e) =>
-                                handlePriorityTimeChange(
-                                  priority,
-                                  "responseTimeMinutes",
-                                  parseInt(e.target.value) || 0
-                                )
-                              }
-                              placeholder="e.g., 30"
-                              min="1"
-                            />
-                            {prioritySla.responseTimeMinutes > 0 && (
-                              <div className="form-field-hint">
-                                {formatTimeMinutes(prioritySla.responseTimeMinutes)}
+                          <div className="field-group">
+                            <FormField label="Response Time" required>
+                              <div className="input-with-icon">
+                                <FaClock className="input-icon" />
+                                <Input
+                                  type="number"
+                                  value={prioritySla.responseTimeMinutes}
+                                  onChange={(e) =>
+                                    handlePriorityTimeChange(
+                                      priority,
+                                      "responseTimeMinutes",
+                                      parseInt(e.target.value) || 0
+                                    )
+                                  }
+                                  placeholder="e.g., 30"
+                                  min="1"
+                                />
                               </div>
-                            )}
-                          </FormField>
+                              {prioritySla.responseTimeMinutes > 0 && (
+                                <div className="form-field-hint">
+                                  <FaCalendarAlt className="hint-icon" />
+                                  {formatTimeMinutes(prioritySla.responseTimeMinutes)}
+                                </div>
+                              )}
+                            </FormField>
+                          </div>
 
-                          <FormField label="Resolution Time (Minutes)" required>
-                            <Input
-                              type="number"
-                              value={prioritySla.resolutionTimeMinutes}
-                              onChange={(e) =>
-                                handlePriorityTimeChange(
-                                  priority,
-                                  "resolutionTimeMinutes",
-                                  parseInt(e.target.value) || 0
-                                )
-                              }
-                              placeholder="e.g., 1440"
-                              min="1"
-                            />
-                            {prioritySla.resolutionTimeMinutes > 0 && (
-                              <div className="form-field-hint">
-                                {formatTimeMinutes(
-                                  prioritySla.resolutionTimeMinutes
-                                )}
+                          <div className="field-group">
+                            <FormField label="Resolution Time" required>
+                              <div className="input-with-icon">
+                                <FaStopwatch className="input-icon" />
+                                <Input
+                                  type="number"
+                                  value={prioritySla.resolutionTimeMinutes}
+                                  onChange={(e) =>
+                                    handlePriorityTimeChange(
+                                      priority,
+                                      "resolutionTimeMinutes",
+                                      parseInt(e.target.value) || 0
+                                    )
+                                  }
+                                  placeholder="e.g., 1440"
+                                  min="1"
+                                />
                               </div>
-                            )}
-                          </FormField>
+                              {prioritySla.resolutionTimeMinutes > 0 && (
+                                <div className="form-field-hint">
+                                  <FaCalendarAlt className="hint-icon" />
+                                  {formatTimeMinutes(prioritySla.resolutionTimeMinutes)}
+                                </div>
+                              )}
+                            </FormField>
+                          </div>
                         </div>
                       </div>
                     );
@@ -159,36 +278,46 @@ export const SlaRules: React.FC = () => {
               </div>
             )}
 
-            <div className="form-actions">
+            {/* Form Actions */}
+            <div className="modal-form-actions">
               <Button
                 type="button"
                 variant="secondary"
-                onClick={handleReset}
+                onClick={handleCancel}
                 disabled={loading}
-                className="reset-btn"
+                className="cancel-btn"
               >
                 <FaTimes className="btn-icon" />
-                Reset
+                Cancel
               </Button>
               <Button
                 type="submit"
                 variant="primary"
-                disabled={loading || departmentsLoading}
+                disabled={loading || departmentsLoading || !formData.helpdeskDepartmentId}
                 className="submit-btn"
               >
-                <FaSave className="btn-icon" />
-                {loading ? "Creating..." : "Create SLA Policies"}
+                {loading ? (
+                  <>
+                    <Loader size="small" variant="white" />
+                    <span>Creating...</span>
+                  </>
+                ) : (
+                  <>
+                    <FaSave className="btn-icon" />
+                    <span>Create SLA Policy</span>
+                  </>
+                )}
               </Button>
             </div>
           </form>
-        </Card>
-      )}
+        </div>
+      </Modal>
 
       {/* Filters and Search */}
       <div className="sla-toolbar">
         <div className="sla-search">
           <div className="search-input-container">
-            <FaSearch />
+            <FaSearch className="search-icon" />
             <input
               type="text"
               placeholder="Search departments..."

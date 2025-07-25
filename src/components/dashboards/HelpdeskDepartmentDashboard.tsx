@@ -175,7 +175,15 @@ export const HelpdeskDepartmentDashboard: React.FC = () => {
   };
 
   if (loading) {
-    return <Loader centered text="Loading dashboard..." minHeight="60vh" />;
+    return (
+      <Loader
+        centered
+        text="Loading dashboard..."
+        minHeight="60vh"
+        useTicketAnimation={true}
+        ticketMessage="Loading department tickets and performance metrics..."
+      />
+    );
   }
 
   return (

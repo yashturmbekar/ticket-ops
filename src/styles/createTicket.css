@@ -1954,3 +1954,50 @@
   border-color: var(--color-primary-dark, var(--color-primary));
   color: white;
 }
+
+/* Create Ticket Content Body Loader */
+.create-content-body-loader {
+  position: fixed;
+  top: 130px; /* Account for header and breadcrumb */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Override loader background for backdrop effect */
+.create-content-body-loader .professional-loader-container,
+.create-content-body-loader .professional-loader-container--ticket,
+.create-content-body-loader .professional-ticket-loader {
+  background: transparent !important;
+}
+
+/* Create Ticket Loader Backdrop */
+.create-ticket-loader-backdrop {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(0, 0, 0, 0.85) !important;
+  backdrop-filter: blur(8px) !important;
+  z-index: 9999 !important;
+}
+
+/* Create Ticket Form Section Loader */
+.create-form-loader-section {
+  position: relative;
+  width: 100%;
+  min-height: 300px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid var(--color-primary, #007bff);
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}

@@ -111,7 +111,15 @@ export const EmployeeDashboard: React.FC = () => {
   };
 
   if (loading) {
-    return <Loader centered text="Loading dashboard..." minHeight="60vh" />;
+    return (
+      <Loader
+        centered
+        text="Loading dashboard..."
+        minHeight="60vh"
+        useTicketAnimation={true}
+        ticketMessage="Fetching your tickets and updates..."
+      />
+    );
   }
 
   return (

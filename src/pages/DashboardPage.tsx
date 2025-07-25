@@ -12,7 +12,15 @@ export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
 
   if (!user) {
-    return <Loader centered text="Loading dashboard..." minHeight="60vh" />;
+    return (
+      <Loader
+        centered
+        text="Loading dashboard..."
+        minHeight="60vh"
+        useTicketAnimation={true}
+        ticketMessage="Authenticating and preparing your workspace..."
+      />
+    );
   }
 
   // Common dashboard layout with role welcome

@@ -570,7 +570,15 @@ export const TicketsPage: React.FC = () => {
   const filteredTickets = tickets;
 
   if (loading) {
-    return <Loader centered text="Loading tickets..." minHeight="60vh" />;
+    return (
+      <Loader
+        centered
+        text="Loading tickets..."
+        minHeight="60vh"
+        useTicketAnimation={true}
+        ticketMessage="Searching and organizing your tickets..."
+      />
+    );
   }
 
   return (

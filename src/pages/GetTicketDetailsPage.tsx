@@ -1059,7 +1059,13 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
   if (loading) {
     return (
-      <Loader centered text="Loading ticket details..." minHeight="60vh" />
+      <Loader
+        centered
+        text="Loading ticket details..."
+        minHeight="60vh"
+        useTicketAnimation={true}
+        ticketMessage="Fetching ticket information and history..."
+      />
     );
   }
 

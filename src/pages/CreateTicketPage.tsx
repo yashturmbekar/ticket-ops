@@ -12,6 +12,7 @@ import { useNotifications } from "../hooks/useNotifications";
 import { getAllHelpdeskDepartments } from "../services/helpdeskDepartmentService";
 import { createTicket } from "../services/ticketService";
 import { TicketStatus } from "../types";
+import { Loader } from "../components/common";
 import "../styles/createTicket.css";
 
 interface TicketFormData {
@@ -476,27 +477,15 @@ export const CreateTicketPage: React.FC = () => {
 
   return (
     <div className="create-page">
-      {/* Enhanced Ticket Loading Animation - Backdrop Only */}
+      {/* Content Body Loader */}
       {loading && (
-        <div className="ticket-loading-backdrop">
-          <div className="ticket-loading-animation-container">
-            <div className="ticket-loading-moving-group">
-              <div className="ticket-loading-icon">
-                <FaTicketAlt />
-              </div>
-              <h3 className="ticket-loading-title">Creating Ticket</h3>
-            </div>
-          </div>
-          <p className="ticket-loading-message">
-            {operationStatus || "Please wait while we process your request..."}
-          </p>
-          <div className="ticket-loading-progress"></div>
-          {operationStatus.includes("large files") && (
-            <p className="ticket-loading-submessage">
-              Large files may take several minutes to process. Please don't
-              close this window.
-            </p>
-          )}
+        <div className="create-content-body-loader">
+          <Loader
+            useTicketAnimation={true}
+            centered={true}
+            text="Creating your ticket..."
+            ticketMessage="Please wait while we process your request..."
+          />
         </div>
       )}
 

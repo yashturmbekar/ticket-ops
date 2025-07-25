@@ -26,6 +26,7 @@ import SlaRulesPage from "./pages/SlaRulesPage.tsx";
 import DepartmentsCreatePage from "./pages/CreateDepartmentsPage.tsx";
 import DepartmentsPage from "./pages/DepartmentsPage";
 import DepartmentsEditPage from "./pages/EditDepartmentPage.tsx";
+import LoaderDemoPage from "./pages/LoaderDemoPage";
 import { useAuth } from "./hooks/useAuth";
 import { usePermissions } from "./hooks/usePermissions";
 import { UserRole, Permission } from "./types";
@@ -507,7 +508,7 @@ const AppContent: React.FC = () => {
               </LayoutWrapper>
             </ProtectedRoute>
           }
-        />      
+        />
         <Route
           path="/assets"
           element={
@@ -626,6 +627,16 @@ const AppContent: React.FC = () => {
             >
               <LayoutWrapper>
                 <SettingsPage />
+              </LayoutWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/demo/loaders"
+          element={
+            <ProtectedRoute>
+              <LayoutWrapper>
+                <LoaderDemoPage />
               </LayoutWrapper>
             </ProtectedRoute>
           }

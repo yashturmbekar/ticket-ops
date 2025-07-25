@@ -580,9 +580,6 @@ export const TicketsPage: React.FC = () => {
         <div className="tickets-page-title-section">
           <div className="title-with-badge">
             <h1 className="tickets-page-title">{pageInfo.title}</h1>
-            <span className={`role-badge ${roleInfo.color}`}>
-              {roleInfo.badge}
-            </span>
           </div>
           <p className="tickets-page-subtitle">{pageInfo.subtitle}</p>
           <p className="role-description">{roleInfo.description}</p>

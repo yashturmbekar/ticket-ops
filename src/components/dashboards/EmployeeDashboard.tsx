@@ -7,6 +7,7 @@ import {
   FaEye,
   FaTasks,
   FaExclamationTriangle,
+  FaUser,
 } from "react-icons/fa";
 import { Loader, TicketTile } from "../common";
 import type { Ticket } from "../../types";
@@ -35,6 +36,7 @@ export const EmployeeDashboard: React.FC = () => {
     avgResponseTime: 0,
   });
   const [myTickets, setMyTickets] = useState<Ticket[]>([]);
+  const [activeTab, setActiveTab] = useState<"my">("my");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -117,9 +119,9 @@ export const EmployeeDashboard: React.FC = () => {
       {/* Dashboard Header */}
       <div className="modern-dashboard-header">
         <div>
-          <h1 className="modern-dashboard-title">My Dashboard</h1>
+          <h1 className="modern-dashboard-title">Employee Dashboard</h1>
           <p className="modern-dashboard-subtitle">
-            Track your tickets and get the help you need
+            Track your tickets, access resources, and manage your IT requests
           </p>
         </div>
       </div>
@@ -183,59 +185,81 @@ export const EmployeeDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* My Tickets Section */}
+      {/* Active Tickets Section */}
       <div className="modern-tickets-section">
         <div className="modern-section-header">
-          <h2 className="modern-section-title">My Tickets</h2>
+          <h2 className="modern-section-title">Active Tickets</h2>
           <div className="modern-section-actions">
             <button
               className="btn btn-secondary btn-sm"
               onClick={() => navigate("/tickets")}
             >
               <FaEye />
-              <span>View All</span>
+              <span>View All Tickets</span>
             </button>
           </div>
         </div>
 
-        <div className="dashboard-tickets-grid">
-          {myTickets.map((ticket) => {
-            return (
-              <TicketTile
-                key={ticket.id}
-                ticket={{
-                  id: ticket.id,
-                  ticketCode:
-                    (ticket as DisplayTicket).ticketCode ||
-                    `TKT-${ticket.id.slice(0, 8)}`,
-                  title: ticket.title,
-                  description: ticket.description,
-                  status: ticket.status,
-                  priority: ticket.priority,
-                  assignedTo: ticket.assignedTo,
-                  department: ticket.assignedDepartmentName,
-                  createdAt: ticket.createdAt.toISOString(),
-                  slaDeadline: ticket.slaDeadline?.toISOString(),
-                  commentCount: ticket.totalCommentsCount,
-                  attachmentCount: ticket.attachments?.length || 0,
-                  tags: ticket.tags,
-                }}
-                onClick={handleTicketClick}
-                compact={true}
-              />
-            );
-          })}
+        {/* Tab Navigation */}
+        <div className="modern-tabs">
+          <button
+            className={`modern-tab ${activeTab === "my" ? "active" : ""}`}
+            onClick={() => setActiveTab("my")}
+          >
+            <FaUser />
+            <span>My Tickets</span>
+            <span className="tab-count">{myTickets.length}</span>
+          </button>
         </div>
 
-        {myTickets.length === 0 && (
-          <div className="modern-empty-state">
-            <div className="modern-empty-icon">
-              <FaTasks />
-            </div>
-            <h3>No tickets yet</h3>
-            <p>When you create support tickets, they'll appear here.</p>
+        {/* Tab Content */}
+        <div className="modern-tab-content">
+          <div className="dashboard-tickets-grid">
+            {activeTab === "my" ? (
+              myTickets.length > 0 ? (
+                myTickets.slice(0, 8).map((ticket) => (
+                  <TicketTile
+                    key={ticket.id}
+                    ticket={{
+                      id: ticket.id,
+                      ticketCode:
+                        (ticket as DisplayTicket).ticketCode ||
+                        `TKT-${ticket.id.slice(0, 8)}`,
+                      title: ticket.title,
+                      description: ticket.description,
+                      status: ticket.status,
+                      priority: ticket.priority,
+                      assignedTo: ticket.assignedTo,
+                      department: ticket.assignedDepartmentName,
+                      createdAt: ticket.createdAt.toISOString(),
+                      slaDeadline: ticket.slaDeadline?.toISOString(),
+                      commentCount: ticket.totalCommentsCount,
+                      attachmentCount: ticket.attachments?.length || 0,
+                      tags: ticket.tags,
+                    }}
+                    onClick={handleTicketClick}
+                    compact={true}
+                  />
+                ))
+              ) : (
+                <div className="modern-empty-state-full">
+                  <div className="modern-empty-icon">
+                    <FaTasks />
+                  </div>
+                  <h3>No tickets found!</h3>
+                  <p>You don't have any active tickets at the moment.</p>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => navigate("/create-ticket")}
+                  >
+                    <FaTicketAlt />
+                    <span>Create New Ticket</span>
+                  </button>
+                </div>
+              )
+            ) : null}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

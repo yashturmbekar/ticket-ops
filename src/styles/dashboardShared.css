@@ -692,3 +692,43 @@
     padding: 0.1rem 0.3rem;
   }
 }
+
+/* Enhanced empty state for full content areas - keep this for potential future use */
+.modern-empty-state-full {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: var(--dashboard-card-bg);
+  border: 1px solid var(--dashboard-border);
+  border-radius: 12px;
+  margin: 1rem 0;
+}
+
+.modern-empty-state-full .modern-empty-icon {
+  width: 80px;
+  height: 80px;
+  background: var(--dashboard-muted-bg);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 2rem;
+  color: var(--dashboard-text-muted);
+}
+
+.modern-empty-state-full h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--dashboard-text-primary);
+}
+
+.modern-empty-state-full p {
+  margin: 0 0 1.5rem 0;
+  color: var(--dashboard-text-secondary);
+  font-size: 1rem;
+  line-height: 1.5;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}

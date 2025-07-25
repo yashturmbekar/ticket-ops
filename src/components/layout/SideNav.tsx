@@ -141,17 +141,10 @@ const SideNavModern: React.FC<SideNavProps> = ({
                   {!isCollapsed && (
                     <>
                       <span className="modern-nav-label">{item.label}</span>
-                      {/* Optional: Add notification badges */}
-                      {item.path === "/tickets" && (
-                        <span className="modern-nav-badge">3</span>
-                      )}
                     </>
                   )}
 
-                  {/* Collapsed state tooltip indicator */}
-                  {isCollapsed && item.path === "/tickets" && (
-                    <div className="modern-nav-badge-collapsed">3</div>
-                  )}
+                  {/* Collapsed state tooltip indicator - removed badge */}
                 </Link>
               </li>
             ))}

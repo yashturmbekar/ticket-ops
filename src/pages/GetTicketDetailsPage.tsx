@@ -191,7 +191,7 @@ const getEnhancedTimeline = (statusHistory: any[], comments: any[]) => {
       ...item,
       type: "comment",
       text: item.comment || item.text || "Comment added",
-      timestamp: item.createdAt,
+      timestamp: item.createdDate,
     })),
   ];
 
@@ -310,6 +310,7 @@ interface CommentData {
   author: string;
   content: string;
   timestamp: string;
+  createdDate: string;
   isInternal: boolean;
   commenterEmployeeId?: number;
   attachments?: Array<{
@@ -682,17 +683,17 @@ const TicketDetailsPageProfessional: React.FC = () => {
     if (!apiComments || apiComments.length === 0) {
       return [];
     }
-
     return apiComments
-      .map((comment) => ({
-        id: comment.id,
-        author: comment.commenterEmployeeDetails?.employeeName || "Unknown",
-        content: comment.comment,
-        timestamp: comment.createdDate,
-        isInternal: false,
-        commenterEmployeeId: comment.commenterEmployeeId,
-        attachments: comment.attachments || [],
-      }))
+    .map((comment) => ({
+      id: comment.id,
+      author: comment.commenterEmployeeDetails?.employeeName || "Unknown",
+      content: comment.comment,
+      timestamp: comment.createdDate,
+      createdDate: comment.createdDate,
+      isInternal: false,
+      commenterEmployeeId: comment.commenterEmployeeId,
+      attachments: comment.attachments || [],
+    }))
       .sort(
         (a, b) =>
           new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()

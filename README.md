@@ -22,18 +22,7 @@ RedFish Ticket-Ops is a full-featured IT Service Management (ITSM) platform desi
 - **📱 Responsive Design** - Cross-platform compatibility with mobile-first approach
 - **🌙 Accessibility** - WCAG 2.1 compliant with theme customization
 
-## 🔐 Demo Credentials
-
-The system includes demo accounts for testing different user roles:
-
-| Role         | Email                | Password    | Access Level                                     |
-| ------------ | -------------------- | ----------- | ------------------------------------------------ |
-| **Admin**    | admin@redfish.com    | admin123    | Full system access, settings, user management    |
-| **Manager**  | manager@redfish.com  | manager123  | Department oversight, reporting, team management |
-| **IT Staff** | tech@redfish.com     | tech123     | Ticket management, asset tracking, operations    |
-| **Employee** | employee@redfish.com | employee123 | Submit tickets, view own tickets, knowledge base |
-
-## 🚀 Feature Highlights
+## Feature Highlights
 
 ### 🎫 Advanced Ticket Management
 
@@ -208,9 +197,9 @@ npm run dev
 
 Open your browser and navigate to `http://localhost:5173`
 
-### 3. Login with Demo Credentials
+### 3. Access the Application
 
-Use any of the demo accounts listed in the credentials table above to explore different user experiences.
+Open your browser and navigate to `http://localhost:5173` to start using the RedFish Ticket-Ops system.
 
 ## 🔧 Development Scripts
 

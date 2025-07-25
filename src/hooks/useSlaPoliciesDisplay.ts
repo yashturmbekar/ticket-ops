@@ -123,7 +123,7 @@ export const useSlaPoliciesDisplay = (): UseSlaPoliciesDisplayResult => {
   // Check if department has SLA policies
   const hasSlaPolicies = useCallback((departmentId: string) => {
     const policy = slaPolicies.find(p => p.helpdeskDepartmentId === departmentId);
-    return policy && policy.ticketPrioritySlaRulesDTOS.length > 0;
+    return Boolean(policy && policy.ticketPrioritySlaRulesDTOS.length > 0);
   }, [slaPolicies]);
 
   // Load initial data

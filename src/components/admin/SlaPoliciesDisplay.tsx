@@ -8,6 +8,7 @@ import { useSlaPoliciesDisplay } from "../../hooks/useSlaPoliciesDisplay";
 import { Button } from "../common/Button";
 import { Card } from "../common/Card";
 import { Modal } from "../common/Modal";
+import { Loader } from "../common/Loader";
 import "./SlaPoliciesDisplay.css";
 
 interface SlaPoliciesDisplayProps {
@@ -34,10 +35,12 @@ export const SlaPoliciesDisplay: React.FC<SlaPoliciesDisplayProps> = ({
 
   if (loading) {
     return (
-      <div className="sla-loading">
-        <div className="loading-spinner"></div>
-        <p>Loading SLA policies...</p>
-      </div>
+      <Loader 
+        text="Loading SLA policies..." 
+        centered 
+        useTicketAnimation 
+        ticketMessage="Fetching your SLA configurations"
+      />
     );
   }
 

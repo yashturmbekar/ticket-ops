@@ -33,7 +33,69 @@ export interface HelpdeskDepartment {
   organizationId: number;
 }
 
+// New interfaces for the SLA policy display
+export interface TicketPrioritySlaRule {
+  id: string | null;
+  priority: Priority;
+  responseTimeMinutes: number;
+  resolutionTimeMinutes: number;
+  isActive: boolean;
+}
+
+export interface DepartmentSlaPolicy {
+  helpdeskDepartmentId: string;
+  helpdeskDepartmentName: string;
+  ticketPrioritySlaRulesDTOS: TicketPrioritySlaRule[];
+}
+
 export class SlaService {
+  /**
+   * Get all helpdesk departments
+   */
+  static async getAllHelpdeskDepartments(): Promise<HelpdeskDepartment[]> {
+    const response = await apiClient.get("/helpdesk-departments/all");
+    return response || [];
+  }
+
+  /**
+   * Get SLA policies for a specific department
+   */
+  static async getSlaPoliciesByDepartment(departmentId: string): Promise<DepartmentSlaPolicy> {
+    const response = await apiClient.get(`/helpdesk-tickets-sla-policy/${departmentId}`);
+    return response;
+  }
+
+  /**
+   * Get SLA policies for all departments
+   */
+  static async getAllSlaPolicies(): Promise<DepartmentSlaPolicy[]> {
+    try {
+      // First get all departments
+      const departments = await this.getAllHelpdeskDepartments();
+      
+      // Then fetch SLA policies for each department
+      const slaPoliciesPromises = departments.map(async (department) => {
+        try {
+          return await this.getSlaPoliciesByDepartment(department.id);
+        } catch (error) {
+          console.warn(`Failed to fetch SLA policies for department ${department.name}:`, error);
+          // Return a default structure for departments without SLA policies
+          return {
+            helpdeskDepartmentId: department.id,
+            helpdeskDepartmentName: department.name,
+            ticketPrioritySlaRulesDTOS: []
+          };
+        }
+      });
+
+      const slaPolicies = await Promise.all(slaPoliciesPromises);
+      return slaPolicies.filter(policy => policy !== null);
+    } catch (error) {
+      console.error("Error fetching all SLA policies:", error);
+      throw error;
+    }
+  }
+
   /**
    * Create SLA policies for multiple priorities for a department
    */

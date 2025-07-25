@@ -1,12 +1,7 @@
 import React from "react";
 import { useAuth } from "../hooks/useAuth";
-import { UserRole } from "../types";
 import { Loader } from "../components/common";
-import { RoleWelcome } from "../components/common/RoleWelcome";
-import { AdminDashboard } from "../components/dashboards/AdminDashboard";
-import { ManagerDashboard } from "../components/dashboards/ManagerDashboard";
-import { EmployeeDashboard } from "../components/dashboards/EmployeeDashboard";
-import { HelpdeskDepartmentDashboard } from "../components/dashboards/HelpdeskDepartmentDashboard";
+import { UnifiedDashboard } from "../components/dashboards/UnifiedDashboard";
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -23,65 +18,9 @@ export const DashboardPage: React.FC = () => {
     );
   }
 
-  // Common dashboard layout with role welcome
-  const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
-    children,
-  }) => (
+  return (
     <div className="dashboard-container">
-      <RoleWelcome />
-      {children}
+      <UnifiedDashboard />
     </div>
   );
-
-  // Render different dashboard based on user role
-  switch (user.role) {
-    case UserRole.ORG_ADMIN:
-      return (
-        <DashboardLayout>
-          <AdminDashboard />
-        </DashboardLayout>
-      );
-    case UserRole.HELPDESK_ADMIN:
-      return (
-        <DashboardLayout>
-          <AdminDashboard />
-        </DashboardLayout>
-      );
-    case UserRole.MANAGER:
-      return (
-        <DashboardLayout>
-          <ManagerDashboard />
-        </DashboardLayout>
-      );
-    case UserRole.HR:
-      return (
-        <DashboardLayout>
-          <EmployeeDashboard />
-        </DashboardLayout>
-      );
-    case UserRole.CXO:
-      return (
-        <DashboardLayout>
-          <AdminDashboard />
-        </DashboardLayout>
-      );
-    case UserRole.HELPDESK_DEPARTMENT:
-      return (
-        <DashboardLayout>
-          <HelpdeskDepartmentDashboard />
-        </DashboardLayout>
-      );
-    case UserRole.EMPLOYEE:
-      return (
-        <DashboardLayout>
-          <EmployeeDashboard />
-        </DashboardLayout>
-      );
-    default:
-      return (
-        <DashboardLayout>
-          <EmployeeDashboard />
-        </DashboardLayout>
-      );
-  }
 };

@@ -9,7 +9,7 @@ export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://qa.redfishapp.com";
 export const WEBSOCKET_URL =
   import.meta.env.VITE_WEBSOCKET_URL || "ws://localhost:3000";
-export const API_TIMEOUT = 10000; // 10 seconds default
+export const API_TIMEOUT = 30000; // 30 seconds default
 export const UNAUTH_ROUTES = [
   "/auth/login",
   "/auth/register",

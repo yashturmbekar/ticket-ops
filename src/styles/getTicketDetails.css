@@ -766,12 +766,14 @@
 
 /* ==================== COMMENT ATTACHMENTS ==================== */
 .comment-attachments {
-  margin-top: var(--enhanced-space-3);
-  padding-top: var(--enhanced-space-3);
-  border-top: 1px solid var(--enhanced-border-light);
+  margin-top: var(--enhanced-space-4);
+  padding: var(--enhanced-space-4);
+  border: 1px solid var(--enhanced-border-light);
+  border-radius: var(--enhanced-radius-lg);
+  background-color: var(--enhanced-bg-secondary);
   display: flex;
   flex-wrap: wrap;
-  gap: var(--enhanced-space-2);
+  gap: var(--enhanced-space-3);
 }
 
 .comment-attachment-item {
@@ -791,12 +793,13 @@
 }
 
 .attachment-image {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--enhanced-radius-sm);
+  width: 48px;
+  height: 48px;
+  border-radius: var(--enhanced-radius-md);
   object-fit: cover;
   cursor: pointer;
   transition: transform 0.2s ease;
+  border: 1px solid var(--enhanced-border-light);
 }
 
 .attachment-image:hover {
@@ -934,11 +937,19 @@
   display: flex;
   align-items: center;
   gap: var(--enhanced-space-3);
-  background: var(--enhanced-bg-tertiary);
-  border: 1px solid var(--enhanced-border-light);
+  background: var(--enhanced-bg-secondary);
+  border: 2px solid var(--enhanced-border-light);
   border-radius: var(--enhanced-radius-lg);
-  padding: var(--enhanced-space-3);
+  padding: var(--enhanced-space-4);
   position: relative;
+  box-shadow: var(--enhanced-shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.selected-file:hover {
+  border-color: var(--enhanced-border-medium);
+  box-shadow: var(--enhanced-shadow-md);
+  transform: translateY(-1px);
 }
 
 .file-preview {
@@ -1890,13 +1901,37 @@ textarea:focus-visible {
   align-items: center;
   gap: 16px;
   margin-bottom: 8px;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid var(--enhanced-border-light);
+  background-color: var(--enhanced-bg-tertiary);
+}
+
+.comment-attachment-block[role="button"] {
+  cursor: pointer;
+}
+
+.comment-attachment-block[role="button"]:hover {
+  background-color: var(--enhanced-bg-secondary);
+  border-color: var(--enhanced-border-medium);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.comment-attachment-block[role="button"]:active {
+  transform: translateY(0);
 }
 
 .comment-attachment-icon {
-  width: 40px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: var(--enhanced-radius-md);
+  background-color: var(--enhanced-bg-secondary);
+  border: 1px solid var(--enhanced-border-light);
 }
 
 .comment-attachment-info {
@@ -1963,4 +1998,83 @@ textarea:focus-visible {
   width: 100%;
   box-shadow: 0 2px 8px rgba(60, 60, 60, 0.06);
   display: block;
+}
+
+/* Enhanced Preview Styles for Comment Attachments */
+.file-preview {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.file-preview[style*="pointer"] {
+  border-radius: 8px;
+}
+
+.file-preview[style*="pointer"]:hover {
+  background-color: var(--enhanced-bg-secondary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.pdf-preview-icon,
+.text-preview-icon,
+.file-icon-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  background: var(--enhanced-bg-tertiary);
+  margin-bottom: 8px;
+}
+
+.preview-overlay {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: var(--enhanced-primary);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.file-preview[style*="pointer"]:hover .preview-overlay {
+  opacity: 1;
+}
+
+.preview-hint {
+  font-size: 0.75rem;
+  color: var(--enhanced-primary);
+  margin-top: 4px;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  text-align: center;
+}
+
+.file-preview[style*="pointer"]:hover .preview-hint {
+  opacity: 1;
+}
+
+.file-preview[style*="pointer"] {
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.selected-file {
+  transition: all 0.2s ease;
+}
+
+.selected-file:hover {
+  transform: translateY(-1px);
 }

@@ -11,6 +11,8 @@ import {
   FaBan,
   FaUser,
   FaUsers,
+  FaEye,
+  FaEdit,
 } from "react-icons/fa";
 import { Loader, TicketTile } from "../components/common";
 import type { Ticket, TicketStatus, Priority, UserRole } from "../types";
@@ -57,6 +59,7 @@ export const TicketsPage: React.FC = () => {
   const [loading, setLoading] = useState(true); // Initial page load
   const [searchLoading, setSearchLoading] = useState(false); // Search/filter operations
   const [viewMode, setViewMode] = useState<"tiles" | "list">("tiles");
+  const [tabLoading, setTabLoading] = useState(false);
 
   // Set default active tab - always "my-tickets" as the first tab for all roles
   const getDefaultTab = () => {
@@ -429,9 +432,8 @@ export const TicketsPage: React.FC = () => {
           message: `Failed to load tickets: ${errorMessage}`,
         });
       } finally {
-        if (loading) {
-          setLoading(false); // Only set main loading to false after initial load
-        }
+        setLoading(false); // Only set main loading to false after initial load
+        setTabLoading(false);
         setSearchLoading(false);
         ticketsFetching.current = false;
       }
@@ -663,7 +665,10 @@ export const TicketsPage: React.FC = () => {
               <button
                 key={tab.id}
                 className={`tab-button ${activeTab === tab.id ? "active" : ""}`}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  setTabLoading(true);
+                  setActiveTab(tab.id);
+                }}
               >
                 {tab.icon}
                 <span>{tab.label}</span>
@@ -772,128 +777,157 @@ export const TicketsPage: React.FC = () => {
       </div>
 
       {/* Tickets Grid/List */}
-      <div className={`tickets-container ${viewMode}`}>
-        {viewMode === "tiles" ? (
-          <div className="tickets-grid">
-            {filteredTickets.map((ticket) => {
-              // Type cast to access extended properties from API transform
-              const extendedTicket = ticket as DisplayTicket & {
-                raiserEmployeeDetails?: {
-                  employeeName: string;
-                  designation: string;
-                };
-              };
-              return (
-                <TicketTile
-                  key={ticket.id}
-                  ticket={{
-                    id: ticket.id,
-                    ticketCode: (ticket as DisplayTicket).ticketCode,
-                    title: ticket.title,
-                    description: ticket.description,
-                    status: ticket.status,
-                    priority: ticket.priority,
-                    assignedTo: ticket.assignedTo,
-                    assignedToDetails: (ticket as DisplayTicket)
-                      .assignedToDetails,
-                    createdBy: ticket.createdBy,
-                    raiserEmployeeDetails:
-                      extendedTicket.raiserEmployeeDetails || {
-                        employeeName: ticket.createdBy || "Unknown",
-                        designation: "Employee",
-                      },
-                    department: ticket.assignedDepartmentName,
-                    helpdeskDepartmentDetails: {
-                      name: ticket.assignedDepartmentName || "Unknown",
-                    },
-                    createdAt: ticket.createdAt.toISOString(),
-                    slaDeadline: ticket.slaDeadline?.toISOString(),
-                    commentCount: ticket.totalCommentsCount,
-                    attachmentCount: ticket.attachments?.length || 0,
-                    tags: ticket.tags,
-                  }}
-                  showCheckbox={false}
-                  onClick={handleTicketClick}
-                />
-              );
-            })}
-          </div>
-        ) : (
-          <div className="tickets-list">
-            <table className="tickets-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Title</th>
-                  <th>Status</th>
-                  <th>Priority</th>
-                  <th>Assignee</th>
-                  <th>Created</th>
-                  <th>SLA</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTickets.map((ticket) => {
-                  const slaStatus = getSLAStatus(ticket.slaDeadline);
+      <div className="tickets-container">
+        <div className="tickets-grid-or-list">
+          {tabLoading ? (
+            <div className="tickets-loader-area">
+              <Loader
+                centered
+                text="Loading tickets..."
+                minHeight="60vh"
+                useTicketAnimation={true}
+                ticketMessage="Searching and organizing your tickets..."
+              />
+            </div>
+          ) : (
+            <div className={`tickets-container ${viewMode}`}>
+              {viewMode === "tiles" ? (
+                <div className="tickets-grid">
+                  {filteredTickets.map((ticket) => {
+                    // Type cast to access extended properties from API transform
+                    const extendedTicket = ticket as DisplayTicket & {
+                      raiserEmployeeDetails?: {
+                        employeeName: string;
+                        designation: string;
+                      };
+                    };
+                    return (
+                      <TicketTile
+                        key={ticket.id}
+                        ticket={{
+                          id: ticket.id,
+                          ticketCode: (ticket as DisplayTicket).ticketCode,
+                          title: ticket.title,
+                          description: ticket.description,
+                          status: ticket.status,
+                          priority: ticket.priority,
+                          assignedTo: ticket.assignedTo,
+                          assignedToDetails: (ticket as DisplayTicket)
+                            .assignedToDetails,
+                          createdBy: ticket.createdBy,
+                          raiserEmployeeDetails:
+                            extendedTicket.raiserEmployeeDetails || {
+                              employeeName: ticket.createdBy || "Unknown",
+                              designation: "Employee",
+                            },
+                          department: ticket.assignedDepartmentName,
+                          helpdeskDepartmentDetails: {
+                            name: ticket.assignedDepartmentName || "Unknown",
+                          },
+                          createdAt: ticket.createdAt.toISOString(),
+                          slaDeadline: ticket.slaDeadline?.toISOString(),
+                          commentCount: ticket.totalCommentsCount,
+                          attachmentCount: ticket.attachments?.length || 0,
+                          tags: ticket.tags,
+                        }}
+                        onClick={handleTicketClick}
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="tickets-list">
+                  <table className="tickets-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Assignee</th>
+                        <th>Created</th>
+                        <th>SLA</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredTickets.map((ticket) => {
+                        const slaStatus = getSLAStatus(ticket.slaDeadline);
 
-                  return (
-                    <tr
-                      key={ticket.id}
-                      className="tickets-table-row"
-                      onClick={() => handleTicketClick(ticket.id)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <td className="ticket-id-cell">
-                        {(ticket as DisplayTicket).ticketCode ||
-                          ticket.id.slice(0, 8)}
-                      </td>
-                      <td className="ticket-title-cell">
-                        <div>
-                          <h4>{ticket.title}</h4>
-                          <p>{ticket.description.substring(0, 80)}...</p>
-                        </div>
-                      </td>
-                      <td>
-                        <div
-                          className={`table-status ${getStatusClass(
-                            ticket.status
-                          )}`}
-                        >
-                          {getStatusIcon(ticket.status)}
-                          <span>{ticket.status.replace("_", " ")}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <span
-                          className={`table-priority ${getPriorityClass(
-                            ticket.priority
-                          )}`}
-                        >
-                          {ticket.priority}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="table-assignee">
-                          <div className="assignee-avatar">
-                            {getInitials(ticket.assignedTo || "Unassigned")}
-                          </div>
-                          <span>{ticket.assignedTo || "Unassigned"}</span>
-                        </div>
-                      </td>
-                      <td>{formatTimeAgo(ticket.createdAt)}</td>
-                      <td>
-                        <div className={`table-sla ${slaStatus.status}`}>
-                          <div className="sla-dot"></div>
-                          <span>{slaStatus.text}</span>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+                        return (
+                          <tr key={ticket.id} className="tickets-table-row">
+                            <td className="ticket-id-cell">
+                              {(ticket as DisplayTicket).ticketCode ||
+                                ticket.id.slice(0, 8)}
+                            </td>
+                            <td className="ticket-title-cell">
+                              <div>
+                                <h4>{ticket.title}</h4>
+                                <p>{ticket.description.substring(0, 80)}...</p>
+                              </div>
+                            </td>
+                            <td>
+                              <div
+                                className={`table-status ${getStatusClass(
+                                  ticket.status
+                                )}`}
+                              >
+                                {getStatusIcon(ticket.status)}
+                                <span>{ticket.status.replace("_", " ")}</span>
+                              </div>
+                            </td>
+                            <td>
+                              <span
+                                className={`table-priority ${getPriorityClass(
+                                  ticket.priority
+                                )}`}
+                              >
+                                {ticket.priority}
+                              </span>
+                            </td>
+                            <td>
+                              <div className="table-assignee">
+                                <div className="assignee-avatar">
+                                  {getInitials(
+                                    ticket.assignedTo || "Unassigned"
+                                  )}
+                                </div>
+                                <span>{ticket.assignedTo || "Unassigned"}</span>
+                              </div>
+                            </td>
+                            <td>{formatTimeAgo(ticket.createdAt)}</td>
+                            <td>
+                              <div className={`table-sla ${slaStatus.status}`}>
+                                <div className="sla-dot"></div>
+                                <span>{slaStatus.text}</span>
+                              </div>
+                            </td>
+                            <td>
+                              <div className="table-actions">
+                                <button
+                                  className="action-btn"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleTicketClick(ticket.id);
+                                  }}
+                                >
+                                  <FaEye />
+                                </button>
+                                <button className="action-btn">
+                                  <FaEdit />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Empty State */}

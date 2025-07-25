@@ -1126,6 +1126,15 @@ const TicketDetailsPageProfessional: React.FC = () => {
     };
   }, [commentAttachments]);
 
+  // Cleanup object URLs when component unmounts or selectedAttachment changes
+  useEffect(() => {
+    return () => {
+      if (selectedAttachment && selectedAttachment.src.startsWith("blob:")) {
+        URL.revokeObjectURL(selectedAttachment.src);
+      }
+    };
+  }, [selectedAttachment]);
+
   if (loading) {
     return (
       <Loader
@@ -1682,6 +1691,78 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                             <div
                                               key={attachIndex}
                                               className="comment-attachment-block"
+                                              onClick={() => {
+                                                if (
+                                                  isImage &&
+                                                  fileData &&
+                                                  fileType
+                                                ) {
+                                                  setSelectedAttachment({
+                                                    src: `data:${fileType};base64,${fileData}`,
+                                                    alt: fileName,
+                                                    type: fileType,
+                                                    name: fileName,
+                                                  });
+                                                } else if (
+                                                  isPdf &&
+                                                  fileData &&
+                                                  fileType
+                                                ) {
+                                                  setSelectedAttachment({
+                                                    src: `data:${fileType};base64,${fileData}`,
+                                                    alt: fileName,
+                                                    type: fileType,
+                                                    name: fileName,
+                                                  });
+                                                } else if (
+                                                  isText &&
+                                                  fileData &&
+                                                  fileType
+                                                ) {
+                                                  setSelectedAttachment({
+                                                    src: fileData,
+                                                    alt: fileName,
+                                                    type: fileType,
+                                                    name: fileName,
+                                                  });
+                                                }
+                                              }}
+                                              style={
+                                                isImage || isPdf || isText
+                                                  ? { cursor: "pointer" }
+                                                  : {}
+                                              }
+                                              role={
+                                                isImage || isPdf || isText
+                                                  ? "button"
+                                                  : undefined
+                                              }
+                                              tabIndex={
+                                                isImage || isPdf || isText
+                                                  ? 0
+                                                  : undefined
+                                              }
+                                              title={fileName}
+                                              onKeyDown={(e) => {
+                                                if (
+                                                  (e.key === "Enter" ||
+                                                    e.key === " ") &&
+                                                  (isImage ||
+                                                    isPdf ||
+                                                    isText) &&
+                                                  fileData &&
+                                                  fileType
+                                                ) {
+                                                  setSelectedAttachment({
+                                                    src: isText
+                                                      ? fileData
+                                                      : `data:${fileType};base64,${fileData}`,
+                                                    alt: fileName,
+                                                    type: fileType,
+                                                    name: fileName,
+                                                  });
+                                                }
+                                              }}
                                             >
                                               <div className="comment-attachment-icon">
                                                 {isImage &&
@@ -1826,27 +1907,120 @@ const TicketDetailsPageProfessional: React.FC = () => {
                   {commentAttachments.length > 0 && (
                     <div className="selected-files">
                       {commentAttachments.map((file, index) => {
-                        const isImage = file.type.startsWith("image/");
+                        const isImage =
+                          file.type.startsWith("image/") ||
+                          [
+                            "jpg",
+                            "jpeg",
+                            "png",
+                            "gif",
+                            "bmp",
+                            "webp",
+                            "svg",
+                          ].some((ext) =>
+                            file.name.toLowerCase().endsWith(`.${ext}`)
+                          );
+                        const isPdf =
+                          file.type === "application/pdf" ||
+                          file.name.toLowerCase().endsWith(".pdf");
+                        const isText =
+                          file.type.startsWith("text/") ||
+                          file.type === "application/json" ||
+                          [
+                            "txt",
+                            "log",
+                            "json",
+                            "csv",
+                            "xml",
+                            "md",
+                            "yml",
+                            "yaml",
+                            "ini",
+                            "conf",
+                            "config",
+                            "js",
+                            "ts",
+                            "html",
+                            "css",
+                          ].some((ext) =>
+                            file.name.toLowerCase().endsWith(`.${ext}`)
+                          );
                         const imagePreview = commentAttachmentPreviews[index];
+                        const isPreviewable = isImage || isPdf || isText;
+
                         return (
                           <div key={index} className="selected-file">
-                            <div className="file-preview">
+                            <div
+                              className="file-preview"
+                              onClick={() => {
+                                if (isImage && imagePreview) {
+                                  setSelectedAttachment({
+                                    src: imagePreview,
+                                    alt: file.name,
+                                    type: file.type,
+                                    name: file.name,
+                                  });
+                                } else if (isPdf) {
+                                  // For PDF files, create object URL for preview
+                                  const objectUrl = URL.createObjectURL(file);
+                                  setSelectedAttachment({
+                                    src: objectUrl,
+                                    alt: file.name,
+                                    type: file.type,
+                                    name: file.name,
+                                  });
+                                } else if (isText) {
+                                  // For text files, read content and show preview
+                                  const reader = new FileReader();
+                                  reader.onload = (e) => {
+                                    const content = e.target?.result as string;
+                                    setSelectedAttachment({
+                                      src: content,
+                                      alt: file.name,
+                                      type: file.type,
+                                      name: file.name,
+                                    });
+                                  };
+                                  reader.onerror = (error) => {
+                                    console.error(
+                                      "Error reading file:",
+                                      file.name,
+                                      error
+                                    );
+                                  };
+                                  reader.readAsText(file);
+                                }
+                              }}
+                              style={{
+                                cursor: isPreviewable ? "pointer" : "default",
+                              }}
+                              title={file.name}
+                            >
                               {isImage && imagePreview ? (
                                 <img
                                   src={imagePreview}
                                   alt={file.name}
                                   className="preview-image"
-                                  onClick={() =>
-                                    setSelectedAttachment({
-                                      src: imagePreview,
-                                      alt: file.name,
-                                      type: file.type,
-                                      name: file.name,
-                                    })
-                                  }
+                                  style={{ pointerEvents: "none" }}
                                 />
+                              ) : isPdf ? (
+                                <div className="pdf-preview-icon">
+                                  <FaFilePdf
+                                    size={32}
+                                    className="file-icon pdf"
+                                  />
+                                </div>
+                              ) : isText ? (
+                                <div className="text-preview-icon">
+                                  <FaFileAlt
+                                    size={32}
+                                    className="file-icon text"
+                                  />
+                                </div>
                               ) : (
-                                getFileIcon(file.name)
+                                <div className="file-icon-container">
+                                  {getFileIcon(file.name, 32)}
+                                </div>
                               )}
                               <div className="file-info">
                                 <div className="file-name">{file.name}</div>
@@ -2160,8 +2334,25 @@ const TicketDetailsPageProfessional: React.FC = () => {
                 style={{ width: "80vw", height: "80vh", border: 0 }}
               />
             ) : selectedAttachment.type.startsWith("text/") ||
-              ["txt", "log"].some((ext) =>
-                selectedAttachment.name.toLowerCase().endsWith(ext)
+              selectedAttachment.type === "application/json" ||
+              [
+                "txt",
+                "log",
+                "json",
+                "csv",
+                "xml",
+                "md",
+                "yml",
+                "yaml",
+                "ini",
+                "conf",
+                "config",
+                "js",
+                "ts",
+                "html",
+                "css",
+              ].some((ext) =>
+                selectedAttachment.name.toLowerCase().endsWith(`.${ext}`)
               ) ? (
               <pre
                 className="text-preview-modal"
@@ -2176,10 +2367,20 @@ const TicketDetailsPageProfessional: React.FC = () => {
               >
                 {(() => {
                   try {
-                    // Try to decode base64
-                    return atob(selectedAttachment.src);
+                    // Check if it's base64 encoded (from existing comments) or plain text (from file reader)
+                    if (
+                      selectedAttachment.src.includes("data:") ||
+                      selectedAttachment.src.match(/^[A-Za-z0-9+/]*={0,2}$/)
+                    ) {
+                      // It's base64, decode it
+                      return atob(selectedAttachment.src);
+                    } else {
+                      // It's already plain text from FileReader
+                      return selectedAttachment.src;
+                    }
                   } catch {
-                    return "Unable to preview text file.";
+                    // If base64 decode fails, treat as plain text
+                    return selectedAttachment.src;
                   }
                 })()}
               </pre>

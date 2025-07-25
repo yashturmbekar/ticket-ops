@@ -56,6 +56,7 @@ export {
   getTicketStats,
   searchTickets,
   searchMyTickets,
+  searchAssignedTickets,
 } from "./ticketService";
 
 export {

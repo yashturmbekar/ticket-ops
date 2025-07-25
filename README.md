@@ -198,6 +198,11 @@ git clone https://github.com/yashturmbekar/ticket-ops.git
 cd ticket-ops
 
 # Install dependencies
+# Clone the repository
+git clone https://github.com/yashturmbekar/ticket-ops.git
+cd ticket-ops
+
+# Install dependencies
 npm install
 
 # Start development server
@@ -215,6 +220,182 @@ Use any of the demo accounts listed in the credentials table above to explore di
 ## 🔧 Development Scripts
 
 ```bash
+# 🚀 Development
+npm run dev              # Start development server with HMR
+npm run build            # Build for production
+npm run preview          # Preview production build locally
+
+# 🔍 Code Quality
+npm run lint             # Run ESLint for code analysis
+npm run type-check       # TypeScript compilation check
+
+# 📦 Dependencies
+npm install              # Install project dependencies
+npm update               # Update dependencies to latest versions
+npm audit                # Check for security vulnerabilities
+
+# 🧹 Maintenance
+npm run clean            # Clean build artifacts and node_modules
+```
+
+## 🌐 Environment Configuration
+
+Create a `.env.local` file in the root directory:
+
+```env
+# Application Configuration
+VITE_APP_NAME="RedFish Ticket-Ops"
+VITE_COMPANY_NAME="RedFish Technologies"
+VITE_VERSION="1.0.0"
+
+# API Configuration
+VITE_API_BASE_URL="http://localhost:3000/api"
+VITE_WEBSOCKET_URL="ws://localhost:3000"
+
+# Authentication
+VITE_JWT_SECRET="your-jwt-secret"
+VITE_SESSION_TIMEOUT="3600"
+
+# Features
+VITE_ENABLE_DARK_MODE="true"
+VITE_ENABLE_NOTIFICATIONS="true"
+VITE_ENABLE_REAL_TIME="true"
+
+# Support & Contact
+VITE_SUPPORT_EMAIL="support@redfish.com"
+VITE_HELP_DESK_PHONE="+1-555-0123"
+
+# Development
+VITE_DEBUG_MODE="true"
+VITE_LOG_LEVEL="info"
+```
+
+## 📁 Project Architecture
+
+```
+redfish-ticket-ops/
+├── 📁 public/                          # Static assets and public files
+│   ├── favicon.svg                     # Application favicon
+│   └── redfish-logo.svg               # Company branding logo
+├── 📁 src/                             # Source code directory
+│   ├── 📁 components/                  # React component library
+│   │   ├── admin/                      # Administrative interface components
+│   │   │   ├── AdminSettings.tsx       # System configuration interface
+│   │   │   ├── SlaRules.tsx            # SLA management components
+│   │   │   └── TicketRules.tsx         # Ticket automation rules
+│   │   ├── auth/                       # Authentication components
+│   │   │   └── LoginPage.tsx           # Login interface with validation
+│   │   ├── common/                     # Reusable UI components
+│   │   │   ├── Breadcrumb/             # Navigation breadcrumb component
+│   │   │   ├── Button/                 # Customizable button component
+│   │   │   ├── Card/                   # Material card component
+│   │   │   └── ...                     # Additional common components
+│   │   ├── dashboards/                 # Dashboard visualization components
+│   │   ├── layout/                     # Application layout components
+│   │   └── tickets/                    # Ticket management components
+│   ├── 📁 constants/                   # Application configuration constants
+│   │   ├── assetTypes.ts               # Asset classification definitions
+│   │   ├── departments.ts              # Organizational structure data
+│   │   ├── permissions.ts              # Role-based permission definitions
+│   │   ├── priorities.ts               # Ticket priority configurations
+│   │   ├── ticketStatus.ts             # Ticket lifecycle status definitions
+│   │   └── userRoles.ts                # User role and access level definitions
+│   ├── 📁 contexts/                    # React Context providers
+│   │   ├── AuthContext.tsx             # Authentication state management
+│   │   ├── NotificationContext.tsx     # Global notification system
+│   │   └── ThemeContext.tsx            # Application theme management
+│   ├── 📁 features/                    # Feature-specific modules
+│   │   └── departments/                # Department management feature
+│   ├── 📁 hooks/                       # Custom React hooks
+│   │   ├── useApi.ts                   # API communication hook
+│   │   ├── useAuth.ts                  # Authentication state hook
+│   │   ├── useEmployeeProfile.ts       # User profile management
+│   │   ├── useNavigation.ts            # Navigation state management
+│   │   ├── useNotifications.ts         # Notification system hook
+│   │   ├── usePermissions.ts           # Role-based access control
+│   │   ├── useRealtime.ts              # Real-time data synchronization
+│   │   ├── useSlaManagement.ts         # SLA tracking and management
+│   │   ├── useTheme.ts                 # Theme switching functionality
+│   │   └── useWebSocket.ts             # WebSocket connection management
+│   ├── 📁 pages/                       # Main application pages
+│   │   ├── AssetsPage.tsx              # Asset management interface
+│   │   ├── CreateTicketPage.tsx        # Ticket creation form
+│   │   ├── DashboardPage.tsx           # Main dashboard view
+│   │   ├── DepartmentsPage.tsx         # Department management
+│   │   ├── KnowledgePage.tsx           # Knowledge base interface
+│   │   ├── NetworkPage.tsx             # Network monitoring dashboard
+│   │   ├── ReportsPage.tsx             # Reporting and analytics
+│   │   ├── SettingsPage.tsx            # Application configuration
+│   │   ├── TicketsDashboardPage.tsx    # Ticket overview dashboard
+│   │   └── UsersPage.tsx               # User management interface
+│   ├── 📁 services/                    # API service layer
+│   │   ├── api.ts                      # Core API configuration
+│   │   ├── apiClient.ts                # HTTP client setup
+│   │   ├── assetService.ts             # Asset management API
+│   │   ├── authService.ts              # Authentication services
+│   │   ├── helpdeskDepartmentService.ts # Department API services
+│   │   ├── knowledgeService.ts         # Knowledge base API
+│   │   ├── networkService.ts           # Network monitoring API
+│   │   ├── reportsService.ts           # Reporting API services
+│   │   ├── roleBasedNavigation.ts      # Navigation permission service
+│   │   ├── slaService.ts               # SLA management API
+│   │   ├── ticketService.ts            # Ticket management API
+│   │   ├── userService.ts              # User management API
+│   │   └── websocketService.ts         # Real-time communication
+│   ├── 📁 styles/                      # Global stylesheets
+│   │   ├── globals.css                 # Global CSS variables and resets
+│   │   ├── dashboard.css               # Dashboard-specific styles
+│   │   ├── tickets.css                 # Ticket interface styles
+│   │   └── ...                         # Additional component styles
+│   ├── 📁 theme/                       # Theme configuration
+│   │   └── index.ts                    # Material-UI theme setup
+│   ├── 📁 types/                       # TypeScript type definitions
+│   │   └── index.ts                    # Global type definitions
+│   └── 📁 utils/                       # Utility functions
+│       ├── apiTransforms.ts            # Data transformation utilities
+│       └── profileUtils.ts             # User profile helper functions
+├── 📁 .github/                         # GitHub configuration
+│   └── copilot-instructions.md         # AI coding assistant instructions
+├── eslint.config.js                   # ESLint configuration
+├── tsconfig.json                       # TypeScript configuration
+├── vite.config.ts                      # Vite build configuration
+└── package.json                        # Project dependencies and scripts
+```
+
+### 🏗️ Architectural Principles
+
+- **🧩 Modular Design** - Feature-based organization for scalability
+- **🔄 Separation of Concerns** - Clear distinction between UI, business logic, and data
+- **♻️ Reusable Components** - DRY principle with shared component library
+- **📡 Service Layer Pattern** - Centralized API communication and data transformation
+- **🎯 Custom Hooks** - Business logic encapsulation and state management
+- **🔒 Type Safety** - Comprehensive TypeScript coverage for reliability
+- **📱 Responsive First** - Mobile-first design approach
+
+## 🎨 Design System & UI Architecture
+
+### Material Design Implementation
+
+- **🎨 Material-UI (MUI) v7.2.0** - Comprehensive component library following Material Design 3
+- **🎭 Emotion CSS-in-JS** - Dynamic styling with theme integration
+- **🎯 Design Tokens** - Consistent spacing, typography, and color systems
+- **📐 Grid System** - Responsive 12-column layout with breakpoint management
+
+### Theme & Accessibility
+
+- **🌙 Dual Theme Support** - Light and dark mode with system preference detection
+- **♿ WCAG 2.1 AA Compliance** - Accessible design with proper contrast ratios
+- **📱 Responsive Design** - Mobile-first approach with fluid layouts
+- **🎨 Custom Color Palette** - Professional corporate branding with semantic colors
+- **📝 Typography Scale** - Consistent text hierarchy with optimal readability
+
+### Performance Optimization
+
+- **⚡ Code Splitting** - Lazy loading of routes and components
+- **🗂️ Bundle Optimization** - Tree shaking and dynamic imports
+- **💾 Caching Strategies** - Service worker implementation for offline support
+- **🔄 Virtual Scrolling** - Efficient rendering of large data sets
+- **📊 Performance Monitoring** - Core Web Vitals tracking and optimization
 # 🚀 Development
 npm run dev              # Start development server with HMR
 npm run build            # Build for production
@@ -415,6 +596,7 @@ The application is fully responsive and optimized for:
 - Theme persistence in localStorage
 
 ## 📊 Implementation Status & Roadmap
+## 📊 Implementation Status & Roadmap
 
 ### ✅ Completed Features (v1.0)
 
@@ -532,6 +714,22 @@ npm audit                # Check for security vulnerabilities
 
 # 🧹 Maintenance
 npm run clean            # Clean build artifacts and node_modules
+# 🚀 Development
+npm run dev              # Start development server with HMR
+npm run build            # Build for production
+npm run preview          # Preview production build locally
+
+# 🔍 Code Quality
+npm run lint             # Run ESLint for code analysis
+npm run type-check       # TypeScript compilation check
+
+# 📦 Dependencies
+npm install              # Install project dependencies
+npm update               # Update dependencies to latest versions
+npm audit                # Check for security vulnerabilities
+
+# 🧹 Maintenance
+npm run clean            # Clean build artifacts and node_modules
 ```
 
 ## 🌐 API Integration
@@ -556,6 +754,110 @@ VITE_SUPPORT_EMAIL=support@company.com
 
 ## 🤝 Contributing
 
+We welcome contributions from the community! Here's how you can help improve RedFish Ticket-Ops:
+
+### 🚀 Getting Started
+
+1. **Fork** the repository on GitHub
+2. **Clone** your fork locally: `git clone https://github.com/yourusername/ticket-ops.git`
+3. **Create** a feature branch: `git checkout -b feature/amazing-feature`
+4. **Make** your changes following our coding guidelines
+5. **Test** your changes thoroughly
+6. **Commit** using conventional commits: `git commit -m 'feat: add amazing feature'`
+7. **Push** to your branch: `git push origin feature/amazing-feature`
+8. **Submit** a Pull Request with detailed description
+
+### 📝 Coding Guidelines
+
+- Follow TypeScript best practices and maintain type safety
+- Use React functional components with hooks
+- Implement responsive design for all new components
+- Write self-documenting code with clear variable names
+- Add JSDoc comments for complex functions
+- Follow existing project structure and naming conventions
+
+### 🧪 Testing Requirements
+
+- Write unit tests for new utility functions
+- Test React components with React Testing Library
+- Ensure accessibility compliance (screen reader testing)
+- Verify responsive behavior across different screen sizes
+- Test with both light and dark themes
+
+### 📋 Pull Request Checklist
+
+- [ ] Code follows project style guidelines
+- [ ] Self-review of code completed
+- [ ] Tests added/updated and passing
+- [ ] Documentation updated if needed
+- [ ] No console errors or warnings
+- [ ] Accessibility requirements met
+- [ ] Mobile responsiveness verified
+
+## 🆘 Support & Community
+
+### 📞 Getting Help
+
+- **📧 Email Support**: [support@redfish.com](mailto:support@redfish.com)
+- **📱 Phone**: +1-555-REDFISH (+1-555-733-3474)
+- **💬 GitHub Discussions**: Join our community discussions
+- **🐛 Bug Reports**: Submit via GitHub Issues with detailed reproduction steps
+- **💡 Feature Requests**: Use GitHub Issues with the "enhancement" label
+
+### 📚 Documentation & Resources
+
+- **📖 User Guide**: Check the `/docs` folder for comprehensive documentation
+- **� Video Tutorials**: Available on our YouTube channel
+- **🔧 API Documentation**: OpenAPI/Swagger specifications
+- **💻 Developer Resources**: Setup guides and best practices
+
+### 🌟 Community Guidelines
+
+- Be respectful and inclusive in all interactions
+- Provide clear and detailed bug reports
+- Share knowledge and help other community members
+- Follow our Code of Conduct for a positive environment
+
+---
+
+## 📈 Performance Metrics
+
+### 🚀 Performance Optimization
+
+- **⚡ Lighthouse Score**: 95+ for Performance, Accessibility, Best Practices, SEO
+- **📦 Bundle Size**: Optimized with code splitting and tree shaking
+- **🔄 Load Time**: First Contentful Paint < 1.5s
+- **📱 Mobile Performance**: 90+ Lighthouse mobile score
+- **♿ Accessibility**: WCAG 2.1 AA compliant
+
+### 🔒 Security Features
+
+- **🛡️ Security Headers**: CSP, HSTS, and XSS protection
+- **🔐 Authentication**: JWT-based with secure token handling
+- **🔑 Authorization**: Role-based access control (RBAC)
+- **📋 Input Validation**: Comprehensive client and server-side validation
+- **🔍 Audit Logging**: Complete user action tracking
+- **🚫 XSS Protection**: Sanitized user inputs and CSP headers
+
+---
+
+<div align="center">
+  <h2>🌟 Built with ❤️ by RedFish Technologies</h2>
+  <p>
+    <strong>Powered by:</strong> React • TypeScript • Material-UI • Vite
+  </p>
+  <p>
+    <em>Transforming IT Service Management, One Ticket at a Time</em>
+  </p>
+  
+  ---
+  
+  <p>
+    <strong>📧 Contact:</strong> <a href="mailto:hello@redfish.com">hello@redfish.com</a> |
+    <strong>🌐 Website:</strong> <a href="https://redfish.com">redfish.com</a> |
+    <strong>📱 Follow:</strong> <a href="https://twitter.com/redfishtech">@redfishtech</a>
+  </p>
+</div>
 We welcome contributions from the community! Here's how you can help improve RedFish Ticket-Ops:
 
 ### 🚀 Getting Started

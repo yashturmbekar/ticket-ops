@@ -371,7 +371,14 @@ export const UnifiedDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>(
     dashboardConfig.tabOptions[0]?.key || "my"
   );
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  const handleTabClick = (tabKey: string) => {
+    setLoading(true);
+    setActiveTab(tabKey);
+    // If you fetch data here, do it async and setLoading(false) after fetch
+    setTimeout(() => setLoading(false), 600); // Simulate loading, replace with real fetch if needed
+  };
 
   useEffect(() => {
     const calculateStats = (
@@ -728,18 +735,6 @@ export const UnifiedDashboard: React.FC = () => {
     );
   }
 
-  if (loading) {
-    return (
-      <Loader
-        centered
-        text="Loading dashboard..."
-        minHeight="60vh"
-        useTicketAnimation={true}
-        ticketMessage="Fetching your latest tickets and statistics..."
-      />
-    );
-  }
-
   return (
     <div className="modern-dashboard">
       {/* Dashboard Header */}
@@ -854,7 +849,7 @@ export const UnifiedDashboard: React.FC = () => {
             <button
               key={tab.key}
               className={`modern-tab ${activeTab === tab.key ? "active" : ""}`}
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => handleTabClick(tab.key)}
             >
               {tab.icon}
               <span>{tab.label}</span>
@@ -870,84 +865,99 @@ export const UnifiedDashboard: React.FC = () => {
 
         {/* Tab Content */}
         <div className="modern-tab-content">
-          <div className="dashboard-tickets-grid">
-            {getCurrentTickets().length > 0 ? (
-              getCurrentTickets()
-                .slice(0, 8)
-                .map((ticket) => {
-                  // Type cast to access extended properties from API transform
-                  const extendedTicket = ticket as Ticket & {
-                    assignedToDetails?: {
-                      employeeName: string;
-                      designation: string;
+          {loading && (
+            <Loader
+              centered
+              text="Loading tickets..."
+              minHeight="60vh"
+              useTicketAnimation={true}
+              ticketMessage="Searching and organizing your tickets..."
+            />
+          )}
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+              <div className="modern-spinner" style={{ width: 40, height: 40, border: '4px solid #f3f3f3', borderTop: '4px solid #FF5D5D', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+            </div>
+          ) : (
+            <div className="dashboard-tickets-grid">
+              {getCurrentTickets().length > 0 ? (
+                getCurrentTickets()
+                  .slice(0, 8)
+                  .map((ticket) => {
+                    // Type cast to access extended properties from API transform
+                    const extendedTicket = ticket as Ticket & {
+                      assignedToDetails?: {
+                        employeeName: string;
+                        designation: string;
+                      };
+                      raiserEmployeeDetails?: {
+                        employeeName: string;
+                        designation: string;
+                      };
                     };
-                    raiserEmployeeDetails?: {
-                      employeeName: string;
-                      designation: string;
-                    };
-                  };
-                  return (
-                    <TicketTile
-                      key={ticket.id}
-                      ticket={{
-                        id: ticket.id,
-                        ticketCode: `TKT-${ticket.id.slice(0, 8)}`,
-                        title: ticket.title,
-                        description: ticket.description,
-                        status: ticket.status,
-                        priority: ticket.priority,
-                        assignedTo: ticket.assignedTo,
-                        assignedToDetails: extendedTicket.assignedToDetails,
-                        createdBy: ticket.createdBy,
-                        raiserEmployeeDetails:
-                          extendedTicket.raiserEmployeeDetails || {
-                            employeeName: ticket.createdBy || "Unknown",
-                            designation: "Employee",
+                    return (
+                      <TicketTile
+                        key={ticket.id}
+                        ticket={{
+                          id: ticket.id,
+                          ticketCode: `TKT-${ticket.id.slice(0, 8)}`,
+                          title: ticket.title,
+                          description: ticket.description,
+                          status: ticket.status,
+                          priority: ticket.priority,
+                          assignedTo: ticket.assignedTo,
+                          assignedToDetails: extendedTicket.assignedToDetails,
+                          createdBy: ticket.createdBy,
+                          raiserEmployeeDetails:
+                            extendedTicket.raiserEmployeeDetails || {
+                              employeeName: ticket.createdBy || "Unknown",
+                              designation: "Employee",
+                            },
+                          department: ticket.assignedDepartmentName,
+                          helpdeskDepartmentDetails: {
+                            name: ticket.assignedDepartmentName || "Unknown",
                           },
-                        department: ticket.assignedDepartmentName,
-                        helpdeskDepartmentDetails: {
-                          name: ticket.assignedDepartmentName || "Unknown",
-                        },
-                        createdAt: ticket.createdAt.toISOString(),
-                        slaDeadline: ticket.slaDeadline?.toISOString(),
-                        commentCount: ticket.totalCommentsCount || 0,
-                        attachmentCount: ticket.attachments?.length || 0,
-                        tags: ticket.tags,
-                      }}
-                      onClick={handleTicketClick}
-                      compact={true}
-                    />
-                  );
-                })
-            ) : (
-              <div className="modern-empty-state-full">
-                <div className="modern-empty-icon">
-                  <FaTicketAlt />
-                </div>
-                <h3>
-                  {activeTab === "my" ? "No tickets found!" : "All caught up!"}
-                </h3>
-                <p>
-                  {activeTab === "my"
-                    ? "You don't have any active tickets at the moment."
-                    : `No active ${activeTab} tickets at the moment. Your team is doing great!`}
-                </p>
-                <button
-                  className="btn btn-primary"
-                  onClick={() =>
-                    navigate(activeTab === "my" ? "/create-ticket" : "/tickets")
-                  }
-                >
-                  <FaTicketAlt />
-                  <span>
+                          createdAt: ticket.createdAt.toISOString(),
+                          slaDeadline: ticket.slaDeadline?.toISOString(),
+                          commentCount: ticket.totalCommentsCount || 0,
+                          attachmentCount: ticket.attachments?.length || 0,
+                          tags: ticket.tags,
+                        }}
+                        onClick={handleTicketClick}
+                        compact={true}
+                      />
+                    );
+                  })
+              ) : (
+                <div className="modern-empty-state-full">
+                  <div className="modern-empty-icon">
+                    <FaTicketAlt />
+                  </div>
+                  <h3>
+                    {activeTab === "my" ? "No tickets found!" : "All caught up!"}
+                  </h3>
+                  <p>
                     {activeTab === "my"
-                      ? "Create New Ticket"
-                      : "View All Tickets"}
-                  </span>
-                </button>
-              </div>
-            )}
-          </div>
+                      ? "You don't have any active tickets at the moment."
+                      : `No active ${activeTab} tickets at the moment. Your team is doing great!`}
+                  </p>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() =>
+                      navigate(activeTab === "my" ? "/create-ticket" : "/tickets")
+                    }
+                  >
+                    <FaTicketAlt />
+                    <span>
+                      {activeTab === "my"
+                        ? "Create New Ticket"
+                        : "View All Tickets"}
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

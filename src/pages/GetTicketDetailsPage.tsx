@@ -412,22 +412,96 @@ const TicketDetailsPageProfessional: React.FC = () => {
   };
 
   // Permission checking functions
+  /**
+   * Determines if the current user can edit ticket details.
+   *
+   * ENHANCED PERMISSION SYSTEM:
+   * - Uses ID-based comparison instead of name comparison for better reliability
+   * - Provides detailed logging for debugging permission issues
+   * - Includes comprehensive validation of required data
+   *
+   * Access levels:
+   * - ORG_ADMIN: Can edit all tickets
+   * - HELPDESK_ADMIN: Can edit all tickets
+   * - MANAGER: Can edit tickets assigned to them only (ID-based validation)
+   * - Other roles: No edit access
+   */
   const canEditTicket = (): boolean => {
-    if (!user || !ticket) return false;
+    if (!user || !ticket || !currentApiTicket) {
+      console.debug(
+        "canEditTicket: Missing user, ticket, or currentApiTicket data"
+      );
+      return false;
+    }
+
+    // ORG_ADMIN and HELPDESK_ADMIN have full access to all tickets
+    if (
+      user.role === UserRole.ORG_ADMIN ||
+      user.role === UserRole.HELPDESK_ADMIN
+    ) {
+      console.debug(
+        `canEditTicket: Admin access granted for role: ${user.role}`
+      );
+      return true;
+    }
+
+    // MANAGER can edit tickets assigned to them
+    if (user.role === UserRole.MANAGER) {
+      // Use ID comparison for more reliable matching
+      const userId = user.id;
+      const assignedToEmployeeId = currentApiTicket.assignedToEmployeeId;
+
+      console.debug(
+        `canEditTicket: Manager check - User ID: ${userId}, Assigned ID: ${assignedToEmployeeId}`
+      );
+
+      // Convert both to strings for comparison since API might return different types
+      if (!assignedToEmployeeId || !userId) {
+        console.debug("canEditTicket: Missing assignment or user ID");
+        return false;
+      }
+
+      const hasAccess = String(assignedToEmployeeId) === String(userId);
+      console.debug(
+        `canEditTicket: Manager access ${hasAccess ? "granted" : "denied"}`
+      );
+      return hasAccess;
+    }
+
+    console.debug(`canEditTicket: No edit access for role: ${user.role}`);
+    return false;
+  };
+
+  /**
+   * Gets a user-friendly message explaining edit permissions
+   */
+  const getEditPermissionMessage = (): string => {
+    if (!user) return "Please log in to edit tickets";
+    if (!ticket || !currentApiTicket) return "Ticket data not available";
 
     if (
       user.role === UserRole.ORG_ADMIN ||
       user.role === UserRole.HELPDESK_ADMIN
     ) {
-      return true;
+      return "You have full administrative access to edit this ticket";
     }
 
     if (user.role === UserRole.MANAGER) {
-      const userFullName = `${user.firstName} ${user.lastName}`;
-      return ticket.assignedTo?.employeeName === userFullName;
+      const userId = user.id;
+      const assignedToEmployeeId = currentApiTicket.assignedToEmployeeId;
+
+      if (!assignedToEmployeeId) {
+        return "This ticket is not assigned to anyone. Only admins can edit unassigned tickets";
+      }
+
+      if (String(assignedToEmployeeId) === String(userId)) {
+        return "You can edit this ticket because it is assigned to you";
+      } else {
+        return "You can only edit tickets that are assigned to you";
+      }
     }
 
-    return false;
+    return "You do not have permission to edit tickets";
   };
 
   // Update handlers (keeping same logic as original)
@@ -692,16 +766,16 @@ const TicketDetailsPageProfessional: React.FC = () => {
       return [];
     }
     return apiComments
-    .map((comment) => ({
-      id: comment.id,
-      author: comment.commenterEmployeeDetails?.employeeName || "Unknown",
-      content: comment.comment,
-      timestamp: comment.createdDate,
-      createdDate: comment.createdDate,
-      isInternal: false,
-      commenterEmployeeId: comment.commenterEmployeeId,
-      attachments: comment.attachments || [],
-    }))
+      .map((comment) => ({
+        id: comment.id,
+        author: comment.commenterEmployeeDetails?.employeeName || "Unknown",
+        content: comment.comment,
+        timestamp: comment.createdDate,
+        createdDate: comment.createdDate,
+        isInternal: false,
+        commenterEmployeeId: comment.commenterEmployeeId,
+        attachments: comment.attachments || [],
+      }))
       .sort(
         (a, b) =>
           new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -1198,15 +1272,23 @@ const TicketDetailsPageProfessional: React.FC = () => {
                       const fileName = attachment.fileName;
                       const fileType = attachment.fileType;
                       const fileData = attachment.fileData;
-                      const ext: any = fileName?.split(".").pop()?.toLowerCase();
+                      const ext: any = fileName
+                        ?.split(".")
+                        .pop()
+                        ?.toLowerCase();
                       const isImage = fileType && fileType.startsWith("image/");
-                      const isPdf = fileType === "application/pdf" || ext === "pdf";
-                      const isText = fileType?.startsWith("text/") || ["txt", "log"].includes(ext);
+                      const isPdf =
+                        fileType === "application/pdf" || ext === "pdf";
+                      const isText =
+                        fileType?.startsWith("text/") ||
+                        ["txt", "log"].includes(ext);
                       const size = getAttachmentSize(attachment);
                       return (
                         <div key={index} className="attachment-item">
                           <div className="attachment-name-row">
-                            <span className="attachment-name" title={fileName}>{fileName}</span>
+                            <span className="attachment-name" title={fileName}>
+                              {fileName}
+                            </span>
                             <button
                               className="download-attachment-btn ticket-download-btn"
                               onClick={(e) => {
@@ -1226,24 +1308,64 @@ const TicketDetailsPageProfessional: React.FC = () => {
                             className="attachment-preview"
                             onClick={() => {
                               if (isImage && fileData && fileType) {
-                                setSelectedAttachment({ src: `data:${fileType};base64,${fileData}`, alt: fileName, type: fileType, name: fileName });
+                                setSelectedAttachment({
+                                  src: `data:${fileType};base64,${fileData}`,
+                                  alt: fileName,
+                                  type: fileType,
+                                  name: fileName,
+                                });
                               } else if (isPdf && fileData && fileType) {
-                                setSelectedAttachment({ src: `data:${fileType};base64,${fileData}`, alt: fileName, type: fileType, name: fileName });
+                                setSelectedAttachment({
+                                  src: `data:${fileType};base64,${fileData}`,
+                                  alt: fileName,
+                                  type: fileType,
+                                  name: fileName,
+                                });
                               } else if (isText && fileData && fileType) {
-                                setSelectedAttachment({ src: fileData, alt: fileName, type: fileType, name: fileName });
+                                setSelectedAttachment({
+                                  src: fileData,
+                                  alt: fileName,
+                                  type: fileType,
+                                  name: fileName,
+                                });
                               }
                             }}
-                            style={(isImage || isPdf || isText) ? { cursor: "pointer" } : {}}
-                            role={(isImage || isPdf || isText) ? "button" : undefined}
-                            tabIndex={(isImage || isPdf || isText) ? 0 : undefined}
+                            style={
+                              isImage || isPdf || isText
+                                ? { cursor: "pointer" }
+                                : {}
+                            }
+                            role={
+                              isImage || isPdf || isText ? "button" : undefined
+                            }
+                            tabIndex={
+                              isImage || isPdf || isText ? 0 : undefined
+                            }
                             onKeyDown={(e) => {
-                              if ((e.key === "Enter" || e.key === " ") && (isImage || isPdf || isText) && fileData && fileType) {
-                                setSelectedAttachment({ src: isText ? fileData : `data:${fileType};base64,${fileData}`, alt: fileName, type: fileType, name: fileName });
+                              if (
+                                (e.key === "Enter" || e.key === " ") &&
+                                (isImage || isPdf || isText) &&
+                                fileData &&
+                                fileType
+                              ) {
+                                setSelectedAttachment({
+                                  src: isText
+                                    ? fileData
+                                    : `data:${fileType};base64,${fileData}`,
+                                  alt: fileName,
+                                  type: fileType,
+                                  name: fileName,
+                                });
                               }
                             }}
                           >
                             {isImage && fileData && fileType ? (
-                              <img src={`data:${fileType};base64,${fileData}`} alt={fileName} className="attachment-preview-image" style={{ pointerEvents: "none" }} />
+                              <img
+                                src={`data:${fileType};base64,${fileData}`}
+                                alt={fileName}
+                                className="attachment-preview-image"
+                                style={{ pointerEvents: "none" }}
+                              />
                             ) : isPdf && fileData && fileType ? (
                               <FaFilePdf className="file-icon pdf" size={40} />
                             ) : isText && fileData && fileType ? (
@@ -1252,7 +1374,9 @@ const TicketDetailsPageProfessional: React.FC = () => {
                               getFileIcon(fileName, 40)
                             )}
                           </div>
-                          <div className="attachment-size">{formatFileSize(size)}</div>
+                          <div className="attachment-size">
+                            {formatFileSize(size)}
+                          </div>
                         </div>
                       );
                     })}
@@ -1546,8 +1670,12 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                               "gif",
                                               "bmp",
                                             ].includes(ext || "");
-                                          const isPdf = fileType === "application/pdf" || ext === "pdf";
-                                          const isText = fileType?.startsWith("text/") || ["txt", "log"].includes(ext);
+                                          const isPdf =
+                                            fileType === "application/pdf" ||
+                                            ext === "pdf";
+                                          const isText =
+                                            fileType?.startsWith("text/") ||
+                                            ["txt", "log"].includes(ext);
 
                                           // Make the whole card clickable for images
                                           return (
@@ -1556,29 +1684,47 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                               className="comment-attachment-block"
                                             >
                                               <div className="comment-attachment-icon">
-                                                {isImage && fileData && fileType ? (
+                                                {isImage &&
+                                                fileData &&
+                                                fileType ? (
                                                   <img
                                                     src={`data:${fileType};base64,${fileData}`}
                                                     alt={fileName}
                                                     className="attachment-image"
-                                                    style={{ pointerEvents: "none" }}
+                                                    style={{
+                                                      pointerEvents: "none",
+                                                    }}
                                                   />
-                                                ) : isPdf && fileData && fileType ? (
-                                                  <FaFilePdf className="file-icon pdf" size={24} />
-                                                ) : isText && fileData && fileType ? (
-                                                  <FaFileAlt className="file-icon text" size={24} />
+                                                ) : isPdf &&
+                                                  fileData &&
+                                                  fileType ? (
+                                                  <FaFilePdf
+                                                    className="file-icon pdf"
+                                                    size={24}
+                                                  />
+                                                ) : isText &&
+                                                  fileData &&
+                                                  fileType ? (
+                                                  <FaFileAlt
+                                                    className="file-icon text"
+                                                    size={24}
+                                                  />
                                                 ) : (
                                                   getFileIcon(fileName, 24)
                                                 )}
                                               </div>
                                               <div className="comment-attachment-info">
-                                                <span className="comment-attachment-name">{fileName}</span>
-                                                <span className="comment-attachment-size">{formatFileSize(fileSize)}</span>
+                                                <span className="comment-attachment-name">
+                                                  {fileName}
+                                                </span>
+                                                <span className="comment-attachment-size">
+                                                  {formatFileSize(fileSize)}
+                                                </span>
                                               </div>
                                               <div className="comment-attachment-download">
                                                 <button
                                                   className="comment-download-btn"
-                                                  onClick={e => {
+                                                  onClick={(e) => {
                                                     e.stopPropagation();
                                                     if (fileData && fileType) {
                                                       downloadAttachment(
@@ -1588,7 +1734,9 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                                       );
                                                     }
                                                   }}
-                                                  disabled={!fileData || !fileType}
+                                                  disabled={
+                                                    !fileData || !fileType
+                                                  }
                                                   title="Download attachment"
                                                 >
                                                   <FaDownload />
@@ -1743,6 +1891,14 @@ const TicketDetailsPageProfessional: React.FC = () => {
                 <div className="header-title">
                   <FaUserTie className="header-icon" />
                   <h2>Assignment & Status</h2>
+                  {canEditTicket() && (
+                    <span
+                      className="edit-indicator"
+                      title="You can edit these fields"
+                    >
+                      <FaEdit />
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="card-content">
@@ -1774,7 +1930,10 @@ const TicketDetailsPageProfessional: React.FC = () => {
                             ))}
                         </select>
                       ) : (
-                        <div className="field-display">
+                        <div
+                          className="field-display"
+                          title={getEditPermissionMessage()}
+                        >
                           <FaBuilding className="display-icon" />
                           <span>{ticket.department}</span>
                         </div>
@@ -1867,7 +2026,10 @@ const TicketDetailsPageProfessional: React.FC = () => {
                           )}
                         </div>
                       ) : (
-                        <div className="field-display">
+                        <div
+                          className="field-display"
+                          title={getEditPermissionMessage()}
+                        >
                           {ticket.assignedTo ? (
                             <>
                               <FaUserTie className="display-icon" />
@@ -1917,7 +2079,10 @@ const TicketDetailsPageProfessional: React.FC = () => {
                           )}
                         </select>
                       ) : (
-                        <div className="field-display">
+                        <div
+                          className="field-display"
+                          title={getEditPermissionMessage()}
+                        >
                           <span
                             className={`priority-badge priority-${ticket.priority.toLowerCase()}`}
                           >
@@ -1970,22 +2135,45 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
       {/* Image Modal */}
       {selectedAttachment && (
-        <div className="enhanced-image-modal" onClick={() => setSelectedAttachment(null)}>
-          <div className="image-modal-content" onClick={e => e.stopPropagation()}>
-            <button className="image-modal-close" onClick={() => setSelectedAttachment(null)}>
+        <div
+          className="enhanced-image-modal"
+          onClick={() => setSelectedAttachment(null)}
+        >
+          <div
+            className="image-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="image-modal-close"
+              onClick={() => setSelectedAttachment(null)}
+            >
               <FaTimes />
             </button>
             {/* Render preview by type */}
             {selectedAttachment.type.startsWith("image/") ? (
               <img src={selectedAttachment.src} alt={selectedAttachment.alt} />
-            ) : selectedAttachment.type === "application/pdf" || selectedAttachment.name.toLowerCase().endsWith(".pdf") ? (
+            ) : selectedAttachment.type === "application/pdf" ||
+              selectedAttachment.name.toLowerCase().endsWith(".pdf") ? (
               <iframe
                 src={selectedAttachment.src}
                 title={selectedAttachment.alt}
                 style={{ width: "80vw", height: "80vh", border: 0 }}
               />
-            ) : selectedAttachment.type.startsWith("text/") || ["txt", "log"].some(ext => selectedAttachment.name.toLowerCase().endsWith(ext)) ? (
-              <pre className="text-preview-modal" style={{ maxWidth: "80vw", maxHeight: "70vh", overflow: "auto", background: "#f8f8f8", padding: 16, borderRadius: 8 }}>
+            ) : selectedAttachment.type.startsWith("text/") ||
+              ["txt", "log"].some((ext) =>
+                selectedAttachment.name.toLowerCase().endsWith(ext)
+              ) ? (
+              <pre
+                className="text-preview-modal"
+                style={{
+                  maxWidth: "80vw",
+                  maxHeight: "70vh",
+                  overflow: "auto",
+                  background: "#f8f8f8",
+                  padding: 16,
+                  borderRadius: 8,
+                }}
+              >
                 {(() => {
                   try {
                     // Try to decode base64
@@ -1998,7 +2186,11 @@ const TicketDetailsPageProfessional: React.FC = () => {
             ) : (
               <div style={{ padding: 32, textAlign: "center" }}>
                 <FaFileAlt size={48} style={{ marginBottom: 16 }} />
-                <div>Preview not supported for this file type.<br />Please download to view.</div>
+                <div>
+                  Preview not supported for this file type.
+                  <br />
+                  Please download to view.
+                </div>
               </div>
             )}
             <div className="image-modal-title">{selectedAttachment.alt}</div>

@@ -34,7 +34,7 @@ import { UserRole, Permission } from "./types";
 import { AUTH_TOKEN_KEY, USER_DATA_KEY } from "./constants";
 import { jwtDecode } from "jwt-decode";
 import "./styles/globals.css";
-import { DashboardPage } from "./pages/DashboardPage";
+import { DashboardPage } from "./pages/DashboardPage.tsx";
 
 // Interfaces for JWT token structure
 interface DecodedToken {

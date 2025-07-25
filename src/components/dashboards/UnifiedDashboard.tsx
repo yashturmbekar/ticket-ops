@@ -945,7 +945,9 @@ export const UnifiedDashboard: React.FC = () => {
                 <button
                   className="btn btn-primary"
                   onClick={() =>
-                    navigate(activeTab === "my" ? "/create-ticket" : "/tickets")
+                    navigate(
+                      activeTab === "my" ? "/tickets/create" : "/tickets"
+                    )
                   }
                 >
                   <FaTicketAlt />

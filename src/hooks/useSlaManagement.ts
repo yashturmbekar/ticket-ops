@@ -26,7 +26,7 @@ export interface UseSlaManagementResult {
     field: "responseTimeMinutes" | "resolutionTimeMinutes",
     value: number
   ) => void;
-  handleSubmit: (e: React.FormEvent) => Promise<void>;
+  handleSubmit: (e: React.FormEvent) => Promise<boolean>;
   handleReset: () => void;
 
   // Data fetching
@@ -169,7 +169,7 @@ export const useSlaManagement = (): UseSlaManagementResult => {
       e.preventDefault();
 
       if (!validateForm()) {
-        return;
+        return false;
       }
 
       try {
@@ -186,6 +186,7 @@ export const useSlaManagement = (): UseSlaManagementResult => {
         // Reset form and refresh policies list
         setFormData(initialFormData);
         await fetchSlaPolicies();
+        return true;
       } catch (error) {
         console.error("Error creating SLA policy:", error);
         const errorMessage =
@@ -198,6 +199,7 @@ export const useSlaManagement = (): UseSlaManagementResult => {
           title: "Error",
           message: errorMessage || "Failed to create SLA policy",
         });
+        return false;
       } finally {
         setLoading(false);
       }

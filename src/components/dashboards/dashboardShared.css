@@ -68,28 +68,23 @@
   align-items: center;
 }
 
-/* Stats Grid - Flexible for Different Roles */
+/* Stats Grid - 6 columns for all roles */
 .modern-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(6, 1fr);
   gap: 1rem;
   margin-bottom: 2rem;
 }
 
-/* Admin gets 6 columns, Manager gets 4, Employee gets 4 */
-.modern-stats-grid.admin {
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  max-width: none;
-}
-
-.modern-stats-grid.manager {
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  max-width: 1200px;
-}
-
-.modern-stats-grid.employee {
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  max-width: 1100px;
+/* All roles now get exactly 6 columns */
+.modern-stats-grid.org_admin,
+.modern-stats-grid.helpdesk_admin,
+.modern-stats-grid.manager,
+.modern-stats-grid.helpdesk_department,
+.modern-stats-grid.employee,
+.modern-stats-grid.hr,
+.modern-stats-grid.cxo {
+  grid-template-columns: repeat(6, 1fr);
 }
 
 /* Compact Stats Bar for Employee Dashboard */
@@ -446,9 +441,15 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1400px) {
+  .modern-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 @media (max-width: 1024px) {
-  .modern-stats-grid.admin {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  .modern-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .modern-stat-value {

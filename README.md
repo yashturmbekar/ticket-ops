@@ -22,7 +22,18 @@ RedFish Ticket-Ops is a full-featured IT Service Management (ITSM) platform desi
 - **📱 Responsive Design** - Cross-platform compatibility with mobile-first approach
 - **🌙 Accessibility** - WCAG 2.1 compliant with theme customization
 
-## Feature Highlights
+## 🔐 Demo Credentials
+
+The system includes demo accounts for testing different user roles:
+
+| Role         | Email                | Password    | Access Level                                     |
+| ------------ | -------------------- | ----------- | ------------------------------------------------ |
+| **Admin**    | admin@redfish.com    | admin123    | Full system access, settings, user management    |
+| **Manager**  | manager@redfish.com  | manager123  | Department oversight, reporting, team management |
+| **IT Staff** | tech@redfish.com     | tech123     | Ticket management, asset tracking, operations    |
+| **Employee** | employee@redfish.com | employee123 | Submit tickets, view own tickets, knowledge base |
+
+## 🚀 Feature Highlights
 
 ### 🎫 Advanced Ticket Management
 
@@ -197,9 +208,9 @@ npm run dev
 
 Open your browser and navigate to `http://localhost:5173`
 
-### 3. Access the Application
+### 3. Login with Demo Credentials
 
-Open your browser and navigate to `http://localhost:5173` to start using the RedFish Ticket-Ops system.
+Use any of the demo accounts listed in the credentials table above to explore different user experiences.
 
 ## 🔧 Development Scripts
 
@@ -433,18 +444,6 @@ The application is fully responsive and optimized for:
 - [x] SLA rule configuration and tracking
 - [x] Notification system architecture
 - [x] API service layer with error handling
-
-#### 🎯 Dashboard System (Latest Update)
-
-- [x] **Unified Role-Based Dashboard** - Single intelligent component adapting to user roles
-  - **ORG-ADMIN & HELPDESK-ADMIN**: Organization tickets + My tickets with comprehensive analytics
-  - **MANAGER**: Assigned tickets + My tickets with team management metrics
-  - **HELPDESK-DEPARTMENT**: Department tickets + My tickets with resolution tracking
-  - **EMPLOYEE**: Personal tickets with simplified metrics
-- [x] Dynamic statistics and performance indicators
-- [x] Role-appropriate tab navigation and filtering
-- [x] Responsive design with professional styling
-- [x] Real-time data fetching and error handling
 
 ### 🚧 In Development (v1.1)
 

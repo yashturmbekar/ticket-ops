@@ -283,6 +283,14 @@
   font-weight: 600;
   color: #1f2937;
   margin: 0 0 0.25rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.title-icon-inline {
+  font-size: 1rem;
+  color: #3b82f6;
 }
 
 .section-description {
@@ -305,10 +313,15 @@
   left: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: #3b82f6;
   font-size: 0.875rem;
   pointer-events: none;
   z-index: 1;
+  transition: color 0.3s ease;
+}
+
+.select-with-icon:focus-within .select-icon {
+  color: #1e40af;
 }
 
 .sla-modal-form select {
@@ -383,7 +396,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  align-items: flex-start;
 }
 
 .priority-title {
@@ -406,6 +419,14 @@
   align-self: flex-start;
 }
 
+.priority-description {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0.25rem 0 0 0;
+  line-height: 1.4;
+  font-style: italic;
+}
+
 .priority-fields {
   display: grid;
   gap: 1.25rem;
@@ -426,10 +447,15 @@
 .input-icon {
   position: absolute;
   left: 0.75rem;
-  color: #9ca3af;
+  color: #3b82f6;
   font-size: 0.875rem;
   pointer-events: none;
   z-index: 1;
+  transition: color 0.3s ease;
+}
+
+.input-with-icon:focus-within .input-icon {
+  color: #1e40af;
 }
 
 .sla-modal-form input[type="number"] {
@@ -446,6 +472,16 @@
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.sla-modal-form .form-field label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  display: block;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
 }
 
 .form-field-hint {

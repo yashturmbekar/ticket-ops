@@ -71,6 +71,18 @@ export const SlaRules: React.FC = () => {
     return iconMap[priority] || <FaClock />;
   };
 
+  // Priority description mapping
+  const getPriorityDescription = (priority: string) => {
+    const descriptionMap: Record<string, string> = {
+      LOW: "Non-urgent issues that can be addressed during normal business hours",
+      MEDIUM: "Standard issues requiring attention within business hours",
+      HIGH: "Important issues requiring immediate attention",
+      CRITICAL: "Urgent issues affecting business operations",
+      URGENT: "Emergency issues requiring immediate resolution"
+    };
+    return descriptionMap[priority] || "Priority level configuration";
+  };
+
   // Priority colors mapping
   const getPriorityColor = (priority: string) => {
     const colorMap: Record<string, string> = {
@@ -139,7 +151,10 @@ export const SlaRules: React.FC = () => {
                   <FaBuilding />
                 </div>
                 <div className="section-content">
-                  <h4 className="section-title">Helpdesk Department</h4>
+                  <h4 className="section-title">
+                    <FaUsers className="title-icon-inline" />
+                    Helpdesk Department
+                  </h4>
                   <p className="section-description">Select the department for SLA configuration</p>
                 </div>
               </div>
@@ -174,12 +189,15 @@ export const SlaRules: React.FC = () => {
                   <div className="section-icon">
                     <FaLayerGroup />
                   </div>
-                  <div className="section-content">
-                    <h4 className="section-title">Priority SLA Settings</h4>
-                    <p className="section-description">
-                      Configure response and resolution times for each priority level
-                    </p>
-                  </div>
+                                  <div className="section-content">
+                  <h4 className="section-title">
+                    <FaLayerGroup className="title-icon-inline" />
+                    Priority SLA Settings
+                  </h4>
+                  <p className="section-description">
+                    Configure response and resolution times for each priority level
+                  </p>
+                </div>
                 </div>
 
                 <div className="priority-grid">
@@ -210,39 +228,39 @@ export const SlaRules: React.FC = () => {
                             >
                               {priority}
                             </h5>
-                            <div className="priority-badge" style={{ backgroundColor: getPriorityColor(priority) }}>
-                              {priority}
-                            </div>
+                            <p className="priority-description">
+                              {getPriorityDescription(priority)}
+                            </p>
                           </div>
                         </div>
 
                         <div className="priority-fields">
-                          <div className="field-group">
-                            <FormField label="Response Time" required>
-                              <div className="input-with-icon">
-                                <FaClock className="input-icon" />
-                                <Input
-                                  type="number"
-                                  value={prioritySla.responseTimeMinutes}
-                                  onChange={(e) =>
-                                    handlePriorityTimeChange(
-                                      priority,
-                                      "responseTimeMinutes",
-                                      parseInt(e.target.value) || 0
-                                    )
-                                  }
-                                  placeholder="e.g., 30"
-                                  min="1"
-                                />
-                              </div>
-                              {prioritySla.responseTimeMinutes > 0 && (
-                                <div className="form-field-hint">
-                                  <FaCalendarAlt className="hint-icon" />
-                                  {formatTimeMinutes(prioritySla.responseTimeMinutes)}
-                                </div>
-                              )}
-                            </FormField>
-                          </div>
+                                                     <div className="field-group">
+                             <FormField label="Response Time" required>
+                               <div className="input-with-icon">
+                                 <FaClock className="input-icon" />
+                                 <Input
+                                   type="number"
+                                   value={prioritySla.responseTimeMinutes}
+                                   onChange={(e) =>
+                                     handlePriorityTimeChange(
+                                       priority,
+                                       "responseTimeMinutes",
+                                       parseInt(e.target.value) || 0
+                                     )
+                                   }
+                                   placeholder="e.g., 30"
+                                   min="1"
+                                 />
+                               </div>
+                               {prioritySla.responseTimeMinutes > 0 && (
+                                 <div className="form-field-hint">
+                                   <FaCalendarAlt className="hint-icon" />
+                                   {formatTimeMinutes(prioritySla.responseTimeMinutes)}
+                                 </div>
+                               )}
+                             </FormField>
+                           </div>
 
                           <div className="field-group">
                             <FormField label="Resolution Time" required>

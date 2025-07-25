@@ -1610,7 +1610,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
                         handleAddComment();
                       }
                     }}
-                    placeholder="Add a comment... (Ctrl+Enter to submit)"
+                    placeholder="Add a comment..."
                     rows={4}
                     className="comment-textarea"
                   />

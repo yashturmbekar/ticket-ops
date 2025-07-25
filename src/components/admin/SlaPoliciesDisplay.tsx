@@ -26,8 +26,12 @@ export const SlaPoliciesDisplay: React.FC<SlaPoliciesDisplayProps> = ({
     loading,
     refreshing,
     editingPolicy,
+    editablePolicy,
+    saving,
     handleEditPolicy,
     handleCloseEdit,
+    handleSavePolicy,
+    handleUpdateRule,
     formatTimeMinutes,
     getPriorityColor,
     getPriorityLabel,
@@ -151,7 +155,7 @@ export const SlaPoliciesDisplay: React.FC<SlaPoliciesDisplayProps> = ({
       </div>
 
       {/* Edit Modal */}
-      {editingPolicy && (
+      {editingPolicy && editablePolicy && (
         <Modal
           isOpen={!!editingPolicy}
           onClose={handleCloseEdit}
@@ -165,7 +169,7 @@ export const SlaPoliciesDisplay: React.FC<SlaPoliciesDisplayProps> = ({
             </p>
             
             <div className="edit-priority-rules">
-              {editingPolicy.ticketPrioritySlaRulesDTOS.map((rule) => (
+              {editablePolicy.ticketPrioritySlaRulesDTOS.map((rule) => (
                 <div
                   key={rule.priority}
                   className="edit-priority-rule"
@@ -190,6 +194,9 @@ export const SlaPoliciesDisplay: React.FC<SlaPoliciesDisplayProps> = ({
                         value={rule.responseTimeMinutes}
                         min="1"
                         className="time-input"
+                        onChange={(e) => handleUpdateRule(rule.priority, {
+                          responseTimeMinutes: parseInt(e.target.value)
+                        })}
                       />
                     </div>
                     <div className="edit-time-item">
@@ -199,6 +206,9 @@ export const SlaPoliciesDisplay: React.FC<SlaPoliciesDisplayProps> = ({
                         value={rule.resolutionTimeMinutes}
                         min="1"
                         className="time-input"
+                        onChange={(e) => handleUpdateRule(rule.priority, {
+                          resolutionTimeMinutes: parseInt(e.target.value)
+                        })}
                       />
                     </div>
                     <div className="edit-time-item">
@@ -207,6 +217,9 @@ export const SlaPoliciesDisplay: React.FC<SlaPoliciesDisplayProps> = ({
                           type="checkbox"
                           checked={rule.isActive}
                           className="active-checkbox"
+                          onChange={(e) => handleUpdateRule(rule.priority, {
+                            isActive: e.target.checked
+                          })}
                         />
                         Active
                       </label>
@@ -217,11 +230,20 @@ export const SlaPoliciesDisplay: React.FC<SlaPoliciesDisplayProps> = ({
             </div>
 
             <div className="edit-actions">
-              <Button variant="secondary" onClick={handleCloseEdit}>
+              <Button 
+                variant="secondary" 
+                onClick={handleCloseEdit}
+                disabled={saving}
+              >
                 Cancel
               </Button>
-              <Button variant="primary">
-                Save Changes
+              <Button 
+                variant="primary" 
+                onClick={handleSavePolicy}
+                disabled={saving}
+                loading={saving}
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
           </div>

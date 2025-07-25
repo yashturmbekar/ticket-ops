@@ -33,6 +33,8 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
     "/settings": "Settings",
     "/departments": "Departments",
     "/departments/create": "Create Department",
+    "/sla-rules": "SLA",
+    "/sla-rules/create": "Create SLA Policy",
   };
 
   // Check if we're on a ticket details page and get the ticket code

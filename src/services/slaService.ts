@@ -121,6 +121,29 @@ export class SlaService {
   }
 
   /**
+   * Update SLA policies for a department (creates or updates all priority rules)
+   */
+  static async updateDepartmentSlaPolicy(departmentId: string, rules: TicketPrioritySlaRule[]): Promise<SlaPolicy[]> {
+    const payload = {
+      helpdeskDepartmentId: departmentId,
+      ticketPrioritySlaRulesDTOS: rules.map(rule => ({
+        id: rule.id,
+        priority: rule.priority,
+        responseTimeMinutes: rule.responseTimeMinutes,
+        resolutionTimeMinutes: rule.resolutionTimeMinutes,
+        isActive: rule.isActive,
+      })),
+    };
+
+    const response = await apiClient.put(
+      `/helpdesk-tickets-sla-policy`,
+      payload
+    );
+
+    return response;
+  }
+
+  /**
    * Get all SLA policies
    */
   static async getSlapolicies(): Promise<SlaPolicy[]> {

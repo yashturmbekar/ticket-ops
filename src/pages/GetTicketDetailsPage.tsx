@@ -1205,7 +1205,23 @@ const TicketDetailsPageProfessional: React.FC = () => {
                       const size = getAttachmentSize(attachment);
                       return (
                         <div key={index} className="attachment-item">
-                          <div className="attachment-name" title={fileName}>{fileName}</div>
+                          <div className="attachment-name-row">
+                            <span className="attachment-name" title={fileName}>{fileName}</span>
+                            <button
+                              className="download-attachment-btn ticket-download-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                downloadAttachment(
+                                  fileName || "",
+                                  fileData || "",
+                                  fileType || ""
+                                );
+                              }}
+                              title="Download attachment"
+                            >
+                              <FaDownload />
+                            </button>
+                          </div>
                           <div
                             className="attachment-preview"
                             onClick={() => {
@@ -1236,20 +1252,6 @@ const TicketDetailsPageProfessional: React.FC = () => {
                               getFileIcon(fileName, 40)
                             )}
                           </div>
-                          <button
-                            className="download-attachment-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              downloadAttachment(
-                                fileName || "",
-                                fileData || "",
-                                fileType || ""
-                              );
-                            }}
-                            title="Download attachment"
-                          >
-                            <FaDownload />
-                          </button>
                           <div className="attachment-size">{formatFileSize(size)}</div>
                         </div>
                       );
@@ -1551,63 +1553,47 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                           return (
                                             <div
                                               key={attachIndex}
-                                              className="comment-attachment-item"
-                                              onClick={() => {
-                                                if (isImage && fileData && fileType) {
-                                                  setSelectedAttachment({ src: `data:${fileType};base64,${fileData}`, alt: fileName, type: fileType, name: fileName });
-                                                } else if (isPdf && fileData && fileType) {
-                                                  setSelectedAttachment({ src: `data:${fileType};base64,${fileData}`, alt: fileName, type: fileType, name: fileName });
-                                                } else if (isText && fileData && fileType) {
-                                                  setSelectedAttachment({ src: fileData, alt: fileName, type: fileType, name: fileName });
-                                                }
-                                              }}
-                                              role={(isImage || isPdf || isText) ? "button" : undefined}
-                                              tabIndex={(isImage || isPdf || isText) ? 0 : undefined}
-                                              style={(isImage || isPdf || isText) ? { cursor: "pointer" } : {}}
-                                              onKeyDown={isImage || isPdf || isText ? (e => {
-                                                if ((e.key === "Enter" || e.key === " ") && fileData && fileType) {
-                                                  setSelectedAttachment({ src: isText ? fileData : `data:${fileType};base64,${fileData}`, alt: fileName, type: fileType, name: fileName });
-                                                }
-                                              }) : undefined}
+                                              className="comment-attachment-block"
                                             >
-                                              {isImage && fileData && fileType ? (
-                                                <img
-                                                  src={`data:${fileType};base64,${fileData}`}
-                                                  alt={fileName}
-                                                  className="attachment-image"
-                                                  style={{ pointerEvents: "none" }}
-                                                />
-                                              ) : isPdf && fileData && fileType ? (
-                                                <FaFilePdf className="file-icon pdf" size={24} />
-                                              ) : isText && fileData && fileType ? (
-                                                <FaFileAlt className="file-icon text" size={24} />
-                                              ) : (
-                                                getFileIcon(fileName, 24)
-                                              )}
-                                              <div className="attachment-details">
-                                                <span className="attachment-name">
-                                                  {fileName}
-                                                </span>
-                                                <span className="attachment-size">
-                                                  ({formatFileSize(fileSize)})
-                                                </span>
+                                              <div className="comment-attachment-icon">
+                                                {isImage && fileData && fileType ? (
+                                                  <img
+                                                    src={`data:${fileType};base64,${fileData}`}
+                                                    alt={fileName}
+                                                    className="attachment-image"
+                                                    style={{ pointerEvents: "none" }}
+                                                  />
+                                                ) : isPdf && fileData && fileType ? (
+                                                  <FaFilePdf className="file-icon pdf" size={24} />
+                                                ) : isText && fileData && fileType ? (
+                                                  <FaFileAlt className="file-icon text" size={24} />
+                                                ) : (
+                                                  getFileIcon(fileName, 24)
+                                                )}
                                               </div>
-                                              <button
-                                                className="download-attachment-btn"
-                                                onClick={e => {
-                                                  e.stopPropagation();
-                                                  if (fileData && fileType) {
-                                                    downloadAttachment(
-                                                      fileName,
-                                                      fileData,
-                                                      fileType
-                                                    );
-                                                  }
-                                                }}
-                                                disabled={!fileData || !fileType}
-                                              >
-                                                <FaDownload />
-                                              </button>
+                                              <div className="comment-attachment-info">
+                                                <span className="comment-attachment-name">{fileName}</span>
+                                                <span className="comment-attachment-size">{formatFileSize(fileSize)}</span>
+                                              </div>
+                                              <div className="comment-attachment-download">
+                                                <button
+                                                  className="comment-download-btn"
+                                                  onClick={e => {
+                                                    e.stopPropagation();
+                                                    if (fileData && fileType) {
+                                                      downloadAttachment(
+                                                        fileName,
+                                                        fileData,
+                                                        fileType
+                                                      );
+                                                    }
+                                                  }}
+                                                  disabled={!fileData || !fileType}
+                                                  title="Download attachment"
+                                                >
+                                                  <FaDownload />
+                                                </button>
+                                              </div>
                                             </div>
                                           );
                                         }

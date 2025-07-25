@@ -476,31 +476,22 @@
   color: var(--enhanced-text-tertiary);
 }
 
-.download-attachment-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 32px;
-  height: 32px;
-  background: rgba(66, 133, 244, 0.9);
+.ticket-download-btn {
+  display: inline-block;
+  margin-left: 12px;
+  vertical-align: middle;
+  background: var(--enhanced-primary);
   color: white;
   border: none;
   border-radius: 50%;
+  width: 28px;
+  height: 28px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: background 0.2s;
   font-size: 14px;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(4px);
-  opacity: 0.8;
 }
-
-.download-attachment-btn:hover {
+.ticket-download-btn:hover {
   background: var(--enhanced-primary-dark);
-  transform: scale(1.1);
-  box-shadow: 0 2px 8px rgba(66, 133, 244, 0.4);
-  opacity: 1;
 }
 
 .attachment-size {
@@ -784,21 +775,6 @@
 .attachment-size {
   font-size: 0.625rem;
   color: var(--enhanced-text-tertiary);
-}
-
-.download-attachment-btn {
-  background: transparent;
-  border: none;
-  color: var(--enhanced-text-secondary);
-  padding: var(--enhanced-space-1);
-  border-radius: var(--enhanced-radius-sm);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.download-attachment-btn:hover {
-  background: var(--enhanced-bg-tertiary);
-  color: var(--enhanced-primary);
 }
 
 /* ==================== COMMENT COMPOSER ==================== */
@@ -1827,4 +1803,114 @@ textarea:focus-visible {
     align-items: flex-start;
     gap: var(--enhanced-space-1);
   }
+}
+
+.attachment-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.comment-attachment-details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.comment-attachment-name {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--enhanced-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.comment-attachment-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.comment-attachment-block {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.comment-attachment-icon {
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.comment-attachment-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.comment-attachment-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--enhanced-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.comment-attachment-size {
+  font-size: 0.75rem;
+  color: var(--enhanced-text-tertiary);
+  margin-top: 2px;
+}
+
+.comment-attachment-download {
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.comment-download-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--enhanced-primary);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(255,93,93,0.08);
+}
+.comment-download-btn:hover:not(:disabled) {
+  background: var(--enhanced-primary-dark);
+  box-shadow: 0 4px 12px rgba(255,93,93,0.18);
+}
+.comment-download-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.comment-attachments-card {
+  background: var(--enhanced-bg-secondary);
+  border: 1px solid var(--enhanced-border-light);
+  border-radius: var(--enhanced-radius-lg);
+  padding: 12px 16px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(60,60,60,0.06);
+  display: block;
 }

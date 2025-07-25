@@ -186,3 +186,289 @@
 [data-theme="dark"] .professional-loader__text {
   color: var(--color-text-secondary-dark, #9ca3af);
 }
+
+/* =============== TICKET ANIMATION LOADER =============== */
+
+.professional-loader-container--ticket {
+  min-height: 200px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.professional-ticket-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 600px;
+}
+
+/* Moving ticket container */
+.ticket-animation-container {
+  position: relative;
+  height: 120px;
+  width: 100%;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Moving ticket icon and text group */
+.ticket-moving-group {
+  position: absolute;
+  top: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  animation: ticketSlideLeftToRight 3s ease-in-out infinite;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.ticket-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary, #ff5d5d) 0%,
+    #ff6b6b 50%,
+    var(--color-primary-dark, #e04545) 100%
+  );
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: white;
+  box-shadow: 0 8px 20px rgba(255, 93, 93, 0.3),
+    0 0 30px rgba(255, 93, 93, 0.15);
+  animation: ticketRotateGently 3s ease-in-out infinite;
+  position: relative;
+}
+
+/* Add ticket glow effect */
+.ticket-icon::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary, #ff5d5d),
+    #ff6b6b,
+    var(--color-primary-dark, #e04545)
+  );
+  border-radius: 20px;
+  opacity: 0.2;
+  z-index: -1;
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+.ticket-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #1e293b);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.ticket-message {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #64748b);
+  line-height: 1.6;
+  max-width: 400px;
+  text-align: center;
+}
+
+/* Progress bar */
+.ticket-progress {
+  width: 100%;
+  max-width: 300px;
+  height: 4px;
+  background: var(--color-border-light, #e2e8f0);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.ticket-progress::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-primary, #ff5d5d),
+    transparent
+  );
+  animation: progressSlide 2s ease-in-out infinite;
+}
+
+/* Ticket Animation Keyframes */
+@keyframes ticketSlideLeftToRight {
+  0% {
+    left: -120px;
+    opacity: 0;
+    transform: translateY(-50%) scale(0.9);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%) scale(1.05);
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+  100% {
+    left: calc(100% + 120px);
+    opacity: 0;
+    transform: translateY(-50%) scale(0.9);
+  }
+}
+
+@keyframes ticketRotateGently {
+  0% {
+    transform: rotate(-3deg);
+  }
+  25% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+  75% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(3deg);
+  }
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes progressSlide {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 0%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Size variants for ticket loader */
+.professional-loader--small .ticket-icon {
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+}
+
+.professional-loader--small .ticket-title {
+  font-size: 0.875rem;
+}
+
+.professional-loader--large .ticket-icon {
+  width: 80px;
+  height: 80px;
+  font-size: 2.4rem;
+}
+
+.professional-loader--large .ticket-title {
+  font-size: 1.25rem;
+}
+
+/* Dark theme support for ticket loader */
+[data-theme="dark"] .ticket-title {
+  color: var(--color-text-primary-dark, #f1f5f9);
+}
+
+[data-theme="dark"] .ticket-message {
+  color: var(--color-text-secondary-dark, #94a3b8);
+}
+
+[data-theme="dark"] .ticket-progress {
+  background: var(--color-border-dark, #374151);
+}
+
+/* Responsive design for ticket loader */
+@media (max-width: 768px) {
+  .ticket-animation-container {
+    height: 80px;
+    margin-bottom: 1rem;
+  }
+
+  .ticket-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+
+  .ticket-title {
+    font-size: 0.875rem;
+  }
+
+  .ticket-message {
+    font-size: 0.8rem;
+    max-width: 300px;
+  }
+
+  .ticket-progress {
+    max-width: 250px;
+  }
+}
+
+/* Accessibility - reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .ticket-moving-group {
+    animation: ticketPulse 2s ease-in-out infinite;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+  }
+
+  .ticket-icon {
+    animation: none;
+  }
+
+  @keyframes ticketPulse {
+    0%,
+    100% {
+      opacity: 0.7;
+      transform: translateX(-50%) translateY(-50%) scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-50%) scale(1.05);
+    }
+  }
+}

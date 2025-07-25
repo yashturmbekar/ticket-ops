@@ -12,6 +12,7 @@ import { useNotifications } from "../hooks/useNotifications";
 import { getAllHelpdeskDepartments } from "../services/helpdeskDepartmentService";
 import { createTicket } from "../services/ticketService";
 import { TicketStatus } from "../types";
+import { Loader } from "../components/common";
 import "../styles/createTicket.css";
 
 interface TicketFormData {
@@ -71,7 +72,6 @@ export const CreateTicketPage: React.FC = () => {
   const { addNotification } = useNotifications();
   const [loading, setLoading] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState(false);
-  const [operationStatus, setOperationStatus] = useState<string>("");
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   // Add state for selectedImage
   const [selectedImage, setSelectedImage] = useState<{
@@ -151,7 +151,6 @@ export const CreateTicketPage: React.FC = () => {
     }
 
     setLoading(true);
-    setOperationStatus("Processing attachments...");
 
     try {
       // Convert files to byte arrays with progress handling
@@ -164,11 +163,6 @@ export const CreateTicketPage: React.FC = () => {
 
       for (let i = 0; i < formData.attachments.length; i++) {
         const file = formData.attachments[i];
-        setOperationStatus(
-          `Processing file ${i + 1}/${formData.attachments.length}: ${
-            file.name
-          }`
-        );
         try {
           console.log(
             `Processing file ${i + 1}/${formData.attachments.length}: ${
@@ -190,8 +184,6 @@ export const CreateTicketPage: React.FC = () => {
         }
       }
 
-      setOperationStatus("Creating ticket...");
-
       // Construct ticket data
       const ticketData = {
         title: formData.title,
@@ -210,9 +202,6 @@ export const CreateTicketPage: React.FC = () => {
       if (totalSize > 5 * 1024 * 1024) {
         // 5MB
         console.log(`Large upload detected: ${totalSize} bytes`);
-        setOperationStatus(
-          "Uploading large files... This may take a few minutes."
-        );
 
         // Show user notification for large uploads
         addNotification({
@@ -223,11 +212,8 @@ export const CreateTicketPage: React.FC = () => {
         });
       }
 
-      setOperationStatus("Creating your ticket...");
       const response = await createTicket(ticketData);
       console.log("Ticket created successfully:", response);
-
-      setOperationStatus("Ticket created successfully!");
 
       addNotification({
         type: "success",
@@ -298,7 +284,6 @@ export const CreateTicketPage: React.FC = () => {
       });
     } finally {
       setLoading(false);
-      setOperationStatus("");
     }
   };
 
@@ -476,27 +461,15 @@ export const CreateTicketPage: React.FC = () => {
 
   return (
     <div className="create-page">
-      {/* Enhanced Ticket Loading Animation - Backdrop Only */}
+      {/* Content Body Loader */}
       {loading && (
-        <div className="ticket-loading-backdrop">
-          <div className="ticket-loading-animation-container">
-            <div className="ticket-loading-moving-group">
-              <div className="ticket-loading-icon">
-                <FaTicketAlt />
-              </div>
-              <h3 className="ticket-loading-title">Creating Ticket</h3>
-            </div>
-          </div>
-          <p className="ticket-loading-message">
-            {operationStatus || "Please wait while we process your request..."}
-          </p>
-          <div className="ticket-loading-progress"></div>
-          {operationStatus.includes("large files") && (
-            <p className="ticket-loading-submessage">
-              Large files may take several minutes to process. Please don't
-              close this window.
-            </p>
-          )}
+        <div className="create-content-body-loader">
+          <Loader
+            useTicketAnimation={true}
+            centered={true}
+            text="Creating your ticket..."
+            ticketMessage="Please wait while we process your request..."
+          />
         </div>
       )}
 

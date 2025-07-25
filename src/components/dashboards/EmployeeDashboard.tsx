@@ -111,7 +111,15 @@ export const EmployeeDashboard: React.FC = () => {
   };
 
   if (loading) {
-    return <Loader centered text="Loading dashboard..." minHeight="60vh" />;
+    return (
+      <Loader
+        centered
+        text="Loading dashboard..."
+        minHeight="60vh"
+        useTicketAnimation={true}
+        ticketMessage="Fetching your tickets and updates..."
+      />
+    );
   }
 
   return (
@@ -217,30 +225,53 @@ export const EmployeeDashboard: React.FC = () => {
           <div className="dashboard-tickets-grid">
             {activeTab === "my" ? (
               myTickets.length > 0 ? (
-                myTickets.slice(0, 8).map((ticket) => (
-                  <TicketTile
-                    key={ticket.id}
-                    ticket={{
-                      id: ticket.id,
-                      ticketCode:
-                        (ticket as DisplayTicket).ticketCode ||
-                        `TKT-${ticket.id.slice(0, 8)}`,
-                      title: ticket.title,
-                      description: ticket.description,
-                      status: ticket.status,
-                      priority: ticket.priority,
-                      assignedTo: ticket.assignedTo,
-                      department: ticket.assignedDepartmentName,
-                      createdAt: ticket.createdAt.toISOString(),
-                      slaDeadline: ticket.slaDeadline?.toISOString(),
-                      commentCount: ticket.totalCommentsCount,
-                      attachmentCount: ticket.attachments?.length || 0,
-                      tags: ticket.tags,
-                    }}
-                    onClick={handleTicketClick}
-                    compact={true}
-                  />
-                ))
+                myTickets.slice(0, 8).map((ticket) => {
+                  // Type cast to access extended properties from API transform
+                  const extendedTicket = ticket as Ticket & {
+                    assignedToDetails?: {
+                      employeeName: string;
+                      designation: string;
+                    };
+                    raiserEmployeeDetails?: {
+                      employeeName: string;
+                      designation: string;
+                    };
+                  };
+                  return (
+                    <TicketTile
+                      key={ticket.id}
+                      ticket={{
+                        id: ticket.id,
+                        ticketCode:
+                          (ticket as DisplayTicket).ticketCode ||
+                          `TKT-${ticket.id.slice(0, 8)}`,
+                        title: ticket.title,
+                        description: ticket.description,
+                        status: ticket.status,
+                        priority: ticket.priority,
+                        assignedTo: ticket.assignedTo,
+                        assignedToDetails: extendedTicket.assignedToDetails,
+                        createdBy: ticket.createdBy,
+                        raiserEmployeeDetails:
+                          extendedTicket.raiserEmployeeDetails || {
+                            employeeName: ticket.createdBy || "Unknown",
+                            designation: "Employee",
+                          },
+                        department: ticket.assignedDepartmentName,
+                        helpdeskDepartmentDetails: {
+                          name: ticket.assignedDepartmentName || "Unknown",
+                        },
+                        createdAt: ticket.createdAt.toISOString(),
+                        slaDeadline: ticket.slaDeadline?.toISOString(),
+                        commentCount: ticket.totalCommentsCount,
+                        attachmentCount: ticket.attachments?.length || 0,
+                        tags: ticket.tags,
+                      }}
+                      onClick={handleTicketClick}
+                      compact={true}
+                    />
+                  );
+                })
               ) : (
                 <div className="modern-empty-state-full">
                   <div className="modern-empty-icon">

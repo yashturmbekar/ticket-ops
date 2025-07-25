@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   FaUser,
+  FaUserPlus,
   FaBuilding,
   FaComments,
   FaClock,
@@ -21,6 +22,15 @@ export interface TicketTileData {
   priority: string;
   assignedTo?: string;
   assignedToDetails?: {
+    employeeName: string;
+    designation: string;
+  };
+  createdBy?: string;
+  createdByDetails?: {
+    employeeName: string;
+    designation: string;
+  };
+  raiserEmployeeDetails?: {
     employeeName: string;
     designation: string;
   };
@@ -167,6 +177,11 @@ export const TicketTile: React.FC<TicketTileProps> = ({
   const statusColor = getStatusColor(ticket.status);
   const assigneeName =
     ticket.assignedToDetails?.employeeName || ticket.assignedTo || "Unassigned";
+  const createdByName =
+    ticket.raiserEmployeeDetails?.employeeName ||
+    ticket.createdByDetails?.employeeName ||
+    ticket.createdBy ||
+    "Unknown";
   const departmentName =
     ticket.helpdeskDepartmentDetails?.name || ticket.department || "Unknown";
 
@@ -185,8 +200,9 @@ export const TicketTile: React.FC<TicketTileProps> = ({
 
   return (
     <div
-      className={`professional-ticket-tile ${isSelected ? "selected" : ""} ${compact ? "compact" : ""
-        }`}
+      className={`professional-ticket-tile ${isSelected ? "selected" : ""} ${
+        compact ? "compact" : ""
+      }`}
       onClick={handleTileClick}
       style={
         {
@@ -260,17 +276,40 @@ export const TicketTile: React.FC<TicketTileProps> = ({
         </div>
       </div>
 
-      {/* Compact Assignment Info */}
-      <div className="assignment-info-compact">
-        <div className="assignee-info-compact">
-          <div className="assignee-avatar-small">
-            <FaUser />
+      {/* Redesigned Assignment and Creator Info - Horizontal Layout */}
+      <div className="assignment-info-redesigned">
+        {/* Created By and Assigned To - Horizontal Layout */}
+        <div className="creator-assignee-row">
+          {/* Created By Section */}
+          <div className="creator-info-section">
+            <div className="info-label">Created by</div>
+            <div className="creator-info">
+              <div className="creator-avatar">
+                <FaUserPlus />
+              </div>
+              <span className="creator-name">{createdByName}</span>
+            </div>
           </div>
-          <span className="assignee-name-small">{assigneeName}</span>
+
+          {/* Assigned To Section */}
+          <div className="assignee-info-section">
+            <div className="info-label">Assigned to</div>
+            <div className="assignee-info">
+              <div className="assignee-avatar">
+                <FaUser />
+              </div>
+              <span className="assignee-name">{assigneeName}</span>
+            </div>
+          </div>
         </div>
-        <div className="department-info-compact">
-          <FaBuilding />
-          <span className="department-name-small">{departmentName}</span>
+
+        {/* Department Section */}
+        <div className="department-info-section">
+          <div className="info-label">Department</div>
+          <div className="department-info">
+            <FaBuilding />
+            <span className="department-name">{departmentName}</span>
+          </div>
         </div>
       </div>
 
@@ -293,7 +332,10 @@ export const TicketTile: React.FC<TicketTileProps> = ({
         </div>
       </div>
       {/* Counts and SLA */}
-      <div className="tile-footer" style={{ display: "flex", justifyContent: "space-between" }}>
+      <div
+        className="tile-footer"
+        style={{ display: "flex", justifyContent: "space-between" }}
+      >
         <div className="counts">
           <div className="count-item">
             <FaComments />
@@ -315,8 +357,6 @@ export const TicketTile: React.FC<TicketTileProps> = ({
             </div>
           )}
         </div>
-
-
       </div>
 
       {/* Tags */}

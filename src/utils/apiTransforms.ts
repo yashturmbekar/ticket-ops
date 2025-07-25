@@ -41,7 +41,24 @@ export function transformApiTicketToTicket(
           designation: apiTicket.assignedToEmployeeDetails.designation,
         }
       : undefined,
-  } as Ticket & { ticketCode: string };
+    // Add raiser employee details for TicketTile component
+    raiserEmployeeDetails: apiTicket.raiserEmployeeDetails
+      ? {
+          employeeName: apiTicket.raiserEmployeeDetails.employeeName,
+          designation: apiTicket.raiserEmployeeDetails.designation,
+        }
+      : undefined,
+  } as Ticket & {
+    ticketCode: string;
+    assignedToDetails?: {
+      employeeName: string;
+      designation: string;
+    };
+    raiserEmployeeDetails?: {
+      employeeName: string;
+      designation: string;
+    };
+  };
 }
 
 /**

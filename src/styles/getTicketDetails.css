@@ -1308,7 +1308,7 @@
 
 .assignee-info {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: var(--enhanced-space-1);
 }
 

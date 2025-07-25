@@ -1059,7 +1059,13 @@ const TicketDetailsPageProfessional: React.FC = () => {
 
   if (loading) {
     return (
-      <Loader centered text="Loading ticket details..." minHeight="60vh" />
+      <Loader
+        centered
+        text="Loading ticket details..."
+        minHeight="60vh"
+        useTicketAnimation={true}
+        ticketMessage="Fetching ticket information and history..."
+      />
     );
   }
 
@@ -1610,7 +1616,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
                         handleAddComment();
                       }
                     }}
-                    placeholder="Add a comment... (Ctrl+Enter to submit)"
+                    placeholder="Add a comment..."
                     rows={4}
                     className="comment-textarea"
                   />

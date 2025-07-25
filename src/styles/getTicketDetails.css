@@ -135,48 +135,68 @@
 }
 
 /* ==================== STATUS & PRIORITY BADGES ==================== */
-.status-badge,
-.priority-badge {
-  padding: var(--enhanced-space-1) var(--enhanced-space-2);
-  border-radius: var(--enhanced-radius-md);
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border: none;
-  color: white;
+.enhanced-ticket-details-page .status-badge,
+.enhanced-ticket-details-page .priority-badge,
+.enhanced-page-header .status-badge,
+.enhanced-page-header .priority-badge {
+  padding: var(--enhanced-space-1) var(--enhanced-space-2) !important;
+  border-radius: var(--enhanced-radius-md) !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  border: none !important;
+  color: white !important;
+  height: auto !important;
+  line-height: 1.2 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  min-height: 1.5rem !important;
+  vertical-align: middle !important;
 }
 
-.status-badge.status-raised {
+.enhanced-ticket-details-page .status-badge.status-raised,
+.enhanced-page-header .status-badge.status-raised {
   background: #3b82f6;
   color: white;
 }
-.status-badge.status-open {
+.enhanced-ticket-details-page .status-badge.status-open,
+.enhanced-page-header .status-badge.status-open {
   background: #3b82f6;
 }
-.status-badge.status-in-progress {
+.enhanced-ticket-details-page .status-badge.status-in-progress,
+.enhanced-page-header .status-badge.status-in-progress {
   background: #f59e0b;
 }
-.status-badge.status-pending-approval {
+.enhanced-ticket-details-page .status-badge.status-pending-approval,
+.enhanced-page-header .status-badge.status-pending-approval {
   background: #8b5cf6;
 }
-.status-badge.status-resolved {
+.enhanced-ticket-details-page .status-badge.status-resolved,
+.enhanced-page-header .status-badge.status-resolved {
   background: #10b981;
 }
-.status-badge.status-closed {
+.enhanced-ticket-details-page .status-badge.status-closed,
+.enhanced-page-header .status-badge.status-closed {
   background: #6b7280;
 }
 
-.priority-badge.priority-critical {
+.enhanced-ticket-details-page .priority-badge.priority-critical,
+.enhanced-page-header .priority-badge.priority-critical {
   background: #dc2626;
 }
-.priority-badge.priority-high {
+.enhanced-ticket-details-page .priority-badge.priority-high,
+.enhanced-page-header .priority-badge.priority-high {
   background: #ea580c;
 }
-.priority-badge.priority-medium {
+.enhanced-ticket-details-page .priority-badge.priority-medium,
+.enhanced-page-header .priority-badge.priority-medium {
   background: #d97706;
 }
-.priority-badge.priority-low {
+.enhanced-ticket-details-page .priority-badge.priority-low,
+.enhanced-page-header .priority-badge.priority-low {
   background: #059669;
 }
 
@@ -675,50 +695,73 @@
 
 .edit-actions {
   display: flex;
-  gap: var(--enhanced-space-2);
-  margin-top: var(--enhanced-space-3);
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .save-btn,
 .cancel-btn {
-  padding: var(--enhanced-space-2) var(--enhanced-space-4);
-  border-radius: var(--enhanced-radius-md);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: var(--enhanced-space-2);
+  padding: 0.25rem 0.5rem !important;
+  border-radius: 0.25rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 1.5rem !important;
+  min-width: 3rem !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  border: 1px solid transparent !important;
+  text-decoration: none !important;
+  user-select: none !important;
+  outline: none !important;
+  box-sizing: border-box !important;
 }
 
 .save-btn {
-  background: var(--enhanced-primary);
-  color: white;
-  border: none;
+  background: var(--enhanced-primary) !important;
+  color: white !important;
+  border-color: var(--enhanced-primary) !important;
 }
 
 .save-btn:hover:not(:disabled) {
-  background: var(--enhanced-primary-dark);
-  transform: translateY(-1px);
-  box-shadow: var(--enhanced-shadow-sm);
+  background: var(--enhanced-primary-dark) !important;
+  border-color: var(--enhanced-primary-dark) !important;
+  transform: translateY(-1px) !important;
+}
+
+.save-btn:active:not(:disabled) {
+  transform: translateY(0) !important;
 }
 
 .save-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
+  background: #9ca3af !important;
+  border-color: #9ca3af !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  opacity: 0.6 !important;
 }
 
 .cancel-btn {
-  background: transparent;
-  color: var(--enhanced-text-secondary);
-  border: 1px solid var(--enhanced-border-light);
+  background: #f8fafc !important;
+  color: #64748b !important;
+  border-color: #e2e8f0 !important;
 }
 
 .cancel-btn:hover {
-  background: var(--enhanced-bg-tertiary);
-  border-color: var(--enhanced-border-medium);
+  background: #f1f5f9 !important;
+  border-color: #cbd5e0 !important;
+  color: #475569 !important;
+  transform: translateY(-1px) !important;
+}
+
+.cancel-btn:active {
+  transform: translateY(0) !important;
 }
 
 /* ==================== COMMENT ATTACHMENTS ==================== */
@@ -1528,9 +1571,12 @@ textarea:focus-visible {
     border-width: 2px;
   }
 
-  .status-badge,
-  .priority-badge {
-    border: 2px solid currentColor;
+  .enhanced-ticket-details-page .status-badge,
+  .enhanced-ticket-details-page .priority-badge,
+  .enhanced-page-header .status-badge,
+  .enhanced-page-header .priority-badge {
+    border: 2px solid currentColor !important;
+    min-height: 1.7rem !important; /* Slightly larger for mobile to account for border */
   }
 }
 

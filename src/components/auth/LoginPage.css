@@ -161,16 +161,18 @@
 }
 
 .form-group {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 }
 
 .form-label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   font-weight: 600;
   color: #1f2937;
   font-size: 0.875rem;
   letter-spacing: 0.01em;
+  width: 20%;
+  min-height: 20px;
 }
 
 .required {
@@ -180,15 +182,15 @@
 
 .form-input {
   width: 100%;
-  padding: 0.75rem 1rem;
+  height: 40px;
+  padding: 0.5rem 0.75rem;
   border: 1px solid #d1d5db;
   border-radius: 6px;
-  font-size: 1rem;
+  font-size: 0.875rem;
   transition: all 0.2s ease;
   background: white;
   color: #1f2937;
   box-sizing: border-box;
-  min-height: 44px;
   font-weight: 400;
   line-height: 1.5;
 }
@@ -206,11 +208,16 @@
 
 .password-input-wrapper {
   position: relative;
+  width: 100%;
+}
+
+.password-input-wrapper .form-input {
+  padding-right: 2.5rem;
 }
 
 .password-toggle {
   position: absolute;
-  right: 1rem;
+  right: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
   background: none;
@@ -218,9 +225,12 @@
   color: #9ca3af;
   cursor: pointer;
   padding: 0;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .password-toggle:hover {
@@ -384,9 +394,13 @@
   }
 
   .form-input {
-    font-size: 1rem;
-    padding: 1rem 1.125rem;
-    min-height: 52px;
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+    height: 44px;
+  }
+
+  .password-input-wrapper .form-input {
+    padding-right: 2.5rem;
   }
 
   .login-button {

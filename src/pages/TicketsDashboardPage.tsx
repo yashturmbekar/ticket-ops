@@ -4,8 +4,6 @@ import {
   FaTicketAlt,
   FaPlus,
   FaSearch,
-  FaEye,
-  FaEdit,
   FaClock,
   FaExclamationTriangle,
   FaCheckCircle,
@@ -61,23 +59,12 @@ export const TicketsPage: React.FC = () => {
   const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"tiles" | "list">("tiles");
 
-  // Set default active tab based on user role
-  const getDefaultTab = (userRole: UserRole) => {
-    switch (userRole) {
-      case "ORG-ADMIN":
-      case "HELPDESK-ADMIN":
-        return "all-tickets";
-      case "MANAGER":
-      case "HELPDESK-DEPARTMENT":
-        return "assigned-tickets";
-      default: // EMPLOYEE
-        return "my-tickets";
-    }
+  // Set default active tab - always "my-tickets" as the first tab for all roles
+  const getDefaultTab = () => {
+    return "my-tickets";
   };
 
-  const [activeTab, setActiveTab] = useState<string>(
-    getDefaultTab(user?.role || "EMPLOYEE")
-  );
+  const [activeTab, setActiveTab] = useState<string>(getDefaultTab());
 
   // Define available tabs based on user role
   const getAvailableTabs = (userRole: UserRole) => {
@@ -85,30 +72,30 @@ export const TicketsPage: React.FC = () => {
       case "ORG-ADMIN":
       case "HELPDESK-ADMIN":
         return [
+          { id: "my-tickets", label: "My Tickets", icon: <FaUser /> },
           {
             id: "all-tickets",
             label: "All Organization Tickets",
             icon: <FaTicketAlt />,
           },
-          { id: "my-tickets", label: "My Tickets", icon: <FaUser /> },
         ];
       case "MANAGER":
         return [
+          { id: "my-tickets", label: "My Tickets", icon: <FaUser /> },
           {
             id: "assigned-tickets",
             label: "Assigned to Me",
             icon: <FaUsers />,
           },
-          { id: "my-tickets", label: "My Tickets", icon: <FaUser /> },
         ];
       case "HELPDESK-DEPARTMENT":
         return [
+          { id: "my-tickets", label: "My Tickets", icon: <FaUser /> },
           {
             id: "assigned-tickets",
             label: "Assigned to Me",
             icon: <FaUsers />,
           },
-          { id: "my-tickets", label: "My Tickets", icon: <FaUser /> },
         ];
       default: // EMPLOYEE
         return [{ id: "my-tickets", label: "My Tickets", icon: <FaUser /> }];
@@ -131,6 +118,9 @@ export const TicketsPage: React.FC = () => {
   const [departmentsLoaded, setDepartmentsLoaded] = useState(false);
   const [totalTicketCount, setTotalTicketCount] = useState(0);
   const [tabCounts, setTabCounts] = useState<Record<string, number>>({});
+  const [originalTabCounts, setOriginalTabCounts] = useState<
+    Record<string, number>
+  >({});
 
   // Refs to prevent duplicate API calls
   const departmentsFetching = useRef(false);
@@ -141,7 +131,7 @@ export const TicketsPage: React.FC = () => {
 
   // Update active tab when user role changes
   useEffect(() => {
-    const defaultTab = getDefaultTab(user?.role || "EMPLOYEE");
+    const defaultTab = getDefaultTab();
     setActiveTab(defaultTab);
   }, [user?.role]);
 
@@ -216,7 +206,7 @@ export const TicketsPage: React.FC = () => {
               searchCriteria.submittedBy = user?.email || user?.username;
               break;
             case "assigned-tickets":
-              // For assigned tickets, we don't need to add user criteria as the API endpoint handles this
+              // For assigned tickets, use the dedicated endpoint - no additional criteria needed
               break;
             case "all-tickets":
               // No filter for all tickets
@@ -224,20 +214,31 @@ export const TicketsPage: React.FC = () => {
           }
 
           // Use appropriate search function based on tab type with minimal results
-          const response =
-            tab.id === "all-tickets"
-              ? await searchTickets(searchCriteria, 0, 1, "createdDate,desc")
-              : tab.id === "assigned-tickets"
-              ? await searchAssignedTickets(
-                  searchCriteria,
-                  0,
-                  1,
-                  "createdDate,desc"
-                )
-              : await searchMyTickets(searchCriteria, 0, 1, "createdDate,desc");
+          let response;
+          if (tab.id === "all-tickets") {
+            response = await searchTickets(
+              searchCriteria,
+              0,
+              1,
+              "createdDate,desc"
+            );
+          } else if (tab.id === "assigned-tickets") {
+            response = await searchAssignedTickets(
+              searchCriteria,
+              0,
+              1,
+              "createdDate,desc"
+            );
+          } else {
+            response = await searchMyTickets(
+              searchCriteria,
+              0,
+              1,
+              "createdDate,desc"
+            );
+          }
 
-          const count =
-            response.meta?.totalItems || response.data?.meta?.totalItems || 0;
+          const count = response.meta?.filteredItemCount || 0;
 
           console.log(
             `Preloaded count for ${tab.id}:`,
@@ -247,6 +248,12 @@ export const TicketsPage: React.FC = () => {
           );
 
           setTabCounts((prev) => ({
+            ...prev,
+            [tab.id]: count,
+          }));
+
+          // Store original unfiltered counts
+          setOriginalTabCounts((prev) => ({
             ...prev,
             [tab.id]: count,
           }));
@@ -295,7 +302,8 @@ export const TicketsPage: React.FC = () => {
             searchCriteria.submittedBy = user?.email || user?.username;
             break;
           case "assigned-tickets":
-            // For assigned tickets, we don't need to add user criteria as the API endpoint handles this
+            // For assigned tickets, use the dedicated endpoint that automatically filters by assignedTo
+            // No additional filter needed - searchAssignedTickets handles this
             break;
           case "all-tickets":
             // Show all tickets in the organization - only for ORG_ADMIN and HELPDESK_ADMIN
@@ -345,29 +353,54 @@ export const TicketsPage: React.FC = () => {
         lastTicketSearchParams.current = searchParamsKey;
 
         // Call the appropriate API based on the active tab
-        const response =
-          activeTab === "all-tickets"
-            ? await searchTickets(searchCriteria, 0, 50, "createdDate,desc")
-            : activeTab === "assigned-tickets"
-            ? await searchAssignedTickets(
-                searchCriteria,
-                0,
-                50,
-                "createdDate,desc"
-              )
-            : await searchMyTickets(searchCriteria, 0, 50, "createdDate,desc");
+        let response;
+        if (activeTab === "all-tickets") {
+          response = await searchTickets(
+            searchCriteria,
+            0,
+            50,
+            "createdDate,desc"
+          );
+        } else if (activeTab === "assigned-tickets") {
+          response = await searchAssignedTickets(
+            searchCriteria,
+            0,
+            50,
+            "createdDate,desc"
+          );
+        } else {
+          response = await searchMyTickets(
+            searchCriteria,
+            0,
+            50,
+            "createdDate,desc"
+          );
+        }
 
         // Extract tickets from response - API returns 'items' array
         const apiTickets = response.data?.items || response.items || [];
 
-        // Extract total count from response.meta.totalItems
-        const totalCount =
-          response.meta?.totalItems || response.data?.meta?.totalItems || 0;
-        setTotalTicketCount(totalCount);
+        // Extract total count from response.meta.filteredItemCount
+        const totalCount = response.meta?.filteredItemCount || 0;
+
+        // For accurate display, use the total count from API response which represents filtered results
+        const hasActiveFilters =
+          filters.status ||
+          filters.priority ||
+          filters.department ||
+          filters.assignee ||
+          debouncedSearch.trim();
+        // Always use totalCount as it represents the total count of filtered results from the API
+        const displayCount = totalCount;
+        setTotalTicketCount(displayCount);
 
         console.log(
           `Main fetch count for ${activeTab}:`,
           totalCount,
+          "Display count:",
+          displayCount,
+          "Has filters:",
+          hasActiveFilters,
           "with criteria:",
           searchCriteria
         );
@@ -375,7 +408,7 @@ export const TicketsPage: React.FC = () => {
         // Store count for the current tab
         setTabCounts((prev) => ({
           ...prev,
-          [activeTab]: totalCount,
+          [activeTab]: displayCount,
         }));
 
         // Transform API response to internal format
@@ -583,6 +616,28 @@ export const TicketsPage: React.FC = () => {
   const roleInfo = getRoleInfo(user?.role || "EMPLOYEE");
   const pageInfo = getPageTitleInfo(activeTab);
 
+  // Check if filters are currently active
+  const hasActiveFilters =
+    filters.status ||
+    filters.priority ||
+    filters.department ||
+    filters.assignee ||
+    debouncedSearch.trim();
+
+  // Function to get the display count for tab badges
+  const getTabDisplayCount = (tabId: string) => {
+    // For the active tab with filters applied, show the current filtered count
+    if (tabId === activeTab && hasActiveFilters) {
+      return totalTicketCount;
+    }
+    // For the active tab without filters, show the current tabCount (which might be updated)
+    if (tabId === activeTab && !hasActiveFilters) {
+      return tabCounts[tabId];
+    }
+    // For inactive tabs, always show the original unfiltered count
+    return originalTabCounts[tabId] || tabCounts[tabId];
+  };
+
   // Since we're filtering on the backend via API, no need for client-side filtering
   const filteredTickets = tickets;
 
@@ -629,9 +684,12 @@ export const TicketsPage: React.FC = () => {
               >
                 {tab.icon}
                 <span>{tab.label}</span>
-                {tabCounts[tab.id] !== undefined && tabCounts[tab.id] > 0 && (
-                  <span className="tab-count">{tabCounts[tab.id]}</span>
-                )}
+                {getTabDisplayCount(tab.id) !== undefined &&
+                  getTabDisplayCount(tab.id) > 0 && (
+                    <span className="tab-count">
+                      {getTabDisplayCount(tab.id)}
+                    </span>
+                  )}
               </button>
             ))}
           </div>
@@ -807,7 +865,6 @@ export const TicketsPage: React.FC = () => {
                   <th>Assignee</th>
                   <th>Created</th>
                   <th>SLA</th>
-                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -815,12 +872,18 @@ export const TicketsPage: React.FC = () => {
                   const slaStatus = getSLAStatus(ticket.slaDeadline);
 
                   return (
-                    <tr key={ticket.id} className="tickets-table-row">
+                    <tr
+                      key={ticket.id}
+                      className="tickets-table-row"
+                      onClick={() => handleTicketClick(ticket.id)}
+                      style={{ cursor: "pointer" }}
+                    >
                       <td>
                         <input
                           type="checkbox"
                           checked={selectedTickets.includes(ticket.id)}
                           onChange={() => handleSelectTicket(ticket.id)}
+                          onClick={(e) => e.stopPropagation()}
                         />
                       </td>
                       <td className="ticket-id-cell">
@@ -865,22 +928,6 @@ export const TicketsPage: React.FC = () => {
                         <div className={`table-sla ${slaStatus.status}`}>
                           <div className="sla-dot"></div>
                           <span>{slaStatus.text}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="table-actions">
-                          <button
-                            className="action-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleTicketClick(ticket.id);
-                            }}
-                          >
-                            <FaEye />
-                          </button>
-                          <button className="action-btn">
-                            <FaEdit />
-                          </button>
                         </div>
                       </td>
                     </tr>

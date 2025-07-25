@@ -19,7 +19,11 @@ import {
 } from "react-icons/fa";
 import { Loader, TicketTile } from "../common";
 import type { Ticket } from "../../types";
-import { searchTickets, searchMyTickets } from "../../services";
+import {
+  searchTickets,
+  searchMyTickets,
+  searchAssignedTickets,
+} from "../../services";
 import { transformApiTicketsToTickets } from "../../utils/apiTransforms";
 import { useNotifications } from "../../hooks";
 import { useAuth } from "../../hooks/useAuth";
@@ -220,12 +224,18 @@ const getDashboardConfig = (role: UserRole): DashboardConfig => {
       return {
         ...baseConfig,
         showDepartmentTickets: true,
+        showAssignedTickets: true,
         showMyTickets: true,
         tabOptions: [
           {
             key: "department",
             label: "Department Tickets",
             icon: <FaBuilding />,
+          },
+          {
+            key: "assigned",
+            label: "Assigned Tickets",
+            icon: <FaTasks />,
           },
           {
             key: "my",
@@ -240,6 +250,13 @@ const getDashboardConfig = (role: UserRole): DashboardConfig => {
             icon: <FaBuilding />,
             color: "#3498db",
             description: "All department tickets",
+          },
+          {
+            key: "assignedTickets",
+            label: "Assigned to Me",
+            icon: <FaTasks />,
+            color: "#8e44ad",
+            description: "Tickets assigned to me",
           },
           {
             key: "openTickets",
@@ -444,6 +461,7 @@ export const UnifiedDashboard: React.FC = () => {
       } else if (user?.role === UserRole.HELPDESK_DEPARTMENT) {
         roleSpecificStats = {
           departmentTickets: departmentTickets.length,
+          assignedTickets: assignedTickets.length,
         };
       }
 
@@ -485,14 +503,7 @@ export const UnifiedDashboard: React.FC = () => {
 
         // Fetch assigned tickets for managers
         if (dashboardConfig.showAssignedTickets) {
-          promises.push(
-            searchTickets(
-              { assignedToEmployeeId: user?.id },
-              0,
-              12,
-              "createdDate,desc"
-            )
-          );
+          promises.push(searchAssignedTickets({}, 0, 12, "createdDate,desc"));
         }
 
         // Fetch department tickets for helpdesk department

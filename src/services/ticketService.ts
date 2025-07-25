@@ -50,9 +50,7 @@ export async function createTicket(ticketData: Record<string, unknown>) {
   return apiClient.post("/helpdesk-tickets", ticketData);
 }
 
-export async function updateTicket(
-  ticketData: Record<string, unknown>
-) {
+export async function updateTicket(ticketData: Record<string, unknown>) {
   console.log("Updating ticket with full object:", ticketData);
   return apiClient.put(`${endpoint}`, ticketData);
 }
@@ -97,6 +95,18 @@ export async function searchMyTickets(
 ) {
   return apiClient.post(
     `${endpoint}/my-tickets/search?page=${page}&size=${size}&sort=${sort}`,
+    searchData
+  );
+}
+
+export async function searchAssignedTickets(
+  searchData: Record<string, unknown>,
+  page = 0,
+  size = 10,
+  sort = "id,desc"
+) {
+  return apiClient.post(
+    `${endpoint}/assigned/search?page=${page}&size=${size}&sort=${sort}`,
     searchData
   );
 }

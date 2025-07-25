@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaBars, FaBell, FaAngleLeft, FaAngleRight } from "react-icons/fa";
+import { FaBars, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import { useAuth } from "../../hooks/useAuth";
 import { useEmployeeProfile } from "../../hooks/useEmployeeProfile";
 import { USER_ROLE_LABELS } from "../../constants/userRoles";
@@ -27,7 +27,6 @@ export const Header: React.FC<HeaderProps> = ({
   const { user, logout } = useAuth();
   const { profile } = useEmployeeProfile();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const navigate = useNavigate();
 
   // Close dropdowns when clicking outside
@@ -39,26 +38,19 @@ export const Header: React.FC<HeaderProps> = ({
       ) {
         setIsUserMenuOpen(false);
       }
-      if (
-        isNotificationOpen &&
-        !(event.target as Element).closest(".modern-notification-dropdown")
-      ) {
-        setIsNotificationOpen(false);
-      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isUserMenuOpen, isNotificationOpen]);
+  }, [isUserMenuOpen]);
 
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setIsUserMenuOpen(false);
-        setIsNotificationOpen(false);
       }
     };
 
@@ -91,12 +83,6 @@ export const Header: React.FC<HeaderProps> = ({
     console.log("Toggle user menu clicked, current state:", isUserMenuOpen);
     console.log("User data in toggle:", user);
     setIsUserMenuOpen(!isUserMenuOpen);
-    setIsNotificationOpen(false);
-  };
-
-  const toggleNotifications = () => {
-    setIsNotificationOpen(!isNotificationOpen);
-    setIsUserMenuOpen(false);
   };
 
   const getRoleLabel = () => {
@@ -138,68 +124,6 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="modern-header-right">
-        {/* Notifications */}
-        <div className="modern-notification-dropdown">
-          <button
-            className="modern-icon-btn modern-notification-btn"
-            onClick={toggleNotifications}
-            aria-expanded={isNotificationOpen}
-            title="Notifications"
-          >
-            <FaBell />
-            <span className="modern-notification-badge">3</span>
-          </button>
-
-          {isNotificationOpen && (
-            <div className="modern-dropdown-menu modern-notification-menu">
-              <div className="modern-dropdown-header">
-                <h3>Notifications</h3>
-                <button className="modern-text-btn">Mark all read</button>
-              </div>
-              <div className="modern-notification-list">
-                <div className="modern-notification-item">
-                  <div className="modern-notification-content">
-                    <p className="modern-notification-title">
-                      New ticket assigned
-                    </p>
-                    <p className="modern-notification-text">
-                      Ticket #T-001 has been assigned to you
-                    </p>
-                    <span className="modern-notification-time">
-                      2 minutes ago
-                    </span>
-                  </div>
-                </div>
-                <div className="modern-notification-item">
-                  <div className="modern-notification-content">
-                    <p className="modern-notification-title">SLA Warning</p>
-                    <p className="modern-notification-text">
-                      Ticket #T-015 is approaching SLA deadline
-                    </p>
-                    <span className="modern-notification-time">
-                      15 minutes ago
-                    </span>
-                  </div>
-                </div>
-                <div className="modern-notification-item">
-                  <div className="modern-notification-content">
-                    <p className="modern-notification-title">System Update</p>
-                    <p className="modern-notification-text">
-                      Maintenance scheduled for tonight at 2 AM
-                    </p>
-                    <span className="modern-notification-time">1 hour ago</span>
-                  </div>
-                </div>
-              </div>
-              <div className="modern-dropdown-footer">
-                <button className="modern-text-btn">
-                  View all notifications
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* User Name */}
         <span className="modern-user-name-display">{getUserDisplayName()}</span>
 

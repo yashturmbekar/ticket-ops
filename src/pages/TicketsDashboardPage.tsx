@@ -56,7 +56,6 @@ export const TicketsPage: React.FC = () => {
   const [departments, setDepartments] = useState<HelpdeskDepartment[]>([]);
   const [loading, setLoading] = useState(true); // Initial page load
   const [searchLoading, setSearchLoading] = useState(false); // Search/filter operations
-  const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"tiles" | "list">("tiles");
 
   // Set default active tab - always "my-tickets" as the first tab for all roles
@@ -538,22 +537,6 @@ export const TicketsPage: React.FC = () => {
     navigate(`/tickets/${ticketId}`);
   };
 
-  const handleSelectTicket = (ticketId: string) => {
-    setSelectedTickets((prev) =>
-      prev.includes(ticketId)
-        ? prev.filter((id) => id !== ticketId)
-        : [...prev, ticketId]
-    );
-  };
-
-  const handleSelectAll = () => {
-    if (selectedTickets.length === tickets.length) {
-      setSelectedTickets([]);
-    } else {
-      setSelectedTickets(tickets.map((ticket) => ticket.id));
-    }
-  };
-
   // Get page title and subtitle based on active tab
   const getPageTitleInfo = (tab: string) => {
     switch (tab) {
@@ -786,15 +769,6 @@ export const TicketsPage: React.FC = () => {
             <span className="search-indicator"> (searching...)</span>
           )}
         </div>
-
-        {selectedTickets.length > 0 && (
-          <div className="bulk-actions">
-            <span>{selectedTickets.length} selected</span>
-            <button className="btn btn-sm btn-secondary">Assign</button>
-            <button className="btn btn-sm btn-secondary">Update Status</button>
-            <button className="btn btn-sm btn-secondary">Export</button>
-          </div>
-        )}
       </div>
 
       {/* Tickets Grid/List */}
@@ -838,10 +812,8 @@ export const TicketsPage: React.FC = () => {
                     attachmentCount: ticket.attachments?.length || 0,
                     tags: ticket.tags,
                   }}
-                  isSelected={selectedTickets.includes(ticket.id)}
-                  showCheckbox={true}
+                  showCheckbox={false}
                   onClick={handleTicketClick}
-                  onSelect={handleSelectTicket}
                 />
               );
             })}
@@ -851,13 +823,6 @@ export const TicketsPage: React.FC = () => {
             <table className="tickets-table">
               <thead>
                 <tr>
-                  <th>
-                    <input
-                      type="checkbox"
-                      checked={selectedTickets.length === tickets.length}
-                      onChange={handleSelectAll}
-                    />
-                  </th>
                   <th>ID</th>
                   <th>Title</th>
                   <th>Status</th>
@@ -878,14 +843,6 @@ export const TicketsPage: React.FC = () => {
                       onClick={() => handleTicketClick(ticket.id)}
                       style={{ cursor: "pointer" }}
                     >
-                      <td>
-                        <input
-                          type="checkbox"
-                          checked={selectedTickets.includes(ticket.id)}
-                          onChange={() => handleSelectTicket(ticket.id)}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      </td>
                       <td className="ticket-id-cell">
                         {(ticket as DisplayTicket).ticketCode ||
                           ticket.id.slice(0, 8)}

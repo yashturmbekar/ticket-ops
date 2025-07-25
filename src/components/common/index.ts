@@ -2,7 +2,6 @@ export * from "./Button";
 export * from "./Breadcrumb";
 export * from "./Card";
 export * from "./Form";
-export * from "./Header";
 export * from "./Loader";
 export * from "./Modal";
 export * from "./NotificationContainer";

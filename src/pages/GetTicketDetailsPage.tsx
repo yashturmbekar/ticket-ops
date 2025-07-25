@@ -1525,24 +1525,37 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                               "bmp",
                                             ].includes(ext || "");
 
+                                          // Make the whole card clickable for images
                                           return (
                                             <div
                                               key={attachIndex}
                                               className="comment-attachment-item"
+                                              onClick={() => {
+                                                if (isImage && fileData && fileType) {
+                                                  setSelectedImage({
+                                                    src: `data:${fileType};base64,${fileData}`,
+                                                    alt: fileName,
+                                                  });
+                                                }
+                                              }}
+                                              role={isImage ? "button" : undefined}
+                                              tabIndex={isImage ? 0 : undefined}
+                                              style={isImage ? { cursor: "pointer" } : {}}
+                                              onKeyDown={isImage ? (e => {
+                                                if ((e.key === "Enter" || e.key === " ") && fileData && fileType) {
+                                                  setSelectedImage({
+                                                    src: `data:${fileType};base64,${fileData}`,
+                                                    alt: fileName,
+                                                  });
+                                                }
+                                              }) : undefined}
                                             >
-                                              {isImage &&
-                                              fileData &&
-                                              fileType ? (
+                                              {isImage && fileData && fileType ? (
                                                 <img
                                                   src={`data:${fileType};base64,${fileData}`}
                                                   alt={fileName}
                                                   className="attachment-image"
-                                                  onClick={() =>
-                                                    setSelectedImage({
-                                                      src: `data:${fileType};base64,${fileData}`,
-                                                      alt: fileName,
-                                                    })
-                                                  }
+                                                  style={{ pointerEvents: "none" }}
                                                 />
                                               ) : (
                                                 getFileIcon(fileName, 24)
@@ -1557,7 +1570,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                               </div>
                                               <button
                                                 className="download-attachment-btn"
-                                                onClick={(e) => {
+                                                onClick={e => {
                                                   e.stopPropagation();
                                                   if (fileData && fileType) {
                                                     downloadAttachment(
@@ -1567,9 +1580,7 @@ const TicketDetailsPageProfessional: React.FC = () => {
                                                     );
                                                   }
                                                 }}
-                                                disabled={
-                                                  !fileData || !fileType
-                                                }
+                                                disabled={!fileData || !fileType}
                                               >
                                                 <FaDownload />
                                               </button>

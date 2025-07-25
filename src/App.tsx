@@ -23,6 +23,7 @@ import ReportsPage from "./pages/ReportsPage.tsx";
 import { NetworkPage } from "./pages/NetworkPage.tsx";
 import { SettingsPage } from "./pages/SettingsPage.tsx";
 import SlaRulesPage from "./pages/SlaRulesPage.tsx";
+import CreateSlaPolicyPage from "./pages/CreateSlaPolicyPage.tsx";
 import DepartmentsCreatePage from "./pages/CreateDepartmentsPage.tsx";
 import DepartmentsPage from "./pages/DepartmentsPage";
 import DepartmentsEditPage from "./pages/EditDepartmentPage.tsx";
@@ -575,6 +576,18 @@ const AppContent: React.FC = () => {
             >
               <LayoutWrapper>
                 <SlaRulesPage />
+              </LayoutWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sla-rules/create"
+          element={
+            <ProtectedRoute
+              requiredRoles={[UserRole.ORG_ADMIN, UserRole.HELPDESK_ADMIN]}
+            >
+              <LayoutWrapper>
+                <CreateSlaPolicyPage />
               </LayoutWrapper>
             </ProtectedRoute>
           }

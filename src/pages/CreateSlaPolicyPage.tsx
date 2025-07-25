@@ -77,13 +77,13 @@ const CreateSlaPolicyPage: React.FC = () => {
   // Priority colors mapping
   const getPriorityColor = (priority: string) => {
     const colorMap: Record<string, string> = {
-      LOW: "#28a745",
-      MEDIUM: "#ffc107", 
-      HIGH: "#fd7e14",
-      CRITICAL: "#dc3545",
-      URGENT: "#6f42c1"
+      LOW: "var(--color-success)",
+      MEDIUM: "var(--color-warning)", 
+      HIGH: "var(--color-warning-dark)",
+      CRITICAL: "var(--color-error)",
+      URGENT: "var(--color-primary-dark)"
     };
-    return colorMap[priority] || "#6c757d";
+    return colorMap[priority] || "var(--color-text-muted)";
   };
 
   return (

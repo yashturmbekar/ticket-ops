@@ -147,6 +147,10 @@
   color: white;
 }
 
+.status-badge.status-raised {
+  background: #3b82f6;
+  color: white;
+}
 .status-badge.status-open {
   background: #3b82f6;
 }
@@ -1892,11 +1896,11 @@ textarea:focus-visible {
   font-size: 16px;
   cursor: pointer;
   transition: background 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 8px rgba(255,93,93,0.08);
+  box-shadow: 0 2px 8px rgba(255, 93, 93, 0.08);
 }
 .comment-download-btn:hover:not(:disabled) {
   background: var(--enhanced-primary-dark);
-  box-shadow: 0 4px 12px rgba(255,93,93,0.18);
+  box-shadow: 0 4px 12px rgba(255, 93, 93, 0.18);
 }
 .comment-download-btn:disabled {
   opacity: 0.5;
@@ -1911,6 +1915,6 @@ textarea:focus-visible {
   margin-top: 8px;
   margin-bottom: 12px;
   width: 100%;
-  box-shadow: 0 2px 8px rgba(60,60,60,0.06);
+  box-shadow: 0 2px 8px rgba(60, 60, 60, 0.06);
   display: block;
 }

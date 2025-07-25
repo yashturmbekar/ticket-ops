@@ -26,7 +26,11 @@ type DisplayTicket = Ticket & {
     designation: string;
   };
 };
-import { searchTickets, searchMyTickets } from "../services/ticketService";
+import {
+  searchTickets,
+  searchMyTickets,
+  searchAssignedTickets,
+} from "../services/ticketService";
 import { searchHelpdeskDepartments } from "../services/helpdeskDepartmentService";
 import type { HelpdeskDepartment } from "../services/helpdeskDepartmentService";
 import { useNotifications } from "../hooks/useNotifications";
@@ -212,7 +216,7 @@ export const TicketsPage: React.FC = () => {
               searchCriteria.submittedBy = user?.email || user?.username;
               break;
             case "assigned-tickets":
-              searchCriteria.assignedTo = user?.email || user?.username;
+              // For assigned tickets, we don't need to add user criteria as the API endpoint handles this
               break;
             case "all-tickets":
               // No filter for all tickets
@@ -223,6 +227,13 @@ export const TicketsPage: React.FC = () => {
           const response =
             tab.id === "all-tickets"
               ? await searchTickets(searchCriteria, 0, 1, "createdDate,desc")
+              : tab.id === "assigned-tickets"
+              ? await searchAssignedTickets(
+                  searchCriteria,
+                  0,
+                  1,
+                  "createdDate,desc"
+                )
               : await searchMyTickets(searchCriteria, 0, 1, "createdDate,desc");
 
           const count =
@@ -284,8 +295,7 @@ export const TicketsPage: React.FC = () => {
             searchCriteria.submittedBy = user?.email || user?.username;
             break;
           case "assigned-tickets":
-            // Filter to show only tickets assigned to the current user
-            searchCriteria.assignedTo = user?.email || user?.username;
+            // For assigned tickets, we don't need to add user criteria as the API endpoint handles this
             break;
           case "all-tickets":
             // Show all tickets in the organization - only for ORG_ADMIN and HELPDESK_ADMIN
@@ -338,6 +348,13 @@ export const TicketsPage: React.FC = () => {
         const response =
           activeTab === "all-tickets"
             ? await searchTickets(searchCriteria, 0, 50, "createdDate,desc")
+            : activeTab === "assigned-tickets"
+            ? await searchAssignedTickets(
+                searchCriteria,
+                0,
+                50,
+                "createdDate,desc"
+              )
             : await searchMyTickets(searchCriteria, 0, 50, "createdDate,desc");
 
         // Extract tickets from response - API returns 'items' array

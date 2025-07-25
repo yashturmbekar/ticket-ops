@@ -719,6 +719,13 @@ export const TicketsPage: React.FC = () => {
         {viewMode === "tiles" ? (
           <div className="tickets-grid">
             {filteredTickets.map((ticket) => {
+              // Type cast to access extended properties from API transform
+              const extendedTicket = ticket as DisplayTicket & {
+                raiserEmployeeDetails?: {
+                  employeeName: string;
+                  designation: string;
+                };
+              };
               return (
                 <TicketTile
                   key={ticket.id}
@@ -732,7 +739,16 @@ export const TicketsPage: React.FC = () => {
                     assignedTo: ticket.assignedTo,
                     assignedToDetails: (ticket as DisplayTicket)
                       .assignedToDetails,
+                    createdBy: ticket.createdBy,
+                    raiserEmployeeDetails:
+                      extendedTicket.raiserEmployeeDetails || {
+                        employeeName: ticket.createdBy || "Unknown",
+                        designation: "Employee",
+                      },
                     department: ticket.assignedDepartmentName,
+                    helpdeskDepartmentDetails: {
+                      name: ticket.assignedDepartmentName || "Unknown",
+                    },
                     createdAt: ticket.createdAt.toISOString(),
                     slaDeadline: ticket.slaDeadline?.toISOString(),
                     commentCount: ticket.totalCommentsCount,
